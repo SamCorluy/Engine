@@ -10,6 +10,14 @@ namespace dae
 	class GameObject final
 	{
 	public:
+		GameObject() = default;
+		~GameObject() = default;
+
+		GameObject(const GameObject& other) = delete;
+		GameObject(GameObject&& other) = delete;
+		GameObject& operator=(const GameObject& other) = delete;
+		GameObject& operator=(GameObject&& other) = delete;
+
 		void Update(float deltaTime);
 		void StaticUpdate(float deltaTime);
 		void Render() const;
@@ -37,7 +45,6 @@ namespace dae
 		}
 		Subject* GetSubject() { return m_Subject; };
 
-		~GameObject();
 	private:
 		Transform m_Transform{};
 		GameObject* m_Parent = nullptr;

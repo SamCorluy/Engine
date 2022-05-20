@@ -5,16 +5,24 @@
 #include "Font.h"
 #include "Texture2D.h"
 
-dae::TextComponent::TextComponent(const std::string& text, const std::shared_ptr<Font>& font)
-	: m_NeedsUpdate(true), m_Text(text), m_Font(font), m_TextTexture(nullptr)
+dae::TextComponent::TextComponent(const std::shared_ptr<GameObject>& owner, const std::string& text, const std::shared_ptr<Font>& font)
+	:BaseComponent(owner),
+	m_NeedsUpdate(true),
+	m_Text(text),
+	m_Font(font),
+	m_TextTexture(nullptr)
 { }
 
-dae::TextComponent::TextComponent()
-	: m_NeedsUpdate(true), m_Text(), m_Font(), m_TextTexture(nullptr)
+dae::TextComponent::TextComponent(const std::shared_ptr<GameObject>& owner)
+	:BaseComponent(owner),
+	m_NeedsUpdate(true),
+	m_Text(),
+	m_Font(),
+	m_TextTexture(nullptr)
 {
 }
 
-void dae::TextComponent::StaticUpdate(float)
+void dae::TextComponent::Update(float)
 {
 	if (m_NeedsUpdate)
 	{
@@ -33,10 +41,6 @@ void dae::TextComponent::StaticUpdate(float)
 		m_TextTexture = std::make_shared<Texture2D>(texture);
 		m_NeedsUpdate = false;
 	}
-}
-
-void dae::TextComponent::Update(float)
-{
 }
 
 void dae::TextComponent::Render(glm::vec3 pos) const

@@ -12,8 +12,9 @@
 #include "MrPepperComponent.h"
 #include "HealthObserver.h"
 #include "PointsObserver.h"
-#include "servicelocator.h"
-#include "loggedSound_system.h"
+#include "SoundLocator.h"
+#include "SoundLogger.h"
+#include "SoundService.h"
 
 #define MAX_LIVES 3
 
@@ -79,10 +80,10 @@ void dae::Minigin::LoadGame() const
 	m_pGameObject->AddChild(logoObject);
 
 	auto font = ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
-	auto to = new TextComponent("Programming 4 Assignment", font);
+	//auto to = new TextComponent("Programming 4 Assignment", font);
 
 	auto textObject = new GameObject();
-	textObject->AddComponent<TextComponent>(to);
+	//textObject->AddComponent<TextComponent>(to);
 	textObject->SetPosition(80, 20);
 	m_pGameObject->AddChild(textObject);
 
@@ -94,15 +95,15 @@ void dae::Minigin::LoadGame() const
 	m_pGameObject->AddChild(fpsObject);
 
 
-	servicelocator::register_sound_system(new sound_system());
-	auto& ss1 = servicelocator::get_sound_system();
-	auto t1 = ss1.loadsound("../Audio/SoundEffect/Ammo.wav");
-	ss1.play(sound_id(t1), 100);
+	SoundLocator::register_sound_system(new SoundService());
+	auto& ss1 = SoundLocator::get_sound_system();
+	auto t1 = ss1.loadSound("../Audio/SoundEffect/Ammo.wav", SoundType::EFFECT);
+	ss1.play(sound_id(t1), 100, SoundType::EFFECT);
 
-	servicelocator::register_sound_system(new loggedSound_system(ss1));
-	auto& ss2 = servicelocator::get_sound_system();
-	auto t2 = ss2.loadsound("../Audio/SoundEffect/BigExplosion.wav");
-	ss2.play(sound_id(t2), 100);
+	SoundLocator::register_sound_system(new SoundLogger(ss1));
+	auto& ss2 = SoundLocator::get_sound_system();
+	auto t2 = ss2.loadSound("../Audio/SoundEffect/BigExplosion.wav", SoundType::EFFECT);
+	ss2.play(sound_id(t2), 100, SoundType::EFFECT);
 
 	/*auto MrPepperObject = new GameObject();
 	auto mrPepperSub = new MrPepper(SDLK_q, SDLK_w, SDLK_e, 3);
@@ -198,8 +199,8 @@ void dae::Minigin::Run()
 			}
 			m_pGameObject->Update(deltaTime);
 			renderer.Render(m_pGameObject);
-			auto& ss1 = servicelocator::get_sound_system();
-			ss1.update();
+			//auto& ss1 = SoundLocator::get_sound_system();
+			//ss1.update();
 		}
 	}
 

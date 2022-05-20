@@ -218,7 +218,7 @@ xcopy $(SolutionDir)3rdParty\SDL2_mixer-2.0.4\lib\x64\*.dll $(OutputPath) /Y</Co
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\3rdParty\SDL2_mixer-2.0.4\include\SDL_mixer.h" />
-    <ClInclude Include="Achievement.h" />
+    <ClInclude Include="BaseCommand.h" />
     <ClInclude Include="BaseComponent.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="FpsComponent.h" />
@@ -226,11 +226,11 @@ xcopy $(SolutionDir)3rdParty\SDL2_mixer-2.0.4\lib\x64\*.dll $(OutputPath) /Y</Co
     <ClInclude Include="Event.h" />
     <ClInclude Include="HealthObserver.h" />
     <ClInclude Include="InputManager.h" />
-    <ClInclude Include="loggedSound_system.h" />
+    <ClInclude Include="SoundLogger.h" />
     <ClInclude Include="Minigin.h" />
     <ClInclude Include="MiniginPCH.h" />
     <ClInclude Include="MrPepperComponent.h" />
-    <ClInclude Include="NullSound_System.h" />
+    <ClInclude Include="NullSound.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="PointsObserver.h" />
     <ClInclude Include="SceneObject.h" />
@@ -238,9 +238,10 @@ xcopy $(SolutionDir)3rdParty\SDL2_mixer-2.0.4\lib\x64\*.dll $(OutputPath) /Y</Co
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
-    <ClInclude Include="servicelocator.h" />
+    <ClInclude Include="Sound.h" />
+    <ClInclude Include="SoundLocator.h" />
     <ClInclude Include="Singleton.h" />
-    <ClInclude Include="sound_system.h" />
+    <ClInclude Include="SoundService.h" />
     <ClInclude Include="Subject.h" />
     <ClInclude Include="TextComponent.h" />
     <ClInclude Include="Texture2D.h" />
@@ -248,13 +249,14 @@ xcopy $(SolutionDir)3rdParty\SDL2_mixer-2.0.4\lib\x64\*.dll $(OutputPath) /Y</Co
     <ClInclude Include="Transform.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BaseCommand.cpp" />
     <ClCompile Include="BaseComponent.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="FpsComponent.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="HealthObserver.cpp" />
     <ClCompile Include="InputManager.cpp" />
-    <ClCompile Include="loggedSound_system.cpp" />
+    <ClCompile Include="SoundLogger.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Minigin.cpp" />
     <ClCompile Include="MiniginPCH.cpp">
@@ -265,15 +267,16 @@ xcopy $(SolutionDir)3rdParty\SDL2_mixer-2.0.4\lib\x64\*.dll $(OutputPath) /Y</Co
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MiniginPCH.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="MrPepperComponent.cpp" />
-    <ClCompile Include="NullSound_System.cpp" />
+    <ClCompile Include="NullSound.cpp" />
     <ClCompile Include="Observer.cpp" />
     <ClCompile Include="PointsObserver.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
-    <ClCompile Include="servicelocator.cpp" />
-    <ClCompile Include="sound_system.cpp" />
+    <ClCompile Include="Sound.cpp" />
+    <ClCompile Include="SoundLocator.cpp" />
+    <ClCompile Include="SoundService.cpp" />
     <ClCompile Include="Subject.cpp" />
     <ClCompile Include="TextComponent.cpp" />
     <ClCompile Include="Texture2D.cpp" />

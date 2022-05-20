@@ -9,6 +9,12 @@ namespace dae
 	public:
 		Observer() = default;
 		virtual ~Observer() = default;
-		virtual void Notify(Event event) = 0;
+
+		Observer(const Observer & other) = delete;
+		Observer(Observer && other) = delete;
+		Observer& operator=(const Observer & other) = delete;
+		Observer& operator=(Observer && other) = delete;
+
+		virtual void Notify(Event event, const std::weak_ptr<GameObject>& gameObject) = 0;
 	};
 }
