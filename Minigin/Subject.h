@@ -4,39 +4,19 @@
 
 namespace dae
 {
-	class Subject
+	class Subject: BaseComponent
 	{
 	public:
-		Subject();
-		void AddObserver(Observer* observer)
-		{
-			if (numbObservers < MAX_OBSERVERS)
-			{
-				observers[numbObservers] = observer;
-				++numbObservers;
-			}
-		}
-		void RemoveObserver(Observer* observer)
-		{
-			for (int i = 0; i < numbObservers; i++)
-			{
-				if (observers[i] == observer)
-				{
-					delete observers[i];
-					observers[i] = observers[MAX_OBSERVERS - 1];
-					observers[MAX_OBSERVERS - 1] = nullptr;
-					--numbObservers;
-					break;
-				}
-			}
-		}
-		virtual void Update(float elapsedSec) = 0;
-	protected:
-		void Notify(Event event)
-		{
-			for (int i = 0; i < numbObservers; ++i)
-				observers[i]->Notify(event);
-		}
+		Subject(const std::shared_ptr<GameObject>& owner);
+		void AddObserver(Observer* observer);
+		void RemoveObserver(Observer* observer);
+
+		void StaticUpdate(float deltaTime) override;
+		void Update(float deltaTime) override;
+		void Render(glm::vec3 pos) const override;
+
+		void Notify(Event event, const std::weak_ptr<GameObject>& gameObject);
+		void Notify(Event event, int data);
 	private:
 		Observer* observers[MAX_OBSERVERS];
 		int numbObservers;

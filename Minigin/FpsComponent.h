@@ -1,11 +1,10 @@
 #pragma once
 #include "BaseComponent.h"
-#include "Transform.h"
 
 namespace dae
 {
 	class Font;
-	class Texture2D;
+	class TextComponent;
 	class FpsComponent final : public BaseComponent
 	{
 	public:
@@ -13,8 +12,7 @@ namespace dae
 		void StaticUpdate(float deltaTime) override;
 		void Render(glm::vec3 pos) const override;
 
-		explicit FpsComponent(const std::shared_ptr<Font>& font);
-		explicit FpsComponent();
+		explicit FpsComponent(const std::shared_ptr<GameObject>& owner, const std::shared_ptr<Font>& font);
 		virtual ~FpsComponent() = default;
 		void SetFont(const std::shared_ptr<Font>& font);
 		FpsComponent(const FpsComponent& other) = delete;
@@ -22,9 +20,6 @@ namespace dae
 		FpsComponent& operator=(const FpsComponent& other) = delete;
 		FpsComponent& operator=(FpsComponent&& other) = delete;
 	private:
-		bool m_NeedsUpdate;
-		std::string m_Text;
-		std::shared_ptr<Font> m_Font;
-		std::shared_ptr<Texture2D> m_TextTexture;
+		std::weak_ptr<TextComponent> m_pTextComp;
 	};
 }

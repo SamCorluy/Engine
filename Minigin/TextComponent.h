@@ -1,6 +1,5 @@
 #pragma once
 #include "BaseComponent.h"
-#include "Transform.h"
 
 namespace dae
 {
@@ -9,6 +8,7 @@ namespace dae
 	class TextComponent final : public BaseComponent
 	{
 	public:
+		void StaticUpdate(float deltaTime) override;
 		void Update(float deltaTime) override;
 		void Render(glm::vec3 pos) const override;
 

@@ -15,10 +15,10 @@ public:
 	}
 	~SDLMixerPimpl()
 	{
-		for (size_t i = 0; i < effects.size(); i++)
-			delete effects[i];
-		for (size_t i = 0; i < music.size(); i++)
-			delete music[i];
+		for (auto effect : effects)
+			Mix_FreeChunk(effect);
+		for (auto track : music)
+			Mix_FreeMusic(track);
 	}
 	int loadSound(const char* filename, SoundType soundType)
 	{

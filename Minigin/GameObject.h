@@ -1,6 +1,5 @@
 #pragma once
 #include "Transform.h"
-#include "SceneObject.h"
 #include "list"
 #include "BaseComponent.h"
 #include "Subject.h"
@@ -11,7 +10,7 @@ namespace dae
 	{
 	public:
 		GameObject() = default;
-		~GameObject() = default;
+		~GameObject();
 
 		GameObject(const GameObject& other) = delete;
 		GameObject(GameObject&& other) = delete;
@@ -22,8 +21,8 @@ namespace dae
 		void StaticUpdate(float deltaTime);
 		void Render() const;
 
-		template<typename T> void AddComponent(T* comp);
-		template<typename T> T* GetComponent() const;
+		template<typename T> void AddComponent(const std::weak_ptr<BaseComponent>& comp);
+		template<typename T> std::weak_ptr<T> GetComponent() const;
 		template<typename T> void RemoveComponent();
 
 		void SetParent(GameObject* parent);
@@ -49,31 +48,29 @@ namespace dae
 		Transform m_Transform{};
 		GameObject* m_Parent = nullptr;
 		std::list<GameObject*> m_Children;
-		std::vector<BaseComponent*> m_pComponentObjects;
+		std::vector<std::shared_ptr<BaseComponent>> m_pComponentObjects;
 		Subject* m_Subject;
 	};
 
-	template<typename T> void dae::GameObject::AddComponent(T* comp)
+	template<typename T> void dae::GameObject::AddComponent(const std::weak_ptr<BaseComponent>& comp)
 	{
-		if (!GetComponent<T>())
+		if (!GetComponent<T>().lock())
 		{
-			m_pComponentObjects.push_back(comp);
+			m_pComponentObjects.push_back(comp.lock());
 		}
 	}
 
-	template<typename T> T* dae::GameObject::GetComponent() const
+	template<typename T> std::weak_ptr<T> dae::GameObject::GetComponent() const
 	{
-		auto it = std::find_if(m_pComponentObjects.begin(),
-			m_pComponentObjects.end(),
-			[](BaseComponent* sceneObject)
-			{
-				return typeid(T) == typeid(*sceneObject);
-			});
+		std::weak_ptr<T> gameComp;
+		for (std::shared_ptr<BaseComponent> comp: m_pComponentObjects)
+		{
+			gameComp = std::dynamic_pointer_cast<T>(comp);
+			if (gameComp.lock() != nullptr)
+				return gameComp;
+		}
 
-		if (it == m_pComponentObjects.end())
-			return nullptr;
-
-		return dynamic_cast<T*>(*it);
+		return gameComp;
 	}
 
 	template<typename T> void dae::GameObject::RemoveComponent()

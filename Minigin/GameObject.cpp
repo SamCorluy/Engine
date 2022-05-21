@@ -93,8 +93,6 @@ void dae::GameObject::Render() const
 
 dae::GameObject::~GameObject()
 {
-	for (auto obj : m_pComponentObjects)
-		delete obj;
 	for (auto child : m_Children)
 		delete child;
 }

@@ -223,17 +223,12 @@ xcopy $(SolutionDir)3rdParty\SDL2_mixer-2.0.4\lib\x64\*.dll $(OutputPath) /Y</Co
     <ClInclude Include="Font.h" />
     <ClInclude Include="FpsComponent.h" />
     <ClInclude Include="GameObject.h" />
-    <ClInclude Include="Event.h" />
-    <ClInclude Include="HealthObserver.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="SoundLogger.h" />
     <ClInclude Include="Minigin.h" />
     <ClInclude Include="MiniginPCH.h" />
-    <ClInclude Include="MrPepperComponent.h" />
     <ClInclude Include="NullSound.h" />
     <ClInclude Include="Observer.h" />
-    <ClInclude Include="PointsObserver.h" />
-    <ClInclude Include="SceneObject.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="Scene.h" />
@@ -254,7 +249,6 @@ xcopy $(SolutionDir)3rdParty\SDL2_mixer-2.0.4\lib\x64\*.dll $(OutputPath) /Y</Co
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="FpsComponent.cpp" />
     <ClCompile Include="GameObject.cpp" />
-    <ClCompile Include="HealthObserver.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="SoundLogger.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -266,10 +260,8 @@ xcopy $(SolutionDir)3rdParty\SDL2_mixer-2.0.4\lib\x64\*.dll $(OutputPath) /Y</Co
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MiniginPCH.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="MrPepperComponent.cpp" />
     <ClCompile Include="NullSound.cpp" />
     <ClCompile Include="Observer.cpp" />
-    <ClCompile Include="PointsObserver.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="Scene.cpp" />

@@ -1,59 +1,32 @@
 #include "MiniginPCH.h"
-#include <SDL_ttf.h>
 #include "FpsComponent.h"
-#include "Font.h"
-#include "Renderer.h"
+#include "TextComponent.h"
+#include "GameObject.h"
 #include "Texture2D.h"
+
+dae::FpsComponent::FpsComponent(const std::shared_ptr<GameObject>& owner, const std::shared_ptr<Font>& font)
+	: BaseComponent(owner)
+{
+	owner->AddComponent<TextComponent>(std::make_shared<TextComponent>(owner, "60 FPS", font));
+	m_pTextComp = owner->GetComponent<TextComponent>();
+}
 
 void dae::FpsComponent::Update(float deltaTime)
 {
 	int fps = (int)std::floor(1.f / deltaTime);
-	m_Text = std::to_string(fps);
-	if (m_NeedsUpdate)
-	{
-		const SDL_Color color = { 255,255,255 }; // only white text is supported now
-		const auto surf = TTF_RenderText_Blended(m_Font->GetFont(), m_Text.c_str(), color);
-		if (surf == nullptr)
-		{
-			throw std::runtime_error(std::string("Render text failed: ") + SDL_GetError());
-		}
-		auto texture = SDL_CreateTextureFromSurface(Renderer::GetInstance().GetSDLRenderer(), surf);
-		if (texture == nullptr)
-		{
-			throw std::runtime_error(std::string("Create text texture from surface failed: ") + SDL_GetError());
-		}
-		SDL_FreeSurface(surf);
-		m_TextTexture = std::make_shared<Texture2D>(texture);
-		//m_NeedsUpdate = false;
-	}
+
+	m_pTextComp.lock()->SetText(std::to_string(fps) + " FPS");
 }
 
 void dae::FpsComponent::StaticUpdate(float)
 {
 }
 
-void dae::FpsComponent::Render(glm::vec3 pos) const
-{
-	if (m_TextTexture != nullptr)
-	{
-		//const auto& pos = m_Transform.GetPosition();
-		Renderer::GetInstance().RenderTexture(*m_TextTexture, pos.x, pos.y);
-	}
-}
-
-dae::FpsComponent::FpsComponent(const std::shared_ptr<Font>& font)
-	: m_Font(font)
-	, m_NeedsUpdate(true)
-{
-}
-
-dae::FpsComponent::FpsComponent()
-	: m_Font()
-	, m_NeedsUpdate(true)
+void dae::FpsComponent::Render(glm::vec3) const
 {
 }
 
 void dae::FpsComponent::SetFont(const std::shared_ptr<Font>& font)
 {
-	m_Font = font;
+	m_pTextComp.lock()->SetFont(font);
 }

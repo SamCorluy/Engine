@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include "Singleton.h"
 
 namespace dae
@@ -11,9 +12,12 @@ namespace dae
 
 		void Update(float deltaTime);
 		void Render();
+		void SetActiveScene(const std::string& name);
+
 	private:
 		friend class Singleton<SceneManager>;
 		SceneManager() = default;
-		std::vector<std::shared_ptr<Scene>> m_Scenes;
+		std::map<std::string, std::shared_ptr<Scene>> m_Scenes;
+		std::weak_ptr<Scene> m_pActiveScene = std::shared_ptr<Scene>(nullptr);
 	};
 }

@@ -14,7 +14,7 @@ namespace dae
 
 		void SetTexture(const std::string& filename);
 
-		explicit TextureComponent();
+		explicit TextureComponent(const std::shared_ptr<GameObject>& owner, const std::string& filename);
 		virtual ~TextureComponent() = default;
 		TextureComponent(const TextureComponent& other) = delete;
 		TextureComponent(TextureComponent&& other) = delete;
@@ -22,7 +22,6 @@ namespace dae
 		TextureComponent& operator=(TextureComponent&& other) = delete;
 
 	private:
-		bool m_NeedsUpdate;
 		std::shared_ptr<Texture2D> m_Texture;
 	};
 }
