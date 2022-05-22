@@ -10,7 +10,7 @@ namespace dae
 	public:
 		void Update(float deltaTime) override;
 		void StaticUpdate(float deltaTime) override;
-		void Render(glm::vec3 pos) const override;
+		void Render(const Transform& pos) const override;
 
 		explicit FpsComponent(const std::shared_ptr<GameObject>& owner, const std::shared_ptr<Font>& font);
 		virtual ~FpsComponent() = default;

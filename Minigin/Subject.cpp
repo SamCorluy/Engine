@@ -41,7 +41,7 @@ void dae::Subject::Update(float)
 {
 }
 
-void dae::Subject::Render(glm::vec3) const
+void dae::Subject::Render(const Transform&) const
 {
 }
 

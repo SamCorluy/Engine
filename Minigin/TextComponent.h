@@ -10,7 +10,7 @@ namespace dae
 	public:
 		void StaticUpdate(float deltaTime) override;
 		void Update(float deltaTime) override;
-		void Render(glm::vec3 pos) const override;
+		void Render(const Transform& pos) const override;
 
 		void SetText(const std::string& text);
 		void SetFont(const std::shared_ptr<Font>& font);

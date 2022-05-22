@@ -11,12 +11,6 @@ void dae::GameObject::Update(float elapsedSec)
 	{
 		object->Update(elapsedSec);
 	}
-	for (auto&& child : m_Children)
-	{
-		child->Update(elapsedSec);
-	}
-	if(m_Subject)
-		m_Subject->Update(elapsedSec);
 }
 
 void dae::GameObject::StaticUpdate(float elapsedSec)
@@ -25,74 +19,33 @@ void dae::GameObject::StaticUpdate(float elapsedSec)
 	{
 		object->StaticUpdate(elapsedSec);
 	}
-	for (auto&& child : m_Children)
-	{
-		child->StaticUpdate(elapsedSec);
-	}
 }
 
-void dae::GameObject::SetParent(GameObject* parent)
+glm::vec2 dae::GameObject::GetPosition() const
 {
-	auto prevParent = m_Parent;
-	auto amount = m_Parent->GetChildCount();
-
-	for (size_t i = 0; i < amount; i++)
-	{
-		prevParent->GetChildAt((int)i)->m_Parent = parent;
-	}
-
-	parent->m_Children = prevParent->m_Children;
-	prevParent->m_Children.clear();
+	glm::vec2 pos{ m_Transform.GetPosition().x, m_Transform.GetPosition().y };
+	return glm::vec2();
 }
 
-dae::GameObject* dae::GameObject::GetParent() const
+void dae::GameObject::SetPosition(float x, float y)
 {
-	return m_Parent;
+	m_Transform.SetPosition(x, y, 0.0f);
 }
 
-size_t dae::GameObject::GetChildCount() const
+void dae::GameObject::SetPosition(const glm::vec2& pos)
 {
-	return m_Children.size();
+	m_Transform.SetPosition(pos.x, pos.y, 0.0f);
 }
 
-dae::GameObject* dae::GameObject::GetChildAt(int index) const
+const dae::Transform& dae::GameObject::GetTransform() const
 {
-	GameObject* ptr = nullptr;
-	if ((int)m_Children.size() > index)
-	{
-		auto it = m_Children.begin();
-		std::advance(it, index);
-		ptr = *it;
-	}
-	return ptr;
-}
-
-void dae::GameObject::RemoveChild(int index)
-{
-	if (index < (int)m_Children.size())
-		m_Children.remove(GetChildAt(index));
-}
-
-void dae::GameObject::AddChild(GameObject* go)
-{
-	m_Children.emplace_back(go);
-	m_Children.back()->m_Parent = this;
+	return m_Transform;
 }
 
 void dae::GameObject::Render() const
 {
 	for (auto object : m_pComponentObjects)
 	{
-		object->Render(m_Transform.GetPosition());
+		object->Render(m_Transform);
 	}
-	for (auto&& child : m_Children)
-	{
-		child->Render();
-	}
-}
-
-dae::GameObject::~GameObject()
-{
-	for (auto child : m_Children)
-		delete child;
 }

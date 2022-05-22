@@ -11,11 +11,12 @@ dae::TextureComponent::TextureComponent(const std::shared_ptr<GameObject>& owner
 	SetTexture(filename);
 }
 
-void dae::TextureComponent::Render(glm::vec3 pos) const
+void dae::TextureComponent::Render(const Transform& pos) const
 {
+	auto position = pos.GetPosition();
 	if (m_Texture != nullptr)
 	{
-		Renderer::GetInstance().RenderTexture(*m_Texture, pos.x, pos.y);
+		Renderer::GetInstance().RenderTexture(*m_Texture, position.x, position.y);
 	}
 }
 

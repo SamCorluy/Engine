@@ -17,7 +17,7 @@ namespace dae
 
 		virtual void Update(float deltaTime) = 0;
 		virtual void StaticUpdate(float deltaTime) = 0;
-		virtual void Render(glm::vec3 pos) const = 0;
+		virtual void Render(const Transform& pos) const = 0;
 
 		std::weak_ptr<GameObject> GetOwner() const { return m_pOwner; };
 	private:

@@ -6,11 +6,13 @@
 
 namespace dae
 {
+	class Scene;
+	class Texture2D;
 	class GameObject final
 	{
 	public:
 		GameObject() = default;
-		~GameObject();
+		~GameObject() = default;
 
 		GameObject(const GameObject& other) = delete;
 		GameObject(GameObject&& other) = delete;
@@ -25,36 +27,19 @@ namespace dae
 		template<typename T> std::weak_ptr<T> GetComponent() const;
 		template<typename T> void RemoveComponent();
 
-		void SetParent(GameObject* parent);
-		GameObject* GetParent() const;
+		glm::vec2 GetPosition() const;
+		void SetPosition(float x, float y);
+		void SetPosition(const glm::vec2& pos);
 
-		size_t GetChildCount() const;
-		GameObject* GetChildAt(int index) const;
-
-		void RemoveChild(int index);
-		void AddChild(GameObject* go);
-
-		void SetPosition(float x, float y)
-		{
-			m_Transform.SetPosition(x, y, 0.0f);
-		}
-		void SetSubject(Subject* subject)
-		{
-			m_Subject = subject;
-		}
-		Subject* GetSubject() { return m_Subject; };
-
+		const Transform& GetTransform() const;
 	private:
-		Transform m_Transform{};
-		GameObject* m_Parent = nullptr;
-		std::list<GameObject*> m_Children;
+		Transform m_Transform;
 		std::vector<std::shared_ptr<BaseComponent>> m_pComponentObjects;
-		Subject* m_Subject;
 	};
 
 	template<typename T> void dae::GameObject::AddComponent(const std::weak_ptr<BaseComponent>& comp)
 	{
-		if (!GetComponent<T>().lock())
+		if (!GetComponent<T>().lock() && comp.use_count() == 1)
 		{
 			m_pComponentObjects.push_back(comp.lock());
 		}
@@ -82,27 +67,4 @@ namespace dae
 			delete comp;
 		}
 	}
-	//class Texture2D;
-
-	//// todo: this should become final.
-	//class GameObject final : public SceneObject
-	//{
-	//public:
-	//	void Update(float deltaTime) override;
-
-	//	void SetTexture(const std::string& filename);
-	//	void SetPosition(float x, float y);
-
-	//	GameObject() = default;
-	//	virtual ~GameObject();
-	//	GameObject(const GameObject& other) = delete;
-	//	GameObject(GameObject&& other) = delete;
-	//	GameObject& operator=(const GameObject& other) = delete;
-	//	GameObject& operator=(GameObject&& other) = delete;
-
-	//private:
-	//	Transform m_Transform;
-	//	// todo: mmm, every gameobject has a texture? Is that correct?
-	//	//std::shared_ptr<Texture2D> m_Texture{};
-	//};
 }

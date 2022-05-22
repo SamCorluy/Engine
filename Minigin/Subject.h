@@ -13,7 +13,7 @@ namespace dae
 
 		void StaticUpdate(float deltaTime) override;
 		void Update(float deltaTime) override;
-		void Render(glm::vec3 pos) const override;
+		void Render(const Transform& pos) const override;
 
 		void Notify(Event event, const std::weak_ptr<GameObject>& gameObject);
 		void Notify(Event event, int data);

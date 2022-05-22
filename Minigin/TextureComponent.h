@@ -10,7 +10,7 @@ namespace dae
 	public:
 		void StaticUpdate(float deltaTime) override;
 		void Update(float deltaTime) override;
-		void Render(glm::vec3 pos) const override;
+		void Render(const Transform& pos) const override;
 
 		void SetTexture(const std::string& filename);
 

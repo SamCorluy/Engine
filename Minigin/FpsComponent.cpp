@@ -22,7 +22,7 @@ void dae::FpsComponent::StaticUpdate(float)
 {
 }
 
-void dae::FpsComponent::Render(glm::vec3) const
+void dae::FpsComponent::Render(const Transform&) const
 {
 }
 
