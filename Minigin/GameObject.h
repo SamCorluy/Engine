@@ -3,6 +3,7 @@
 #include "list"
 #include "BaseComponent.h"
 #include "Subject.h"
+#include <vector>
 
 namespace dae
 {

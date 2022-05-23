@@ -6,7 +6,7 @@
 #include "Texture2D.h"
 #include "ElapsedTime.h"
 
-dae::TextureComponent::TextureComponent(const std::shared_ptr<GameObject>& owner, const std::vector<AnimationInit> animInfo)
+dae::TextureComponent::TextureComponent(const std::shared_ptr<GameObject>& owner, const std::vector<AnimationInit>& animInfo)
 	: BaseComponent(owner)
 	, m_ActiveTexture{0}
 {
@@ -19,7 +19,7 @@ dae::TextureComponent::TextureComponent(const std::shared_ptr<GameObject>& owner
 void dae::TextureComponent::Render(const Transform& pos) const
 {
 	auto position = pos.GetPosition();
-	if (!(m_ActiveTexture == 0 && m_Textures.size() > 0) && m_Textures[m_ActiveTexture].texture != nullptr)
+	if (!(m_ActiveTexture == 0 && m_Textures.size() == 0) && m_Textures[m_ActiveTexture].texture != nullptr)
 	{
 		float accumTime = m_Textures[m_ActiveTexture].accumTime;
 		float duration = m_Textures[m_ActiveTexture].duration;
@@ -31,15 +31,15 @@ void dae::TextureComponent::Render(const Transform& pos) const
 		SDL_QueryTexture(texture->GetSDLTexture(), NULL, NULL, &width, &height);
 
 		Rect srcRect;
-		srcRect.x = currentFrame * width;
-		srcRect.y = height;
+		srcRect.y = 0;
 		srcRect.width = int(width / frames);
+		srcRect.x = currentFrame * srcRect.width;
 		srcRect.height = height;
 		Rect dstRect;
 		dstRect.x = static_cast<int>(position.x);
 		dstRect.y = static_cast<int>(position.y);
-		dstRect.width = srcRect.width;
-		dstRect.height = srcRect.width;
+		dstRect.width = srcRect.width * 4;
+		dstRect.height = srcRect.width * 4;
 		Renderer::GetInstance().RenderTexture(*m_Textures[m_ActiveTexture].texture, srcRect, dstRect);
 		
 	}
@@ -72,12 +72,14 @@ void dae::TextureComponent::StaticUpdate()
 
 void dae::TextureComponent::Update()
 {
-	if (!(m_ActiveTexture == 0 && m_Textures.size() > 0) && m_Textures[m_ActiveTexture].texture != nullptr)
+	if (!(m_ActiveTexture == 0 && m_Textures.size() == 0) && m_Textures[m_ActiveTexture].texture != nullptr)
 	{
 		float accumTime = m_Textures[m_ActiveTexture].accumTime;
 		float duration = m_Textures[m_ActiveTexture].duration;
 		accumTime += ElapsedTime::GetInstance().GetElapsedTime();
-		accumTime = float(int( 100.f * accumTime) % int(100.f * duration)) / 100.f;
+		int a = static_cast<int>(10000.f * accumTime);
+		int b = static_cast<int>(10000.f * duration);
+		accumTime = static_cast<float>(a % b) / 10000.f;
 		m_Textures[m_ActiveTexture].accumTime = accumTime;
 	}
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseComponent.h"
 #include "Transform.h"
+#include <string>
 
 namespace dae
 {
@@ -9,6 +10,11 @@ namespace dae
 		size_t frames;
 		float duration;
 		const std::string& fileName;
+		AnimationInit(size_t fr, float d, std::string& f)
+			: frames{fr}
+			, duration{d}
+			, fileName{f}
+		{}
 	};
 	class Texture2D;
 	struct Animation
@@ -28,7 +34,7 @@ namespace dae
 		void AddTexture(const AnimationInit animInfo);
 		bool SetActiveAnimation(size_t index);
 
-		explicit TextureComponent(const std::shared_ptr<GameObject>& owner, const std::vector<AnimationInit> animInfo);
+		explicit TextureComponent(const std::shared_ptr<GameObject>& owner, const std::vector<AnimationInit>& animInfo);
 		virtual ~TextureComponent() = default;
 		TextureComponent(const TextureComponent& other) = delete;
 		TextureComponent(TextureComponent&& other) = delete;

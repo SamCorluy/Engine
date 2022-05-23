@@ -22,11 +22,11 @@ void dae::SceneManager::SetActiveScene(const std::string& name)
 	m_pActiveScene = m_Scenes[name];
 }
 
-dae::Scene& dae::SceneManager::CreateScene(const std::string& name)
+std::weak_ptr<dae::Scene> dae::SceneManager::CreateScene(const std::string& name)
 {
-	const auto& scene = std::shared_ptr<Scene>(new Scene(name));
+	const auto scene = std::shared_ptr<Scene>(new Scene(name));
 	m_Scenes[name] = scene;
 	if (m_pActiveScene.expired())
 		m_pActiveScene = scene;
-	return *scene;
+	return scene;
 }

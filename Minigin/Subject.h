@@ -4,7 +4,7 @@
 
 namespace dae
 {
-	class Subject: BaseComponent
+	class Subject final: public BaseComponent
 	{
 	public:
 		Subject(const std::shared_ptr<GameObject>& owner);
