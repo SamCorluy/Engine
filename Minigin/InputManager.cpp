@@ -10,6 +10,7 @@
 class dae::InputManager::Impl
 {
 	std::map <Input, std::vector<std::shared_ptr<BaseCommand>>> m_Commands;
+	std::map < SDL_Keycode,std::pair<bool, bool>> m_KeyQueue;
 	XINPUT_KEYSTROKE m_CurrentState{};
 public:
 	Impl()
@@ -20,7 +21,24 @@ public:
 	bool ProcessInput()
 	{
 		SDL_Event e;
+		std::vector<SDL_Keycode> toRemove;
 		while (SDL_PollEvent(&e)) {
+			switch (e.type)
+			{
+			case SDL_KEYDOWN:
+				m_KeyQueue[e.key.keysym.sym] = std::pair<bool, bool>(true, (bool)e.key.repeat);
+				break;
+			case SDL_KEYUP:
+				m_KeyQueue[e.key.keysym.sym] = std::pair<bool, bool>(false, (bool)e.key.repeat);
+				toRemove.push_back(e.key.keysym.sym);
+				break;
+			}
+
+			if (e.type == SDL_QUIT)
+				return false;
+		}
+		for (auto key: m_KeyQueue)
+		{
 			for (auto command : m_Commands)
 			{
 				auto input = command.first;
@@ -28,28 +46,31 @@ public:
 
 				if (input.isController)
 					continue;
-				if (input.input == e.key.keysym.sym)
+				if (input.input == key.first)
 				{
 					switch (input.type)
 					{
 					case InputType::Hold:
+						if (key.second.first)
+							for (auto com : commands)
+								com->Execute();
+						break;
 					case InputType::Press:
-						if (e.type == SDL_KEYDOWN)
+						if (key.second.first && !key.second.second)
 							for (auto com : commands)
 								com->Execute();
 						break;
 					case InputType::Release:
-						if (e.type == SDL_KEYUP)
+						if (!key.second.first)
 							for (auto com : commands)
 								com->Execute();
 						break;
 					}
 				}
 			}
-
-			if (e.type == SDL_QUIT)
-				return false;
 		}
+		for (auto idx : toRemove)
+			m_KeyQueue.erase(idx);
 		ZeroMemory(&m_CurrentState, sizeof(XINPUT_KEYSTROKE));
 
 		while (XInputGetKeystroke(0, 0, &m_CurrentState) == ERROR_SUCCESS)
@@ -87,7 +108,7 @@ public:
 		return true;
 	}
 
-	void AddControllerInput(int input, InputType type, std::shared_ptr<BaseCommand>& command)
+	void AddControllerInput(int input, InputType type, const std::shared_ptr<BaseCommand>& command)
 	{
 		Input i;
 		i.input = input;
@@ -96,7 +117,7 @@ public:
 		m_Commands[i].push_back(command);
 	}
 
-	void AddKeyboardInput(int input, InputType type, std::shared_ptr<BaseCommand>& command)
+	void AddKeyboardInput(int input, InputType type, const std::shared_ptr<BaseCommand>& command)
 	{
 		Input i;
 		i.input = input;
@@ -106,12 +127,12 @@ public:
 	}
 };
 
-void dae::InputManager::AddControllerInput(int input, InputType type, std::shared_ptr<BaseCommand>& command)
+void dae::InputManager::AddControllerInput(int input, InputType type, const std::shared_ptr<BaseCommand>& command)
 {
 	m_pImpl->AddControllerInput(input, type, command);
 }
 
-void dae::InputManager::AddKeyboardInput(int input, InputType type, std::shared_ptr<BaseCommand>& command)
+void dae::InputManager::AddKeyboardInput(int input, InputType type, const std::shared_ptr<BaseCommand>& command)
 {
 	m_pImpl->AddKeyboardInput(input, type, command);
 }

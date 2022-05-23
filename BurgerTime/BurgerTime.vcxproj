@@ -159,11 +159,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CharacterMoveCommand.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PeterPepperComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CharacterMoveCommand.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="PeterPepperComponent.h" />
   </ItemGroup>

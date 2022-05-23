@@ -41,7 +41,6 @@ void dae::TextureComponent::Render(const Transform& pos) const
 		dstRect.width = srcRect.width * 4;
 		dstRect.height = srcRect.width * 4;
 		Renderer::GetInstance().RenderTexture(*m_Textures[m_ActiveTexture].texture, srcRect, dstRect);
-		
 	}
 }
 
@@ -72,7 +71,7 @@ void dae::TextureComponent::StaticUpdate()
 
 void dae::TextureComponent::Update()
 {
-	if (!(m_ActiveTexture == 0 && m_Textures.size() == 0) && m_Textures[m_ActiveTexture].texture != nullptr)
+	if (m_Textures[m_ActiveTexture].frames > 1 && !(m_ActiveTexture == 0 && m_Textures.size() == 0) && m_Textures[m_ActiveTexture].texture != nullptr)
 	{
 		float accumTime = m_Textures[m_ActiveTexture].accumTime;
 		float duration = m_Textures[m_ActiveTexture].duration;

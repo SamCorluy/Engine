@@ -9,8 +9,8 @@ namespace dae
 	{
 		size_t frames;
 		float duration;
-		const std::string& fileName;
-		AnimationInit(size_t fr, float d, std::string& f)
+		const std::string fileName;
+		AnimationInit(size_t fr, float d, const std::string& f)
 			: frames{fr}
 			, duration{d}
 			, fileName{f}

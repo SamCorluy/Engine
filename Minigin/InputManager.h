@@ -39,8 +39,8 @@ namespace dae
 		InputManager();
 		~InputManager();
 		bool ProcessInput();
-		void AddControllerInput(int input, InputType type, std::shared_ptr<BaseCommand>& command);
-		void AddKeyboardInput(int input, InputType type, std::shared_ptr<BaseCommand>& command);
+		void AddControllerInput(int input, InputType type, const  std::shared_ptr<BaseCommand>& command);
+		void AddKeyboardInput(int input, InputType type, const  std::shared_ptr<BaseCommand>& command);
 		//bool checkButtons(ControllerButton button, XINPUT_STATE toCheck, XINPUT_STATE toCompare) const;
 	};
 }
