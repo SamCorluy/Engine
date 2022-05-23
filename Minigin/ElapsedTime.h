@@ -10,6 +10,7 @@ public:
 	void SetStaticElapsedTime(float time);
 	float GetStaticElapsedTime();
 private:
+	friend class Singleton<ElapsedTime>;
 	ElapsedTime() = default;
 	float m_ElapsedSec;
 	float m_StaticElapsedSec;

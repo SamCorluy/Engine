@@ -6,7 +6,7 @@
 #include "Texture2D.h"
 #include "ElapsedTime.h"
 
-dae::TextureComponent::TextureComponent(const std::shared_ptr<GameObject>& owner, std::vector<const AnimationInit> animInfo)
+dae::TextureComponent::TextureComponent(const std::shared_ptr<GameObject>& owner, const std::vector<AnimationInit> animInfo)
 	: BaseComponent(owner)
 	, m_ActiveTexture{0}
 {
@@ -23,7 +23,7 @@ void dae::TextureComponent::Render(const Transform& pos) const
 	{
 		float accumTime = m_Textures[m_ActiveTexture].accumTime;
 		float duration = m_Textures[m_ActiveTexture].duration;
-		int frames = m_Textures[m_ActiveTexture].frames;
+		int frames = static_cast<int>(m_Textures[m_ActiveTexture].frames);
 		float timePerFrame = duration / frames;
 		int currentFrame = int(accumTime / timePerFrame);
 		auto texture = m_Textures[m_ActiveTexture].texture;
@@ -36,8 +36,8 @@ void dae::TextureComponent::Render(const Transform& pos) const
 		srcRect.width = int(width / frames);
 		srcRect.height = height;
 		Rect dstRect;
-		dstRect.x = position.x;
-		dstRect.y = position.y;
+		dstRect.x = static_cast<int>(position.x);
+		dstRect.y = static_cast<int>(position.y);
 		dstRect.width = srcRect.width;
 		dstRect.height = srcRect.width;
 		Renderer::GetInstance().RenderTexture(*m_Textures[m_ActiveTexture].texture, srcRect, dstRect);

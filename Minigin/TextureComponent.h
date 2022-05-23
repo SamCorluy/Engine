@@ -10,6 +10,7 @@ namespace dae
 		float duration;
 		const std::string& fileName;
 	};
+	class Texture2D;
 	struct Animation
 	{
 		size_t frames;
@@ -17,7 +18,6 @@ namespace dae
 		std::shared_ptr<Texture2D> texture;
 		float accumTime;
 	};
-	class Texture2D;
 	class TextureComponent final : public BaseComponent
 	{
 	public:
@@ -28,7 +28,7 @@ namespace dae
 		void AddTexture(const AnimationInit animInfo);
 		bool SetActiveAnimation(size_t index);
 
-		explicit TextureComponent(const std::shared_ptr<GameObject>& owner, std::vector<const AnimationInit> animInfo);
+		explicit TextureComponent(const std::shared_ptr<GameObject>& owner, const std::vector<AnimationInit> animInfo);
 		virtual ~TextureComponent() = default;
 		TextureComponent(const TextureComponent& other) = delete;
 		TextureComponent(TextureComponent&& other) = delete;

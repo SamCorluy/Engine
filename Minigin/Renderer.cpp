@@ -75,9 +75,9 @@ void dae::Renderer::RenderTexture(const Texture2D& texture, Rect src, Rect dst) 
 	srcRect.y = src.y;
 	srcRect.w = src.width;
 	srcRect.h = src.height;
-	dstRect.x = src.x;
-	dstRect.y = src.y;
-	dstRect.w = src.width;
-	dstRect.h = src.height;
+	dstRect.x = dst.x;
+	dstRect.y = dst.y;
+	dstRect.w = dst.width;
+	dstRect.h = dst.height;
 	SDL_RenderCopy(GetSDLRenderer(), texture.GetSDLTexture(), &srcRect, &dstRect);
 }
