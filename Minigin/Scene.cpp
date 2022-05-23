@@ -15,11 +15,19 @@ void Scene::Add(const std::shared_ptr<GameObject>& object)
 	m_Objects.push_back(object);
 }
 
-void Scene::Update(float deltaTime)
+void Scene::Update()
 {
 	for(auto& object : m_Objects)
 	{
-		object->Update(deltaTime);
+		object->Update();
+	}
+}
+
+void dae::Scene::StaticUpdate()
+{
+	for (auto& object : m_Objects)
+	{
+		object->StaticUpdate();
 	}
 }
 

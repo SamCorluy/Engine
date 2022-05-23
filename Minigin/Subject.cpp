@@ -33,11 +33,11 @@ void dae::Subject::RemoveObserver(Observer* observer)
 	}
 }
 
-void dae::Subject::StaticUpdate(float)
+void dae::Subject::StaticUpdate()
 {
 }
 
-void dae::Subject::Update(float)
+void dae::Subject::Update()
 {
 }
 

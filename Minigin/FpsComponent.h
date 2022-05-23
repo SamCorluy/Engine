@@ -8,8 +8,8 @@ namespace dae
 	class FpsComponent final : public BaseComponent
 	{
 	public:
-		void Update(float deltaTime) override;
-		void StaticUpdate(float deltaTime) override;
+		void Update() override;
+		void StaticUpdate() override;
 		void Render(const Transform& pos) const override;
 
 		explicit FpsComponent(const std::shared_ptr<GameObject>& owner, const std::shared_ptr<Font>& font);

@@ -19,8 +19,8 @@ namespace dae
 		GameObject& operator=(const GameObject& other) = delete;
 		GameObject& operator=(GameObject&& other) = delete;
 
-		void Update(float deltaTime);
-		void StaticUpdate(float deltaTime);
+		void Update();
+		void StaticUpdate();
 		void Render() const;
 
 		template<typename T> void AddComponent(const std::weak_ptr<BaseComponent>& comp);

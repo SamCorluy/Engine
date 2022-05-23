@@ -8,8 +8,8 @@ namespace dae
 	class TextComponent final : public BaseComponent
 	{
 	public:
-		void StaticUpdate(float deltaTime) override;
-		void Update(float deltaTime) override;
+		void StaticUpdate() override;
+		void Update() override;
 		void Render(const Transform& pos) const override;
 
 		void SetText(const std::string& text);

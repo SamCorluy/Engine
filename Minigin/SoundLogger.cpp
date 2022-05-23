@@ -1,9 +1,14 @@
 #include "MiniginPCH.h"
 #include "SoundLogger.h"
 
-SoundLogger::SoundLogger(Sound& wrapped)
+SoundLogger::SoundLogger(Sound* wrapped)
 	:wrapped_(wrapped)
 {}
+
+SoundLogger::~SoundLogger()
+{
+	delete wrapped_;
+}
 
 int SoundLogger::loadSound(const char* filename, SoundType soundType)
 {
@@ -11,7 +16,7 @@ int SoundLogger::loadSound(const char* filename, SoundType soundType)
 	type += (soundType == SoundType::EFFECT) ? "effect" : "sound";
 		
 	log(type.c_str());
-	return wrapped_.loadSound(filename, soundType);
+	return wrapped_->loadSound(filename, soundType);
 }
 
 void SoundLogger::play(const sound_id id, const float volume, SoundType soundType)
@@ -19,13 +24,13 @@ void SoundLogger::play(const sound_id id, const float volume, SoundType soundTyp
 	std::string type = "play sound of type: ";
 	type += (soundType == SoundType::EFFECT) ? "effect" : "sound";
 	log(type.c_str());
-	wrapped_.play(id, volume, soundType);
+	wrapped_->play(id, volume, soundType);
 }
 
 void SoundLogger::stopAllSounds()
 {
 	log("stop all sounds");
-	wrapped_.stopAllSounds();
+	wrapped_->stopAllSounds();
 }
 
 void SoundLogger::log(const char* message)

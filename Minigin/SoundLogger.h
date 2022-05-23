@@ -3,7 +3,8 @@
 class SoundLogger final: public Sound
 {
 public:
-	SoundLogger(Sound &wrapped);
+	SoundLogger(Sound* wrapped);
+	~SoundLogger();
 	SoundLogger(const SoundLogger& other) = delete;
 	SoundLogger(SoundLogger&& other) = delete;
 	SoundLogger& operator=(const SoundLogger& other) = delete;
@@ -15,6 +16,6 @@ public:
 
 private:
 	void log(const char* message);
-	Sound& wrapped_;
+	Sound* wrapped_;
 };
 

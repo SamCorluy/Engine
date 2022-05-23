@@ -11,8 +11,8 @@ namespace dae
 		void AddObserver(Observer* observer);
 		void RemoveObserver(Observer* observer);
 
-		void StaticUpdate(float deltaTime) override;
-		void Update(float deltaTime) override;
+		void StaticUpdate() override;
+		void Update() override;
 		void Render(const Transform& pos) const override;
 
 		void Notify(Event event, const std::weak_ptr<GameObject>& gameObject);

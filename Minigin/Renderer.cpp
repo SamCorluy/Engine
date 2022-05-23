@@ -28,12 +28,13 @@ void dae::Renderer::Init(SDL_Window * window)
 	}
 }
 
-void dae::Renderer::Render(GameObject* pGO) const
+void dae::Renderer::Render() const
 {
 	const auto& color = GetBackgroundColor();
 	SDL_SetRenderDrawColor(m_Renderer, color.r, color.g, color.b, color.a);
 	SDL_RenderClear(m_Renderer);
-	pGO->Render();
+
+	SceneManager::GetInstance().Render();
 	
 	SDL_RenderPresent(m_Renderer);
 }
@@ -64,4 +65,19 @@ void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const
 	dst.w = static_cast<int>(width);
 	dst.h = static_cast<int>(height);
 	SDL_RenderCopy(GetSDLRenderer(), texture.GetSDLTexture(), nullptr, &dst);
+}
+
+void dae::Renderer::RenderTexture(const Texture2D& texture, Rect src, Rect dst) const
+{
+	SDL_Rect srcRect{};
+	SDL_Rect dstRect{};
+	srcRect.x = src.x;
+	srcRect.y = src.y;
+	srcRect.w = src.width;
+	srcRect.h = src.height;
+	dstRect.x = src.x;
+	dstRect.y = src.y;
+	dstRect.w = src.width;
+	dstRect.h = src.height;
+	SDL_RenderCopy(GetSDLRenderer(), texture.GetSDLTexture(), &srcRect, &dstRect);
 }

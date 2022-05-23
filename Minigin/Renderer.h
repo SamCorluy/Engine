@@ -1,5 +1,6 @@
 #pragma once
 #include "Singleton.h"
+#include "Structs.h"
 
 namespace dae
 {
@@ -15,11 +16,12 @@ namespace dae
 		SDL_Color m_clearColor{};	
 	public:
 		void Init(SDL_Window* window);
-		void Render(GameObject* pGO) const;
+		void Render() const;
 		void Destroy();
 
 		void RenderTexture(const Texture2D& texture, float x, float y) const;
 		void RenderTexture(const Texture2D& texture, float x, float y, float width, float height) const;
+		void RenderTexture(const Texture2D& texture, Rect src, Rect dst) const;
 
 		SDL_Renderer* GetSDLRenderer() const { return m_Renderer; }
 

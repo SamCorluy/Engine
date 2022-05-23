@@ -5,19 +5,19 @@
 
 //dae::GameObject::~GameObject() = default;
 
-void dae::GameObject::Update(float elapsedSec)
+void dae::GameObject::Update()
 {
 	for (auto object : m_pComponentObjects)
 	{
-		object->Update(elapsedSec);
+		object->Update();
 	}
 }
 
-void dae::GameObject::StaticUpdate(float elapsedSec)
+void dae::GameObject::StaticUpdate()
 {
 	for (auto object : m_pComponentObjects)
 	{
-		object->StaticUpdate(elapsedSec);
+		object->StaticUpdate();
 	}
 }
 

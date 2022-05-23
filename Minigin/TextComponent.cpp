@@ -22,11 +22,11 @@ dae::TextComponent::TextComponent(const std::shared_ptr<GameObject>& owner)
 {
 }
 
-void dae::TextComponent::StaticUpdate(float)
+void dae::TextComponent::StaticUpdate()
 {
 }
 
-void dae::TextComponent::Update(float)
+void dae::TextComponent::Update()
 {
 	if (m_NeedsUpdate)
 	{

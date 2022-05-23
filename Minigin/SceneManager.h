@@ -10,7 +10,8 @@ namespace dae
 	public:
 		Scene& CreateScene(const std::string& name);
 
-		void Update(float deltaTime);
+		void Update();
+		void StaticUpdate();
 		void Render();
 		void SetActiveScene(const std::string& name);
 
