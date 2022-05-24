@@ -1,12 +1,12 @@
 #include "MiniginPCH.h"
 #include <SDL_ttf.h>
-#include "TextureComponent.h"
+#include "AnimationComponent.h"
 #include "Renderer.h"
 #include "ResourceManager.h"
 #include "Texture2D.h"
 #include "ElapsedTime.h"
 
-dae::TextureComponent::TextureComponent(const std::shared_ptr<GameObject>& owner, const std::vector<AnimationInit>& animInfo)
+dae::AnimationComponent::AnimationComponent(const std::shared_ptr<GameObject>& owner, const std::vector<AnimationInit>& animInfo)
 	: BaseComponent(owner)
 	, m_ActiveTexture{0}
 {
@@ -16,11 +16,16 @@ dae::TextureComponent::TextureComponent(const std::shared_ptr<GameObject>& owner
 	}
 }
 
-void dae::TextureComponent::Render(const Transform& pos) const
+void dae::AnimationComponent::Render(const Transform& pos) const
 {
 	auto position = pos.GetPosition();
 	if (!(m_ActiveTexture == 0 && m_Textures.size() == 0) && m_Textures[m_ActiveTexture].texture != nullptr)
 	{
+		int scale{ 3 };
+		auto window = Renderer::GetInstance().GetWindow();
+		int windowHeight;
+		SDL_GetWindowSize(window, nullptr, &windowHeight);
+
 		float accumTime = m_Textures[m_ActiveTexture].accumTime;
 		float duration = m_Textures[m_ActiveTexture].duration;
 		int frames = static_cast<int>(m_Textures[m_ActiveTexture].frames);
@@ -37,14 +42,14 @@ void dae::TextureComponent::Render(const Transform& pos) const
 		srcRect.height = height;
 		Rect dstRect;
 		dstRect.x = static_cast<int>(position.x);
-		dstRect.y = static_cast<int>(position.y);
-		dstRect.width = srcRect.width * 4;
-		dstRect.height = srcRect.width * 4;
+		dstRect.y = windowHeight - static_cast<int>(position.y);
+		dstRect.width = srcRect.width * scale;
+		dstRect.height = srcRect.width * scale;
 		Renderer::GetInstance().RenderTexture(*m_Textures[m_ActiveTexture].texture, srcRect, dstRect);
 	}
 }
 
-void dae::TextureComponent::AddTexture(const AnimationInit animInfo)
+void dae::AnimationComponent::AddTexture(const AnimationInit animInfo)
 {
 	Animation animation{};
 	animation.accumTime = 0.f;
@@ -54,7 +59,7 @@ void dae::TextureComponent::AddTexture(const AnimationInit animInfo)
 	m_Textures.push_back(animation);
 }
 
-bool dae::TextureComponent::SetActiveAnimation(size_t index)
+bool dae::AnimationComponent::SetActiveAnimation(size_t index)
 {
 	if (index < m_Textures.size())
 	{
@@ -64,12 +69,12 @@ bool dae::TextureComponent::SetActiveAnimation(size_t index)
 	return false;
 }
 
-void dae::TextureComponent::StaticUpdate()
+void dae::AnimationComponent::StaticUpdate()
 {
 
 }
 
-void dae::TextureComponent::Update()
+void dae::AnimationComponent::Update()
 {
 	if (m_Textures[m_ActiveTexture].frames > 1 && !(m_ActiveTexture == 0 && m_Textures.size() == 0) && m_Textures[m_ActiveTexture].texture != nullptr)
 	{

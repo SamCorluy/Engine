@@ -81,3 +81,8 @@ void dae::Renderer::RenderTexture(const Texture2D& texture, Rect src, Rect dst) 
 	dstRect.h = dst.height;
 	SDL_RenderCopy(GetSDLRenderer(), texture.GetSDLTexture(), &srcRect, &dstRect);
 }
+
+SDL_Window* dae::Renderer::GetWindow() const
+{
+	return m_Window;
+}

@@ -270,7 +270,8 @@ xcopy $(SolutionDir)3rdParty\SDL2_mixer-2.0.4\lib\x64\*.dll $(OutputPath) /Y</Co
     <ClInclude Include="Subject.h" />
     <ClInclude Include="TextComponent.h" />
     <ClInclude Include="Texture2D.h" />
-    <ClInclude Include="TextureComponent.h" />
+    <ClInclude Include="AnimationComponent.h" />
+    <ClInclude Include="TextureManagerComponent.h" />
     <ClInclude Include="Transform.h" />
   </ItemGroup>
   <ItemGroup>
@@ -303,7 +304,8 @@ xcopy $(SolutionDir)3rdParty\SDL2_mixer-2.0.4\lib\x64\*.dll $(OutputPath) /Y</Co
     <ClCompile Include="Subject.cpp" />
     <ClCompile Include="TextComponent.cpp" />
     <ClCompile Include="Texture2D.cpp" />
-    <ClCompile Include="TextureComponent.cpp" />
+    <ClCompile Include="AnimationComponent.cpp" />
+    <ClCompile Include="TextureManagerComponent.cpp" />
     <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

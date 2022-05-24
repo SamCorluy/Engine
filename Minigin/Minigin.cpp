@@ -5,7 +5,7 @@
 #include "SceneManager.h"
 #include "Renderer.h"
 #include "ResourceManager.h"
-#include "TextureComponent.h"
+#include "AnimationComponent.h"
 #include "TextComponent.h"
 #include "GameObject.h"
 #include "FpsComponent.h"

@@ -81,7 +81,7 @@
     <ClInclude Include="TextComponent.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
-    <ClInclude Include="TextureComponent.h">
+    <ClInclude Include="AnimationComponent.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
@@ -132,6 +132,9 @@
     <ClInclude Include="Structs.h">
       <Filter>Header Files\HelperClasses</Filter>
     </ClInclude>
+    <ClInclude Include="TextureManagerComponent.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Observer.cpp">
@@ -161,7 +164,7 @@
     <ClCompile Include="TextComponent.cpp">
       <Filter>Source Files\Components</Filter>
     </ClCompile>
-    <ClCompile Include="TextureComponent.cpp">
+    <ClCompile Include="AnimationComponent.cpp">
       <Filter>Source Files\Components</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
@@ -208,6 +211,9 @@
     </ClCompile>
     <ClCompile Include="ElapsedTime.cpp">
       <Filter>Source Files\HelperClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureManagerComponent.cpp">
+      <Filter>Source Files\Components</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

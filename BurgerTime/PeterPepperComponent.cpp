@@ -1,6 +1,6 @@
 #include "PeterPepperComponent.h"
 #include "GameObject.h"
-#include "TextureComponent.h"
+#include "AnimationComponent.h"
 #include<vector>
 #include <iostream>
 
@@ -20,14 +20,15 @@ PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject
 	animInitList.push_back(dae::AnimationInit(2, 0.3f, fileName));
 	fileName = "PeterPepperIdle.png";
 	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName));
-	owner->AddComponent<dae::TextureComponent>(std::make_shared<dae::TextureComponent>(owner, animInitList));
+	owner->AddComponent<dae::AnimationComponent>(std::make_shared<dae::AnimationComponent>(owner, animInitList));
+	owner->SetPosition(pos);
 }
 
 void PeterPepperComponent::Update()
 {
 	if (!m_MovementProcessed)
 	{
-		auto comp = GetOwner().lock()->GetComponent<dae::TextureComponent>();
+		auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
 		comp.lock()->SetActiveAnimation(3);
 	}
 	m_MovementProcessed = false;
@@ -43,7 +44,7 @@ void PeterPepperComponent::Render(const dae::Transform&) const
 
 void PeterPepperComponent::Move(Action action)
 {
-	auto comp = GetOwner().lock()->GetComponent<dae::TextureComponent>();
+	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
 	switch (action)
 	{
 	case Action::Walking:

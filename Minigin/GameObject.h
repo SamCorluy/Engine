@@ -4,6 +4,7 @@
 #include "BaseComponent.h"
 #include "Subject.h"
 #include <vector>
+#include <memory>
 
 namespace dae
 {
