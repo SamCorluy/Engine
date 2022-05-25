@@ -6,8 +6,9 @@
 #include "Texture2D.h"
 #include "ElapsedTime.h"
 
-dae::TextureManagerComponent::TextureManagerComponent(const std::shared_ptr<GameObject>& owner, const std::vector<std::pair<const std::string, glm::vec2>>& textureInfo)
+dae::TextureManagerComponent::TextureManagerComponent(const std::shared_ptr<GameObject>& owner, const std::vector<std::pair<const std::string, glm::vec2>>& textureInfo, int scale)
 	: BaseComponent(owner)
+	, m_Scale{scale}
 {
 	for (auto instance : textureInfo)
 	{
@@ -17,7 +18,6 @@ dae::TextureManagerComponent::TextureManagerComponent(const std::shared_ptr<Game
 
 void dae::TextureManagerComponent::Render(const Transform& pos) const
 {
-	int scale{ 3 };
 	auto window = Renderer::GetInstance().GetWindow();
 	int windowHeight;
 	SDL_GetWindowSize(window, nullptr, &windowHeight);
@@ -27,11 +27,11 @@ void dae::TextureManagerComponent::Render(const Transform& pos) const
 		int width, height;
 		SDL_QueryTexture(text->texture->GetSDLTexture(), NULL, NULL, &width, &height);
 		Rect dstRect;
-		dstRect.x = static_cast<int>(position.x + text->offset.x) * scale;
-		dstRect.y = windowHeight - static_cast<int>(position.y + text->offset.y) * scale;
-		dstRect.width = width * scale;
-		dstRect.height = height * scale;
-		Renderer::GetInstance().RenderTexture(*text->texture, static_cast<float>(dstRect.x), static_cast<float>(dstRect.y), static_cast<float>(dstRect.width), static_cast<float>(dstRect.height));
+		dstRect.x = static_cast<int>(position.x + text->offset.x);
+		dstRect.y = windowHeight - static_cast<int>(position.y + text->offset.y) - height * m_Scale;
+		dstRect.width = width * m_Scale;
+		dstRect.height = height * m_Scale;
+		Renderer::GetInstance().RenderTexture(*text->texture, static_cast<float>(dstRect.x), static_cast<float>(dstRect.y), static_cast<float>(dstRect.width), static_cast<float>(dstRect.height), false);
 	}
 }
 

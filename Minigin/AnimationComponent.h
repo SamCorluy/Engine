@@ -35,8 +35,9 @@ namespace dae
 
 		void AddTexture(const AnimationInit animInfo);
 		bool SetActiveAnimation(size_t index);
+		void SetFlip(bool flip);
 
-		explicit AnimationComponent(const std::shared_ptr<GameObject>& owner, const std::vector<AnimationInit>& animInfo);
+		explicit AnimationComponent(const std::shared_ptr<GameObject>& owner, const std::vector<AnimationInit>& animInfo, int scale);
 		virtual ~AnimationComponent() = default;
 		AnimationComponent(const AnimationComponent& other) = delete;
 		AnimationComponent(AnimationComponent&& other) = delete;
@@ -46,6 +47,8 @@ namespace dae
 	private:
 		std::vector<Animation> m_Textures;
 		size_t m_ActiveTexture;
+		int m_Scale;
+		bool m_Flip;
 	};
 }
 

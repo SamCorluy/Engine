@@ -23,7 +23,7 @@ namespace dae
 
 		void AddTexture(const std::string& fileName, glm::vec2 offset);
 
-		explicit TextureManagerComponent(const std::shared_ptr<GameObject>& owner, const std::vector<std::pair<const std::string, glm::vec2>>& textureInfo);
+		explicit TextureManagerComponent(const std::shared_ptr<GameObject>& owner, const std::vector<std::pair<const std::string, glm::vec2>>& textureInfo, int scale);
 		virtual ~TextureManagerComponent() = default;
 		TextureManagerComponent(const TextureManagerComponent& other) = delete;
 		TextureManagerComponent(TextureManagerComponent&& other) = delete;
@@ -32,5 +32,6 @@ namespace dae
 
 	private:
 		std::vector<std::shared_ptr<TextureStruct>> m_Textures;
+		int m_Scale;
 	};
 }

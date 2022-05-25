@@ -6,9 +6,11 @@
 #include "Texture2D.h"
 #include "ElapsedTime.h"
 
-dae::AnimationComponent::AnimationComponent(const std::shared_ptr<GameObject>& owner, const std::vector<AnimationInit>& animInfo)
+dae::AnimationComponent::AnimationComponent(const std::shared_ptr<GameObject>& owner, const std::vector<AnimationInit>& animInfo, int scale)
 	: BaseComponent(owner)
 	, m_ActiveTexture{0}
+	, m_Scale{scale}
+	, m_Flip{false}
 {
 	for (auto instance : animInfo)
 	{
@@ -21,7 +23,6 @@ void dae::AnimationComponent::Render(const Transform& pos) const
 	auto position = pos.GetPosition();
 	if (!(m_ActiveTexture == 0 && m_Textures.size() == 0) && m_Textures[m_ActiveTexture].texture != nullptr)
 	{
-		int scale{ 3 };
 		auto window = Renderer::GetInstance().GetWindow();
 		int windowHeight;
 		SDL_GetWindowSize(window, nullptr, &windowHeight);
@@ -42,10 +43,10 @@ void dae::AnimationComponent::Render(const Transform& pos) const
 		srcRect.height = height;
 		Rect dstRect;
 		dstRect.x = static_cast<int>(position.x);
-		dstRect.y = windowHeight - static_cast<int>(position.y);
-		dstRect.width = srcRect.width * scale;
-		dstRect.height = srcRect.width * scale;
-		Renderer::GetInstance().RenderTexture(*m_Textures[m_ActiveTexture].texture, srcRect, dstRect);
+		dstRect.y = windowHeight - static_cast<int>(position.y) - srcRect.width * m_Scale;
+		dstRect.width = srcRect.width * m_Scale;
+		dstRect.height = srcRect.width * m_Scale;
+		Renderer::GetInstance().RenderTexture(*m_Textures[m_ActiveTexture].texture, srcRect, dstRect, m_Flip);
 	}
 }
 
@@ -69,9 +70,13 @@ bool dae::AnimationComponent::SetActiveAnimation(size_t index)
 	return false;
 }
 
+void dae::AnimationComponent::SetFlip(bool flip)
+{
+	m_Flip = flip;
+}
+
 void dae::AnimationComponent::StaticUpdate()
 {
-
 }
 
 void dae::AnimationComponent::Update()

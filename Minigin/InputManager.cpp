@@ -11,6 +11,7 @@ class dae::InputManager::Impl
 {
 	std::map <Input, std::vector<std::shared_ptr<BaseCommand>>> m_Commands;
 	std::map < SDL_Keycode,std::pair<bool, bool>> m_KeyQueue;
+	std::map <WORD,std::pair<bool, bool>> m_ButtonQueue;
 	XINPUT_KEYSTROKE m_CurrentState{};
 public:
 	Impl()
@@ -31,6 +32,23 @@ public:
 			case SDL_KEYUP:
 				m_KeyQueue[e.key.keysym.sym] = std::pair<bool, bool>(false, (bool)e.key.repeat);
 				toRemove.push_back(e.key.keysym.sym);
+				break;
+			}
+
+			if (e.type == SDL_QUIT)
+				return false;
+		}
+		ZeroMemory(&m_CurrentState, sizeof(XINPUT_KEYSTROKE));
+		std::vector<WORD> xToRemove;
+		while (XInputGetKeystroke(0, 0, &m_CurrentState) == ERROR_SUCCESS) {
+			switch (m_CurrentState.Flags)
+			{
+			case XINPUT_KEYSTROKE_KEYDOWN:
+				m_ButtonQueue[m_CurrentState.VirtualKey] = std::pair<bool, bool>(true, m_CurrentState.Flags == XINPUT_KEYSTROKE_REPEAT);
+				break;
+			case XINPUT_KEYSTROKE_KEYUP:
+				m_ButtonQueue[m_CurrentState.VirtualKey] = std::pair<bool, bool>(false, m_CurrentState.Flags == XINPUT_KEYSTROKE_REPEAT);
+				xToRemove.push_back(m_CurrentState.VirtualKey);
 				break;
 			}
 
@@ -71,9 +89,8 @@ public:
 		}
 		for (auto idx : toRemove)
 			m_KeyQueue.erase(idx);
-		ZeroMemory(&m_CurrentState, sizeof(XINPUT_KEYSTROKE));
 
-		while (XInputGetKeystroke(0, 0, &m_CurrentState) == ERROR_SUCCESS)
+		for (auto button : m_ButtonQueue)
 		{
 			for (auto command : m_Commands)
 			{
@@ -82,22 +99,22 @@ public:
 
 				if (!input.isController)
 					continue;
-				if (input.input == m_CurrentState.VirtualKey)
+				if (input.input == button.first)
 				{
 					switch (input.type)
 					{
 					case InputType::Hold:
-						if (m_CurrentState.Flags == XINPUT_KEYSTROKE_KEYDOWN)
+						if (button.second.first)
 							for (auto com : commands)
 								com->Execute();
 						break;
 					case InputType::Press:
-						if (m_CurrentState.Flags == XINPUT_KEYSTROKE_KEYDOWN && m_CurrentState.Flags != XINPUT_KEYSTROKE_REPEAT)
+						if (button.second.first && !button.second.second)
 							for (auto com : commands)
 								com->Execute();
 						break;
 					case InputType::Release:
-						if (m_CurrentState.Flags == XINPUT_KEYSTROKE_KEYUP)
+						if (!button.second.first)
 							for (auto com : commands)
 								com->Execute();
 						break;
@@ -105,6 +122,8 @@ public:
 				}
 			}
 		}
+		for (auto idx : xToRemove)
+			m_ButtonQueue.erase(idx);
 		return true;
 	}
 

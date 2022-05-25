@@ -48,26 +48,33 @@ void dae::Renderer::Destroy()
 	}
 }
 
-void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const float y) const
+void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const float y, bool flip) const
 {
 	SDL_Rect dst{};
 	dst.x = static_cast<int>(x);
 	dst.y = static_cast<int>(y);
 	SDL_QueryTexture(texture.GetSDLTexture(), nullptr, nullptr, &dst.w, &dst.h);
-	SDL_RenderCopy(GetSDLRenderer(), texture.GetSDLTexture(), nullptr, &dst);
+	if(!flip)
+		SDL_RenderCopy(GetSDLRenderer(), texture.GetSDLTexture(), nullptr, &dst);
+	else
+		SDL_RenderCopyEx(GetSDLRenderer(), texture.GetSDLTexture(), nullptr, &dst, 0.f, nullptr, SDL_RendererFlip::SDL_FLIP_HORIZONTAL);
 }
 
-void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const float y, const float width, const float height) const
+void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const float y, const float width, const float height, bool flip) const
 {
 	SDL_Rect dst{};
 	dst.x = static_cast<int>(x);
 	dst.y = static_cast<int>(y);
 	dst.w = static_cast<int>(width);
 	dst.h = static_cast<int>(height);
-	SDL_RenderCopy(GetSDLRenderer(), texture.GetSDLTexture(), nullptr, &dst);
+
+	if (!flip)
+		SDL_RenderCopy(GetSDLRenderer(), texture.GetSDLTexture(), nullptr, &dst);
+	else
+		SDL_RenderCopyEx(GetSDLRenderer(), texture.GetSDLTexture(), nullptr, &dst, 0.f, nullptr, SDL_RendererFlip::SDL_FLIP_HORIZONTAL);
 }
 
-void dae::Renderer::RenderTexture(const Texture2D& texture, Rect src, Rect dst) const
+void dae::Renderer::RenderTexture(const Texture2D& texture, Rect src, Rect dst, bool flip) const
 {
 	SDL_Rect srcRect{};
 	SDL_Rect dstRect{};
@@ -79,7 +86,10 @@ void dae::Renderer::RenderTexture(const Texture2D& texture, Rect src, Rect dst) 
 	dstRect.y = dst.y;
 	dstRect.w = dst.width;
 	dstRect.h = dst.height;
-	SDL_RenderCopy(GetSDLRenderer(), texture.GetSDLTexture(), &srcRect, &dstRect);
+	if (!flip)
+		SDL_RenderCopy(GetSDLRenderer(), texture.GetSDLTexture(), &srcRect, &dstRect);
+	else
+		SDL_RenderCopyEx(GetSDLRenderer(), texture.GetSDLTexture(), &srcRect, &dstRect, 0.f, nullptr, SDL_RendererFlip::SDL_FLIP_HORIZONTAL);
 }
 
 SDL_Window* dae::Renderer::GetWindow() const

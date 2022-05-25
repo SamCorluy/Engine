@@ -52,7 +52,7 @@ void dae::TextComponent::Render(const Transform& pos) const
 	auto position = pos.GetPosition();
 	if (m_TextTexture != nullptr)
 	{
-		Renderer::GetInstance().RenderTexture(*m_TextTexture, position.x, position.y);
+		Renderer::GetInstance().RenderTexture(*m_TextTexture, position.x, position.y, false);
 	}
 }
 
