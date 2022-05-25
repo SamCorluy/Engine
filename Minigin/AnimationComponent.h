@@ -25,6 +25,7 @@ namespace dae
 		float duration;
 		std::shared_ptr<Texture2D> texture;
 		float accumTime;
+		glm::vec2 animRect;
 	};
 	class AnimationComponent final : public BaseComponent
 	{
@@ -43,6 +44,8 @@ namespace dae
 		AnimationComponent(AnimationComponent&& other) = delete;
 		AnimationComponent& operator=(const AnimationComponent& other) = delete;
 		AnimationComponent& operator=(AnimationComponent&& other) = delete;
+
+		const glm::vec2 getActiveAnimRec();
 
 	private:
 		std::vector<Animation> m_Textures;

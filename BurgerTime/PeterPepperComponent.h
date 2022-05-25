@@ -25,6 +25,5 @@ private:
 	std::weak_ptr<dae::Subject> m_pSubject;
 	bool m_MovementProcessed;
 	std::weak_ptr<LevelComponent> m_pLevel;
-	std::pair<int, int> m_Offset;
 };
 

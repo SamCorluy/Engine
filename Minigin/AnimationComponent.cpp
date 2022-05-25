@@ -18,6 +18,11 @@ dae::AnimationComponent::AnimationComponent(const std::shared_ptr<GameObject>& o
 	}
 }
 
+const glm::vec2 dae::AnimationComponent::getActiveAnimRec()
+{
+	return m_Textures[m_ActiveTexture].animRect;
+}
+
 void dae::AnimationComponent::Render(const Transform& pos) const
 {
 	auto position = pos.GetPosition();
@@ -41,11 +46,12 @@ void dae::AnimationComponent::Render(const Transform& pos) const
 		srcRect.width = int(width / frames);
 		srcRect.x = currentFrame * srcRect.width;
 		srcRect.height = height;
+		auto rect = m_Textures[m_ActiveTexture].animRect;
 		Rect dstRect;
-		dstRect.x = static_cast<int>(position.x);
-		dstRect.y = windowHeight - static_cast<int>(position.y) - srcRect.width * m_Scale;
-		dstRect.width = srcRect.width * m_Scale;
-		dstRect.height = srcRect.width * m_Scale;
+		dstRect.x = static_cast<int>(position.x - (rect.x / 2.f));
+		dstRect.y = windowHeight - static_cast<int>(position.y + rect.y);
+		dstRect.width = static_cast<int>(rect.x);
+		dstRect.height = static_cast<int>(rect.y);
 		Renderer::GetInstance().RenderTexture(*m_Textures[m_ActiveTexture].texture, srcRect, dstRect, m_Flip);
 	}
 }
@@ -57,6 +63,10 @@ void dae::AnimationComponent::AddTexture(const AnimationInit animInfo)
 	animation.duration = animInfo.duration;
 	animation.texture = ResourceManager::GetInstance().LoadTexture(animInfo.fileName);
 	animation.frames = animInfo.frames;
+	int width, height;
+	SDL_QueryTexture(animation.texture->GetSDLTexture(), NULL, NULL, &width, &height);
+	animation.animRect.x = static_cast<float>((width / animation.frames) * m_Scale);
+	animation.animRect.y = static_cast<float>(height * m_Scale);
 	m_Textures.push_back(animation);
 }
 

@@ -71,11 +71,23 @@ const std::pair<int, int> LevelComponent::CoordinateToIndex(const glm::vec2& pos
 	return idx;
 }
 
+const int LevelComponent::GetFloorOffset() const
+{
+	return m_FloorOffset;
+}
+
+const std::pair<int, int> LevelComponent::GetLadderAccess() const
+{
+	return m_LadderAccessSize;
+}
+
 void LevelComponent::ReadFile(const std::string& filePath, int scale)
 {
 	std::regex gridSizeRegex{ "<GridSize>\\s*<(\\d*), (\\d*)>" };
 	std::regex oddTileSizeRegex{ "<TileSizeOdd>\\s*<(\\d*), (\\d*)>" };
 	std::regex evenTileSizeRegex{ "<TileSizeEven>\\s*<(\\d*), (\\d*)>" };
+	std::regex ladderaccessRegex{ "<LadderAccessSize>\\s*<(\\d*), (\\d*)>" };
+	std::regex FloorOffsetRegex{ "<FloorOffset>\\s*<(\\d*)>" };
 	std::regex nodeRegex{ "<index (\\d*), index (\\d*)>\\s*<(\\d*), (\\d*)>" };
 	std::smatch matches{};
 	std::ifstream in{ filePath };
@@ -103,6 +115,17 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale)
 			std::regex_search(line, matches, evenTileSizeRegex);
 			m_EvenTileSize.first = std::stoi(matches[1]) * scale;
 			m_EvenTileSize.second = std::stoi(matches[2]) * scale;
+		}
+		if (std::regex_match(line, ladderaccessRegex))
+		{
+			std::regex_search(line, matches, ladderaccessRegex);
+			m_LadderAccessSize.first = std::stoi(matches[1]) * scale;
+			m_LadderAccessSize.second = std::stoi(matches[2]) * scale;
+		}
+		if (std::regex_match(line, FloorOffsetRegex))
+		{
+			std::regex_search(line, matches, FloorOffsetRegex);
+			m_FloorOffset = std::stoi(matches[1]) * scale;
 		}
 		if (std::regex_match(line, nodeRegex))
 		{

@@ -2,6 +2,10 @@
 <GridSize>	<9, 19>
 <TileSizeOdd>	<16, 8>
 <TileSizeEven>	<32, 8>
+<LadderAccessSize>	<4, 3>
+
+<identifier>	<x>
+<FloorOffset>	<3>
 
 <loc x, loc y>	<floor, ladderAccess(Color)>
 <index 0, index 0>	<1, 1>
