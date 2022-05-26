@@ -22,6 +22,8 @@ namespace dae
 		void Render(const Transform& pos) const override;
 
 		void AddTexture(const std::string& fileName, glm::vec2 offset);
+		const glm::vec2 getOffset(size_t idx) const;
+		void setOffset(size_t idx, glm::vec2 offset);
 
 		explicit TextureManagerComponent(const std::shared_ptr<GameObject>& owner, const std::vector<std::pair<const std::string, glm::vec2>>& textureInfo, int scale);
 		virtual ~TextureManagerComponent() = default;

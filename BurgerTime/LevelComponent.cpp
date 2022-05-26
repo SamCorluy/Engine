@@ -136,12 +136,12 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale)
 			m_Grid[std::pair<int, int>(std::stoi(matches[1]), std::stoi(matches[2]))] = node;
 		}
 	}
-	std::string bl("BlueLadder.png");
-	std::string blf("BlueLadderFloor.png");
-	std::string gl("GreenLadder.png");
-	std::string glf("GreenLadderFloor.png");
-	std::string f("Floor.png");
-	std::string gf("GreenFloor.png");
+	std::string bl("Textures/Level/BlueLadder.png");
+	std::string blf("Textures/Level/BlueLadderFloor.png");
+	std::string gl("Textures/Level/GreenLadder.png");
+	std::string glf("Textures/Level/GreenLadderFloor.png");
+	std::string f("Textures/Level/Floor.png");
+	std::string gf("Textures/Level/GreenFloor.png");
 	std::vector<std::pair<const std::string, glm::vec2>> textureInfo;
 	std::pair<std::string, glm::vec2> info;
 	for (auto node : m_Grid)

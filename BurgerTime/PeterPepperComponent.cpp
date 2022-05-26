@@ -16,13 +16,13 @@ PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject
 
 	// Handling animation info
 	std::vector<dae::AnimationInit> animInitList;
-	std::string fileName{ "PeterPepperWalkSideWays.png" };
+	std::string fileName{ "Textures/PeterPepper/PeterPepperWalkSideWays.png" };
 	animInitList.push_back(dae::AnimationInit(3, 0.32f, fileName));
-	fileName = "peterPepperLadderDown.png";
+	fileName = "Textures/PeterPepper/peterPepperLadderDown.png";
 	animInitList.push_back(dae::AnimationInit(2, 0.2f, fileName));
-	fileName = "peterPepperLadderUp.png";
+	fileName = "Textures/PeterPepper/peterPepperLadderUp.png";
 	animInitList.push_back(dae::AnimationInit(2, 0.2f, fileName));
-	fileName = "PeterPepperIdle.png";
+	fileName = "Textures/PeterPepper/PeterPepperIdle.png";
 	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName));
 	owner->AddComponent<dae::AnimationComponent>(std::make_shared<dae::AnimationComponent>(owner, animInitList, scale));
 

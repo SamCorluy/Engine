@@ -4,7 +4,6 @@
 #include "Transform.h"
 #include "Subject.h"
 #include "LevelComponent.h"
-#include <memory>
 enum class Action
 {
 	WalkingLeft,

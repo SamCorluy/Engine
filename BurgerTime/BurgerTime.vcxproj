@@ -161,6 +161,7 @@
   <ItemGroup>
     <ClCompile Include="CharacterMoveCommand.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="IngredientComponent.cpp" />
     <ClCompile Include="LevelComponent.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PeterPepperComponent.cpp" />
@@ -168,6 +169,7 @@
   <ItemGroup>
     <ClInclude Include="CharacterMoveCommand.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="IngredientComponent.h" />
     <ClInclude Include="LevelComponent.h" />
     <ClInclude Include="PeterPepperComponent.h" />
   </ItemGroup>

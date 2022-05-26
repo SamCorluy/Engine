@@ -43,6 +43,20 @@ void dae::TextureManagerComponent::AddTexture(const std::string& fileName, glm::
 	m_Textures.push_back(std::make_shared<TextureStruct>(text));
 }
 
+const glm::vec2 dae::TextureManagerComponent::getOffset(size_t idx) const
+{
+	glm::vec2 offset {};
+	if(idx < m_Textures.size())
+		offset = m_Textures[idx]->offset;
+	return offset;
+}
+
+void dae::TextureManagerComponent::setOffset(size_t idx, glm::vec2 offset)
+{
+	if (idx < m_Textures.size())
+		m_Textures[idx]->offset = offset;
+}
+
 void dae::TextureManagerComponent::StaticUpdate()
 {
 

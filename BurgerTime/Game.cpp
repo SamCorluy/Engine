@@ -7,6 +7,7 @@
 #include "InputManager.h"
 #include "LevelComponent.h"
 #include "Renderer.h"
+#include "IngredientComponent.h"
 
 void Game::LoadGame() const
 {
@@ -39,5 +40,73 @@ void Game::LoadGame() const
 	dae::InputManager::GetInstance().AddControllerInput(0x5823, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(peterPepperComponent, Action::WalkingLeft));
 	dae::InputManager::GetInstance().AddControllerInput(0x5822, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(peterPepperComponent, Action::WalkingRight));
 	pScene->Add(gameObject);
+
+	auto player = gameObject->GetComponent<PeterPepperComponent>();
+
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 1,0 }, gameObject, 3, level, IngredientType::BunBot, player));
+	pScene->Add(gameObject);
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 1, 4 }, gameObject, 3, level, IngredientType::Lettuce, player));
+	pScene->Add(gameObject);
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 1, 10 }, gameObject, 3, level, IngredientType::Patty, player));
+	pScene->Add(gameObject);
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 1, 14 }, gameObject, 3, level, IngredientType::Tomato, player));
+	pScene->Add(gameObject);
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 1, 18 }, gameObject, 3, level, IngredientType::BunTop, player));
+	pScene->Add(gameObject);
+
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 3, 0 }, gameObject, 3, level, IngredientType::BunBot, player));
+	pScene->Add(gameObject);
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 3, 4 }, gameObject, 3, level, IngredientType::Tomato, player));
+	pScene->Add(gameObject);
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 3, 8 }, gameObject, 3, level, IngredientType::Patty, player));
+	pScene->Add(gameObject);
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 3, 12 }, gameObject, 3, level, IngredientType::Cheese, player));
+	pScene->Add(gameObject);
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 3, 18 }, gameObject, 3, level, IngredientType::BunTop, player));
+	pScene->Add(gameObject);
+
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 5, 0 }, gameObject, 3, level, IngredientType::BunBot, player));
+	pScene->Add(gameObject);
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 5, 4 }, gameObject, 3, level, IngredientType::Lettuce, player));
+	pScene->Add(gameObject);
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 5, 8 }, gameObject, 3, level, IngredientType::Cheese, player));
+	pScene->Add(gameObject);
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 5, 14 }, gameObject, 3, level, IngredientType::Patty, player));
+	pScene->Add(gameObject);
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 5, 18 }, gameObject, 3, level, IngredientType::BunTop, player));
+	pScene->Add(gameObject);
+
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 7, 0 }, gameObject, 3, level, IngredientType::BunBot, player));
+	pScene->Add(gameObject);
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 7, 6 }, gameObject, 3, level, IngredientType::Patty, player));
+	pScene->Add(gameObject);
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 7, 10 }, gameObject, 3, level, IngredientType::Cheese, player));
+	pScene->Add(gameObject);
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 7, 14 }, gameObject, 3, level, IngredientType::Patty, player));
+	pScene->Add(gameObject);
+	gameObject = std::make_shared<dae::GameObject>();
+	gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(std::pair<int, int>{ 7, 18 }, gameObject, 3, level, IngredientType::BunTop, player));
+	pScene->Add(gameObject);
+
+
 
 }
