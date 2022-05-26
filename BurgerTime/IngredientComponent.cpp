@@ -8,26 +8,33 @@ IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::sha
 	, m_pPlayer{peterPepper}
 	, m_pLevel{level}
 	, m_TextureSize{8 * scale}
+	, m_DropHeight{ 8 * scale / 5 }
 {
 	std::string filePath{"Textures/Burger/"};
 	switch (type)
 	{
 	case IngredientType::BunTop:
+		m_TextureHeight = 7 * scale;
 		filePath += "BunTop/";
 		break;
 	case IngredientType::BunBot:
+		m_TextureHeight = 7 * scale;
 		filePath += "BunBot/";
 		break;
 	case IngredientType::Patty:
+		m_TextureHeight = 7 * scale;
 		filePath += "Patty/";
 		break;
 	case IngredientType::Lettuce:
+		m_TextureHeight = 7 * scale;
 		filePath += "Lettuce/";
 		break;
 	case IngredientType::Cheese:
+		m_TextureHeight = 6 * scale;
 		filePath += "Cheese/";
 		break;
 	case IngredientType::Tomato:
+		m_TextureHeight = 7 * scale;
 		filePath += "Tomato/";
 		break;
 	default:
@@ -71,9 +78,13 @@ void IngredientComponent::Update()
 			{
 				auto text = GetOwner().lock()->GetComponent<dae::TextureManagerComponent>();
 				auto offset = text.lock()->getOffset(i);
-				offset.y -= m_TextureSize / 4;
+				offset.y -= m_DropHeight;
 				text.lock()->setOffset(i, offset);
 				m_pPartitions[i].hasDropped = true;
+				if (hasDropped())
+				{
+					InitiateDrop();
+				}
 			}
 		}
 	}
@@ -86,4 +97,31 @@ void IngredientComponent::StaticUpdate()
 
 void IngredientComponent::Render(const dae::Transform&) const
 {
+}
+
+const int IngredientComponent::GetTextureHeight() const
+{
+	return m_TextureHeight;
+}
+
+void IngredientComponent::InitiateDrop()
+{
+	auto pos = GetOwner().lock()->GetTransform().GetPosition();
+	pos.y -= m_DropHeight;
+	GetOwner().lock()->SetPosition(pos);
+	for (int i = 0; i < m_pPartitions.size(); ++i)
+	{
+		auto text = GetOwner().lock()->GetComponent<dae::TextureManagerComponent>();
+		auto offset = text.lock()->getOffset(i);
+		offset.y += m_DropHeight;
+		text.lock()->setOffset(i, offset);
+	}
+}
+
+const bool IngredientComponent::hasDropped() const
+{
+	for (auto par : m_pPartitions)
+		if (!par.hasDropped)
+			return false;
+	return true;
 }

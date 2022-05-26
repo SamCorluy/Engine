@@ -27,11 +27,16 @@ public:
 	virtual void Update() override;
 	virtual void StaticUpdate() override;
 	virtual void Render(const dae::Transform& pos) const override;
+	const int GetTextureHeight() const;
+	const bool hasDropped() const;
 private:
+	void InitiateDrop();
 	std::vector<IngredientPartition> m_pPartitions;
 	std::weak_ptr<PeterPepperComponent> m_pPlayer;
 	std::weak_ptr<LevelComponent> m_pLevel;
 	glm::vec2 m_PrevPlayerPos{};
 	const int m_TextureSize;
+	int m_TextureHeight;
+	const int m_DropHeight;
 };
 
