@@ -3,11 +3,12 @@
 #include "GameObject.h"
 #include <fstream>
 #include <regex>
+#include "Scene.h"
 
-LevelComponent::LevelComponent(const std::shared_ptr<dae::GameObject>& owner, const std::string& filePath, int scale)
+LevelComponent::LevelComponent(const std::shared_ptr<dae::GameObject>& owner, const std::string& filePath, int scale, const std::weak_ptr<dae::Scene>& scene)
 	:BaseComponent(owner)
 {
-	ReadFile(filePath, scale);
+	ReadFile(filePath, scale, scene);
 }
 
 void LevelComponent::Update()
@@ -34,7 +35,7 @@ std::pair<int, int> LevelComponent::getLevelSize()
 	return size;
 }
 
-const std::map<std::pair<int, int>, GridNode> LevelComponent::GetGrid() const
+const std::map<std::pair<int, int>, std::weak_ptr<NodeComponent>> LevelComponent::GetGrid() const
 {
 	return m_Grid;
 }
@@ -48,7 +49,9 @@ const std::pair<int, int> LevelComponent::CoordinateToIndex(const glm::vec2& pos
 	for (int i = 0; i < m_GridSize.first; ++i)
 	{
 		auto node = m_Grid[{i, 0}];
-		if (pos.x >= botLeft.x + node.nodePos.first && pos.x < (botLeft.x + node.nodePos.first + node.nodeSize.first))
+		auto nodePos = node.lock()->GetNodePos();
+		auto nodeSize = node.lock()->GetNodeSize();
+		if (pos.x >= botLeft.x + nodePos.first && pos.x < (botLeft.x + nodePos.first + nodeSize.first))
 		{
 			idx.first = i;
 			break;
@@ -60,7 +63,9 @@ const std::pair<int, int> LevelComponent::CoordinateToIndex(const glm::vec2& pos
 	for (int i = 0; i < m_GridSize.second; ++i)
 	{
 		auto node = m_Grid[{0, i}];
-		if (pos.y >= botLeft.y + node.nodePos.second && pos.y < (botLeft.y + node.nodePos.second + node.nodeSize.second))
+		auto nodePos = node.lock()->GetNodePos();
+		auto nodeSize = node.lock()->GetNodeSize();
+		if (pos.y >= botLeft.y + nodePos.second && pos.y < (botLeft.y + nodePos.second + nodeSize.second))
 		{
 			idx.second = i;
 			break;
@@ -81,7 +86,7 @@ const std::pair<int, int> LevelComponent::GetLadderAccess() const
 	return m_LadderAccessSize;
 }
 
-void LevelComponent::ReadFile(const std::string& filePath, int scale)
+void LevelComponent::ReadFile(const std::string& filePath, int scale, const std::weak_ptr<dae::Scene>& scene)
 {
 	std::regex gridSizeRegex{ "<GridSize>\\s*<(\\d*), (\\d*)>" };
 	std::regex oddTileSizeRegex{ "<TileSizeOdd>\\s*<(\\d*), (\\d*)>" };
@@ -91,6 +96,7 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale)
 	std::regex nodeRegex{ "<index (\\d*), index (\\d*)>\\s*<(\\d*), (\\d*)>" };
 	std::smatch matches{};
 	std::ifstream in{ filePath };
+
 	if (!in)
 		return;
 	
@@ -129,11 +135,33 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale)
 		}
 		if (std::regex_match(line, nodeRegex))
 		{
+
 			std::regex_search(line, matches, nodeRegex);
-			GridNode node;
+			GridNodeInit node;
 			node.floor = std::stoi(matches[3]);
 			node.ladderAccess = std::stoi(matches[4]);
-			m_Grid[std::pair<int, int>(std::stoi(matches[1]), std::stoi(matches[2]))] = node;
+			int size = m_OddTileSize.first + m_EvenTileSize.first;
+			int multiplier = (int)std::floor(std::stoi(matches[1]) / 2.f);
+			node.nodePos.first = multiplier * size;
+			node.nodePos.first += (std::stoi(matches[1]) % 2) * m_OddTileSize.first;
+			size = m_OddTileSize.second + m_EvenTileSize.second;
+			multiplier = (int)std::floor(std::stoi(matches[2]) / 2.f);
+			node.nodePos.second = multiplier * size;
+			node.nodePos.second += (std::stoi(matches[2]) % 2) * m_OddTileSize.second;
+			if (std::stoi(matches[1]) % 2 == 0)
+				node.nodeSize.first = m_OddTileSize.first;
+			else
+				node.nodeSize.first = m_EvenTileSize.first;
+			if (std::stoi(matches[2]) % 2 == 0)
+				node.nodeSize.second = m_OddTileSize.second;
+			else
+				node.nodeSize.second = m_EvenTileSize.second;
+
+			auto obj = std::make_shared<dae::GameObject>();
+			obj->AddComponent<NodeComponent>(std::make_shared<NodeComponent>(obj, node));
+			auto comp = obj->GetComponent<NodeComponent>();
+			scene.lock()->Add(obj);
+			m_Grid[std::pair<int, int>(std::stoi(matches[1]), std::stoi(matches[2]))] = comp;
 		}
 	}
 	std::string bl("Textures/Level/BlueLadder.png");
@@ -146,22 +174,21 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale)
 	std::pair<std::string, glm::vec2> info;
 	for (auto node : m_Grid)
 	{
-		int size = m_OddTileSize.first + m_EvenTileSize.first;
-		int multiplier = (int)std::floor(node.first.first / 2.f);
+		
 
-		info.second.x = static_cast<float>(multiplier) * static_cast<float>(size);
-		info.second.x += static_cast<float>(node.first.first % 2) * static_cast<float>(m_OddTileSize.first);
+		//info.second.x = static_cast<float>(multiplier) * static_cast<float>(size);
+		//info.second.x += static_cast<float>(node.first.first % 2) * static_cast<float>(m_OddTileSize.first);
 		//info.second.x *= scale;
 
-		size = m_OddTileSize.second + m_EvenTileSize.second;
-		multiplier = (int)std::floor(node.first.second / 2.f);
-		info.second.y = static_cast<float>(multiplier) * static_cast<float>(size);
-		info.second.y += static_cast<float>(node.first.second % 2) * static_cast<float>(m_OddTileSize.second);
+		//size = m_OddTileSize.second + m_EvenTileSize.second;
+		//multiplier = (int)std::floor(node.first.second / 2.f);
+		//info.second.y = static_cast<float>(multiplier) * static_cast<float>(size);
+		//info.second.y += static_cast<float>(node.first.second % 2) * static_cast<float>(m_OddTileSize.second);
 		//info.second.y *= scale;
 		
-		if (node.second.floor == 1)
+		if (node.second.lock()->IsFloor())
 		{
-			if (node.second.ladderAccess == 1 && node.first.second < m_GridSize.second - 1 && m_Grid[std::pair<int, int>(node.first.first, node.first.second + 1)].ladderAccess)
+			if (node.second.lock()->HasLadderAccess() && node.first.second < m_GridSize.second - 1 && m_Grid[std::pair<int, int>(node.first.first, node.first.second + 1)].lock()->HasLadderAccess())
 			{
 				if (node.first.first % 2)
 					info.first = glf;
@@ -178,7 +205,7 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale)
 		}
 		else
 		{
-			if (node.second.ladderAccess == 1)
+			if (node.second.lock()->HasLadderAccess())
 			{
 				if (node.first.first % 2)
 					info.first = gl;
@@ -186,23 +213,25 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale)
 					info.first = bl;
 			}
 		}
+		info.second.x = static_cast<float>(node.second.lock()->GetNodePos().first);
+		info.second.y = static_cast<float>(node.second.lock()->GetNodePos().second);
 
-		if (node.second.floor == 1 || node.second.ladderAccess == 1)
+		if (node.second.lock()->IsFloor() || node.second.lock()->HasLadderAccess())
 			textureInfo.push_back(info);
 
-		m_Grid[node.first].nodePos.first = (int)info.second.x;
-		m_Grid[node.first].nodePos.second = (int)info.second.y;
+		//m_Grid[node.first].nodePos.first = (int)info.second.x;
+		//m_Grid[node.first].nodePos.second = (int)info.second.y;
 		//node.second.nodePos.first = (int)info.second.x;
 		//node.second.nodePos.second = (int)info.second.y;
 
-		if (node.first.first % 2 == 0)
-			m_Grid[node.first].nodeSize.first = m_OddTileSize.first;
-		else
-			m_Grid[node.first].nodeSize.first = m_EvenTileSize.first;
-		if (node.first.second % 2 == 0)
-			m_Grid[node.first].nodeSize.second = m_OddTileSize.second;
-		else
-			m_Grid[node.first].nodeSize.second = m_EvenTileSize.second;
+		//if (node.first.first % 2 == 0)
+		//	m_Grid[node.first].nodeSize.first = m_OddTileSize.first;
+		//else
+		//	m_Grid[node.first].nodeSize.first = m_EvenTileSize.first;
+		//if (node.first.second % 2 == 0)
+		//	m_Grid[node.first].nodeSize.second = m_OddTileSize.second;
+		//else
+		//	m_Grid[node.first].nodeSize.second = m_EvenTileSize.second;
 	}
 	//owner->AddComponent<dae::AnimationComponent>(std::make_shared<dae::AnimationComponent>(owner, animInitList));
 	GetOwner().lock()->AddComponent<dae::TextureManagerComponent>(std::make_shared<dae::TextureManagerComponent>(GetOwner().lock(), textureInfo, scale));

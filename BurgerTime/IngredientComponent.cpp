@@ -42,8 +42,8 @@ IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::sha
 	}
 	glm::vec2 pos;
 	auto map = level.lock()->GetGrid();
-	pos.x = map[idx].nodePos.first + map[idx].nodeSize.first / 2 + level.lock()->GetOwner().lock()->GetTransform().GetPosition().x;
-	pos.y = map[idx].nodePos.second + level.lock()->GetOwner().lock()->GetTransform().GetPosition().y;
+	pos.x = map[idx].lock()->GetNodePos().first + map[idx].lock()->GetNodeSize().first / 2 + level.lock()->GetOwner().lock()->GetTransform().GetPosition().x;
+	pos.y = map[idx].lock()->GetNodePos().second + level.lock()->GetOwner().lock()->GetTransform().GetPosition().y;
 	GetOwner().lock()->SetPosition(pos);
 	std::vector<std::pair<const std::string, glm::vec2>> textureInfo;
 	std::pair<std::string, glm::vec2> info;

@@ -33,8 +33,8 @@ PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject
 	auto node = map[idx];
 	glm::vec2 pos;
 	auto levelTransform = level.lock()->GetOwner().lock()->GetTransform().GetPosition();
-	pos.x = levelTransform.x + node.nodePos.first + node.nodeSize.first / 2.f;
-	pos.y = levelTransform.y + node.nodePos.second + offset;
+	pos.x = levelTransform.x + node.lock()->GetNodePos().first + node.lock()->GetNodeSize().first / 2.f;
+	pos.y = levelTransform.y + node.lock()->GetNodePos().second + offset;
 	owner->SetPosition(pos);
 }
 
@@ -70,71 +70,71 @@ void PeterPepperComponent::Move(Action action)
 	switch (action)
 	{
 	case Action::WalkingLeft:
-		if ((grid.find({ idx.first - 1, idx.second }) == grid.end() || !grid[{ idx.first - 1, idx.second }].floor)
-			&& (levelPos.x + grid[idx].nodePos.first) >= (pos.x - rectSize.x / 2.f))
+		if ((grid.find({ idx.first - 1, idx.second }) == grid.end() || !grid[{ idx.first - 1, idx.second }].lock()->IsFloor())
+			&& (levelPos.x + grid[idx].lock()->GetNodePos().first) >= (pos.x - rectSize.x / 2.f))
 		{
-			pos.x = levelPos.x + grid[idx].nodePos.first + rectSize.x / 2;
+			pos.x = levelPos.x + grid[idx].lock()->GetNodePos().first + rectSize.x / 2;
 			GetOwner().lock()->SetPosition(pos);
 			return;
 		}
-		if (pos.y > (levelPos.y + grid[idx].nodePos.second + offset + ladderRect.second))
+		if (pos.y > (levelPos.y + grid[idx].lock()->GetNodePos().second + offset + ladderRect.second))
 			return;
-		if (pos.y > levelPos.y + grid[idx].nodePos.second + offset)
-			pos.y = levelPos.y + grid[idx].nodePos.second + offset;
+		if (pos.y > levelPos.y + grid[idx].lock()->GetNodePos().second + offset || pos.y < levelPos.y + grid[idx].lock()->GetNodePos().second + offset)
+			pos.y = levelPos.y + grid[idx].lock()->GetNodePos().second + offset;
 		comp.lock()->SetActiveAnimation(0);
 		comp.lock()->SetFlip(false);
 		pos.x -= 100.f * ElapsedTime::GetInstance().GetElapsedTime();
 		GetOwner().lock()->SetPosition(pos);
 		break;
 	case Action::WalkingRight:
-		if ((grid.find({ idx.first + 1, idx.second }) == grid.end() || !grid[{ idx.first + 1, idx.second }].floor)
-			&& (levelPos.x + grid[idx].nodePos.first + grid[idx].nodeSize.first) <= (pos.x + rectSize.x / 2.f))
+		if ((grid.find({ idx.first + 1, idx.second }) == grid.end() || !grid[{ idx.first + 1, idx.second }].lock()->IsFloor())
+			&& (levelPos.x + grid[idx].lock()->GetNodePos().first + grid[idx].lock()->GetNodeSize().first) <= (pos.x + rectSize.x / 2.f))
 		{
-			pos.x = levelPos.x + grid[idx].nodePos.first + grid[idx].nodeSize.first - rectSize.x / 2;
+			pos.x = levelPos.x + grid[idx].lock()->GetNodePos().first + grid[idx].lock()->GetNodeSize().first - rectSize.x / 2;
 			GetOwner().lock()->SetPosition(pos);
 			return;
 		}
-		if (pos.y > (levelPos.y + grid[idx].nodePos.second + offset + ladderRect.second))
+		if (pos.y > (levelPos.y + grid[idx].lock()->GetNodePos().second + offset + ladderRect.second))
 			return;
-		if (pos.y > levelPos.y + grid[idx].nodePos.second + offset)
-			pos.y = levelPos.y + grid[idx].nodePos.second + offset;
+		if (pos.y > levelPos.y + grid[idx].lock()->GetNodePos().second + offset || pos.y < levelPos.y + grid[idx].lock()->GetNodePos().second + offset)
+			pos.y = levelPos.y + grid[idx].lock()->GetNodePos().second + offset;
 		comp.lock()->SetActiveAnimation(0);
 		comp.lock()->SetFlip(true);
 		pos.x += 100.f * ElapsedTime::GetInstance().GetElapsedTime();
 		GetOwner().lock()->SetPosition(pos);
 		break;
 	case Action::ClimbingUp:
-		if ((grid.find({ idx.first, idx.second + 1 }) == grid.end() || !grid[{ idx.first, idx.second + 1 }].ladderAccess)
-			&& (levelPos.y + grid[idx].nodePos.second + offset) >= pos.y)
+		if ((grid.find({ idx.first, idx.second + 1 }) == grid.end() || !grid[{ idx.first, idx.second + 1 }].lock()->HasLadderAccess())
+			&& (levelPos.y + grid[idx].lock()->GetNodePos().second + offset) >= pos.y)
 		{
-			pos.y = levelPos.y + grid[idx].nodePos.second + offset;
+			pos.y = levelPos.y + grid[idx].lock()->GetNodePos().second + offset;
 			GetOwner().lock()->SetPosition(pos);
 			return;
 		}
-		else if ((levelPos.x + grid[idx].nodePos.first + (grid[idx].nodeSize.first - ladderRect.first) / 2) <= (pos.x)
-			&& (levelPos.x + grid[idx].nodePos.first + (grid[idx].nodeSize.first + ladderRect.first) / 2) >= (pos.x))
+		else if ((levelPos.x + grid[idx].lock()->GetNodePos().first + (grid[idx].lock()->GetNodeSize().first - ladderRect.first) / 2) <= (pos.x)
+			&& (levelPos.x + grid[idx].lock()->GetNodePos().first + (grid[idx].lock()->GetNodeSize().first + ladderRect.first) / 2) >= (pos.x))
 		{
 			comp.lock()->SetActiveAnimation(2);
 			comp.lock()->SetFlip(false);
-			pos.x = levelPos.x + grid[idx].nodePos.first + grid[idx].nodeSize.first / 2;
+			pos.x = levelPos.x + grid[idx].lock()->GetNodePos().first + grid[idx].lock()->GetNodeSize().first / 2;
 			pos.y += 100.f * ElapsedTime::GetInstance().GetElapsedTime();
 			GetOwner().lock()->SetPosition(pos);
 		}
 		break;
 	case Action::ClimbingDown:
-		if ((grid.find({ idx.first, idx.second - 1 }) == grid.end() || !grid[{ idx.first, idx.second - 1 }].ladderAccess)
-			&& (levelPos.y + grid[idx].nodePos.second + offset) >= pos.y)
+		if ((grid.find({ idx.first, idx.second - 1 }) == grid.end() || !grid[{ idx.first, idx.second - 1 }].lock()->HasLadderAccess())
+			&& (levelPos.y + grid[idx].lock()->GetNodePos().second + offset) >= pos.y)
 		{
-			pos.y = levelPos.y + grid[idx].nodePos.second + offset;
+			pos.y = levelPos.y + grid[idx].lock()->GetNodePos().second + offset;
 			GetOwner().lock()->SetPosition(pos);
 			return;
 		}
-		else if ((levelPos.x + grid[idx].nodePos.first + (grid[idx].nodeSize.first - ladderRect.first) / 2) <= (pos.x)
-			&& (levelPos.x + grid[idx].nodePos.first + (grid[idx].nodeSize.first + ladderRect.first) / 2) >= (pos.x))
+		else if ((levelPos.x + grid[idx].lock()->GetNodePos().first + (grid[idx].lock()->GetNodeSize().first - ladderRect.first) / 2) <= (pos.x)
+			&& (levelPos.x + grid[idx].lock()->GetNodePos().first + (grid[idx].lock()->GetNodeSize().first + ladderRect.first) / 2) >= (pos.x))
 		{
 			comp.lock()->SetActiveAnimation(1);
 			comp.lock()->SetFlip(false);
-			pos.x = levelPos.x + grid[idx].nodePos.first + grid[idx].nodeSize.first / 2;
+			pos.x = levelPos.x + grid[idx].lock()->GetNodePos().first + grid[idx].lock()->GetNodeSize().first / 2;
 			pos.y -= 100.f * ElapsedTime::GetInstance().GetElapsedTime();
 			GetOwner().lock()->SetPosition(pos);
 		}

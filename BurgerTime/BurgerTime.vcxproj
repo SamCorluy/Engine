@@ -165,6 +165,7 @@
     <ClCompile Include="IngredientComponent.cpp" />
     <ClCompile Include="LevelComponent.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="NodeComponent.cpp" />
     <ClCompile Include="PeterPepperComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -173,6 +174,7 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="IngredientComponent.h" />
     <ClInclude Include="LevelComponent.h" />
+    <ClInclude Include="NodeComponent.h" />
     <ClInclude Include="PeterPepperComponent.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

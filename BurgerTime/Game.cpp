@@ -15,7 +15,7 @@ void Game::LoadGame() const
 	dae::SceneManager::GetInstance().SetActiveScene("BurgerTime");
 
 	auto gameObject = std::make_shared<dae::GameObject>();
-	gameObject->AddComponent<LevelComponent>(std::make_shared<LevelComponent>(gameObject, "../Data/Level.txt", 3));
+	gameObject->AddComponent<LevelComponent>(std::make_shared<LevelComponent>(gameObject, "../Data/Level.txt", 3, pScene));
 	auto size = gameObject->GetComponent<LevelComponent>().lock()->getLevelSize();
 	auto window = dae::Renderer::GetInstance().GetWindow();
 	int windowWidth;
