@@ -5,10 +5,11 @@
 #include <iostream>
 #include "ElapsedTime.h"
 
-PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level)
+PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset)
 	:BaseComponent(owner)
 	, m_MovementProcessed{false}
-	, m_pLevel{ level }
+	, m_pCurrentNode{ node }
+	, m_FloorOffset{floorOffset}
 {
 	// Initialize subject
 	owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
@@ -27,14 +28,14 @@ PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject
 	owner->AddComponent<dae::AnimationComponent>(std::make_shared<dae::AnimationComponent>(owner, animInitList, scale));
 
 	// Handle spawnpoint
-	std::pair<int, int> idx = { 0,0 };
-	auto map = level.lock()->GetGrid();
-	auto offset = level.lock()->GetFloorOffset();
-	auto node = map[idx];
+	//std::pair<int, int> idx = { 0,0 };
+	//auto map = level.lock()->GetGrid();
+	//auto offset = level.lock()->GetFloorOffset();
+	//auto node = map[idx];
 	glm::vec2 pos;
-	auto levelTransform = level.lock()->GetOwner().lock()->GetTransform().GetPosition();
-	pos.x = levelTransform.x + node.lock()->GetNodePos().first + node.lock()->GetNodeSize().first / 2.f;
-	pos.y = levelTransform.y + node.lock()->GetNodePos().second + offset;
+	auto nodeTransform = m_pCurrentNode.lock()->GetOwner().lock()->GetTransform().GetPosition();
+	pos.x = nodeTransform.x + node.lock()->GetNodePos().first + node.lock()->GetNodeSize().first / 2.f;
+	pos.y = nodeTransform.y + node.lock()->GetNodePos().second + m_FloorOffset;
 	owner->SetPosition(pos);
 }
 
@@ -57,85 +58,98 @@ void PeterPepperComponent::Render(const dae::Transform&) const
 {
 }
 
+const std::weak_ptr<NodeComponent> PeterPepperComponent::getNode() const
+{
+	return m_pCurrentNode;
+}
+
 void PeterPepperComponent::Move(Action action)
 {
 	auto rectSize = GetOwner().lock()->GetComponent<dae::AnimationComponent>().lock()->getActiveAnimRec();
-	auto grid = m_pLevel.lock()->GetGrid();
+	//auto grid = m_pLevel.lock()->GetGrid();
 	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
 	auto pos = GetOwner().lock()->GetTransform().GetPosition();
-	auto levelPos = m_pLevel.lock()->GetOwner().lock()->GetTransform().GetPosition();
-	auto idx = m_pLevel.lock()->CoordinateToIndex(pos);
-	auto ladderRect = m_pLevel.lock()->GetLadderAccess();
-	auto offset = m_pLevel.lock()->GetFloorOffset();
+	auto levelPos = m_pCurrentNode.lock()->GetOwner().lock()->GetTransform().GetPosition();
+	//auto idx = m_pLevel.lock()->CoordinateToIndex(pos);
+	auto ladderRect = m_pCurrentNode.lock()->GetLadderAccessSize();
+	//auto offset = m_pCurrentNode.lock()->GetFloorOffset();
 	switch (action)
 	{
 	case Action::WalkingLeft:
-		if ((grid.find({ idx.first - 1, idx.second }) == grid.end() || !grid[{ idx.first - 1, idx.second }].lock()->IsFloor())
-			&& (levelPos.x + grid[idx].lock()->GetNodePos().first) >= (pos.x - rectSize.x / 2.f))
+		if ((m_pCurrentNode.lock()->GetConnection(Direction::LEFT).expired() || !m_pCurrentNode.lock()->GetConnection(Direction::LEFT).lock()->IsFloor())
+			&& (levelPos.x + m_pCurrentNode.lock()->GetNodePos().first) >= (pos.x - rectSize.x / 2.f))
 		{
-			pos.x = levelPos.x + grid[idx].lock()->GetNodePos().first + rectSize.x / 2;
+			pos.x = levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + rectSize.x / 2;
 			GetOwner().lock()->SetPosition(pos);
 			return;
 		}
-		if (pos.y > (levelPos.y + grid[idx].lock()->GetNodePos().second + offset + ladderRect.second))
+		if (!m_pCurrentNode.lock()->IsFloor() || pos.y > (levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset + ladderRect.second))
 			return;
-		if (pos.y > levelPos.y + grid[idx].lock()->GetNodePos().second + offset || pos.y < levelPos.y + grid[idx].lock()->GetNodePos().second + offset)
-			pos.y = levelPos.y + grid[idx].lock()->GetNodePos().second + offset;
+		if (pos.y > levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset || pos.y < levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset)
+			pos.y = levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset;
 		comp.lock()->SetActiveAnimation(0);
 		comp.lock()->SetFlip(false);
 		pos.x -= 100.f * ElapsedTime::GetInstance().GetElapsedTime();
+		if (pos.x < m_pCurrentNode.lock()->GetNodePos().first + levelPos.x)
+			m_pCurrentNode = m_pCurrentNode.lock()->GetConnection(Direction::LEFT);
 		GetOwner().lock()->SetPosition(pos);
 		break;
 	case Action::WalkingRight:
-		if ((grid.find({ idx.first + 1, idx.second }) == grid.end() || !grid[{ idx.first + 1, idx.second }].lock()->IsFloor())
-			&& (levelPos.x + grid[idx].lock()->GetNodePos().first + grid[idx].lock()->GetNodeSize().first) <= (pos.x + rectSize.x / 2.f))
+		if ((m_pCurrentNode.lock()->GetConnection(Direction::RIGHT).expired() || !m_pCurrentNode.lock()->GetConnection(Direction::RIGHT).lock()->IsFloor())
+			&& (levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + m_pCurrentNode.lock()->GetNodeSize().first) <= (pos.x + rectSize.x / 2.f))
 		{
-			pos.x = levelPos.x + grid[idx].lock()->GetNodePos().first + grid[idx].lock()->GetNodeSize().first - rectSize.x / 2;
+			pos.x = levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + m_pCurrentNode.lock()->GetNodeSize().first - rectSize.x / 2;
 			GetOwner().lock()->SetPosition(pos);
 			return;
 		}
-		if (pos.y > (levelPos.y + grid[idx].lock()->GetNodePos().second + offset + ladderRect.second))
+		if (!m_pCurrentNode.lock()->IsFloor() || pos.y > (levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset + ladderRect.second))
 			return;
-		if (pos.y > levelPos.y + grid[idx].lock()->GetNodePos().second + offset || pos.y < levelPos.y + grid[idx].lock()->GetNodePos().second + offset)
-			pos.y = levelPos.y + grid[idx].lock()->GetNodePos().second + offset;
+		if (pos.y > levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset || pos.y < levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset)
+			pos.y = levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset;
 		comp.lock()->SetActiveAnimation(0);
 		comp.lock()->SetFlip(true);
 		pos.x += 100.f * ElapsedTime::GetInstance().GetElapsedTime();
+		if (pos.x > m_pCurrentNode.lock()->GetNodePos().first + levelPos.x + m_pCurrentNode.lock()->GetNodeSize().first)
+			m_pCurrentNode = m_pCurrentNode.lock()->GetConnection(Direction::RIGHT);
 		GetOwner().lock()->SetPosition(pos);
 		break;
 	case Action::ClimbingUp:
-		if ((grid.find({ idx.first, idx.second + 1 }) == grid.end() || !grid[{ idx.first, idx.second + 1 }].lock()->HasLadderAccess())
-			&& (levelPos.y + grid[idx].lock()->GetNodePos().second + offset) >= pos.y)
+		if ((m_pCurrentNode.lock()->GetConnection(Direction::UP).expired() || !m_pCurrentNode.lock()->GetConnection(Direction::UP).lock()->HasLadderAccess())
+			&& (levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset) >= pos.y)
 		{
-			pos.y = levelPos.y + grid[idx].lock()->GetNodePos().second + offset;
+			pos.y = levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset;
 			GetOwner().lock()->SetPosition(pos);
 			return;
 		}
-		else if ((levelPos.x + grid[idx].lock()->GetNodePos().first + (grid[idx].lock()->GetNodeSize().first - ladderRect.first) / 2) <= (pos.x)
-			&& (levelPos.x + grid[idx].lock()->GetNodePos().first + (grid[idx].lock()->GetNodeSize().first + ladderRect.first) / 2) >= (pos.x))
+		else if ((levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + (m_pCurrentNode.lock()->GetNodeSize().first - ladderRect.first) / 2) <= (pos.x)
+			&& (levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + (m_pCurrentNode.lock()->GetNodeSize().first + ladderRect.first) / 2) >= (pos.x))
 		{
 			comp.lock()->SetActiveAnimation(2);
 			comp.lock()->SetFlip(false);
-			pos.x = levelPos.x + grid[idx].lock()->GetNodePos().first + grid[idx].lock()->GetNodeSize().first / 2;
+			pos.x = levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + m_pCurrentNode.lock()->GetNodeSize().first / 2;
 			pos.y += 100.f * ElapsedTime::GetInstance().GetElapsedTime();
+			if (pos.y > m_pCurrentNode.lock()->GetNodePos().second + levelPos.y + m_pCurrentNode.lock()->GetNodeSize().second)
+				m_pCurrentNode = m_pCurrentNode.lock()->GetConnection(Direction::UP);
 			GetOwner().lock()->SetPosition(pos);
 		}
 		break;
 	case Action::ClimbingDown:
-		if ((grid.find({ idx.first, idx.second - 1 }) == grid.end() || !grid[{ idx.first, idx.second - 1 }].lock()->HasLadderAccess())
-			&& (levelPos.y + grid[idx].lock()->GetNodePos().second + offset) >= pos.y)
+		if ((m_pCurrentNode.lock()->GetConnection(Direction::DOWN).expired() || !m_pCurrentNode.lock()->GetConnection(Direction::DOWN).lock()->HasLadderAccess())
+			&& (levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset) >= pos.y)
 		{
-			pos.y = levelPos.y + grid[idx].lock()->GetNodePos().second + offset;
+			pos.y = levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset;
 			GetOwner().lock()->SetPosition(pos);
 			return;
 		}
-		else if ((levelPos.x + grid[idx].lock()->GetNodePos().first + (grid[idx].lock()->GetNodeSize().first - ladderRect.first) / 2) <= (pos.x)
-			&& (levelPos.x + grid[idx].lock()->GetNodePos().first + (grid[idx].lock()->GetNodeSize().first + ladderRect.first) / 2) >= (pos.x))
+		else if ((levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + (m_pCurrentNode.lock()->GetNodeSize().first - ladderRect.first) / 2) <= (pos.x)
+			&& (levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + (m_pCurrentNode.lock()->GetNodeSize().first + ladderRect.first) / 2) >= (pos.x))
 		{
 			comp.lock()->SetActiveAnimation(1);
 			comp.lock()->SetFlip(false);
-			pos.x = levelPos.x + grid[idx].lock()->GetNodePos().first + grid[idx].lock()->GetNodeSize().first / 2;
+			pos.x = levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + m_pCurrentNode.lock()->GetNodeSize().first / 2;
 			pos.y -= 100.f * ElapsedTime::GetInstance().GetElapsedTime();
+			if (pos.y < m_pCurrentNode.lock()->GetNodePos().second + levelPos.y)
+				m_pCurrentNode = m_pCurrentNode.lock()->GetConnection(Direction::DOWN);
 			GetOwner().lock()->SetPosition(pos);
 		}
 		break;

@@ -1,8 +1,16 @@
 #pragma once
 #include "BaseComponent.h"
 #include "GameObject.h"
+enum class Direction
+{
+	LEFT = 0,
+	RIGHT = 1,
+	UP = 2,
+	DOWN = 3
+};
 struct GridNodeInit
 {
+	std::pair<int, int> ladderAccessSize;
 	std::pair<int, int> nodeSize;
 	std::pair<int, int> nodePos;
 	bool ladderAccess;
@@ -17,9 +25,11 @@ public:
 	void StaticUpdate() override;
 	void Render(const dae::Transform& pos) const override;
 
+	std::weak_ptr<NodeComponent> GetConnection(Direction dir) const;
 	std::vector<std::weak_ptr<NodeComponent>> GetConnections() const;
-	void AddConnection(const std::weak_ptr<NodeComponent> pConnection);
+	void SetConnection(const std::weak_ptr<NodeComponent> pConnection, Direction dir);
 
+	const std::pair<int, int> GetLadderAccessSize() const;
 	const std::pair<int, int> GetNodePos() const;
 	const std::pair<int, int> GetNodeSize() const;
 	const bool IsFloor() const;
@@ -30,5 +40,6 @@ private:
 	std::pair<int, int> m_NodePos;
 	bool m_LadderAccess;
 	bool m_Floor;
+	std::pair<int, int> m_LadderAccessSize;
 };
 

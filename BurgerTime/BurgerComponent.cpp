@@ -4,13 +4,13 @@
 
 const float dropVelocity{ 100.f };
 
-BurgerComponent::BurgerComponent(const std::weak_ptr<dae::Scene>& scene, std::vector<BurgerInit> burgerInit, const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level, std::weak_ptr<PeterPepperComponent>& peterPepper)
+BurgerComponent::BurgerComponent(const std::weak_ptr<dae::Scene>& scene, std::vector<BurgerInit> burgerInit, const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level)
 	: BaseComponent(owner)
 {
 	for (auto comp : burgerInit)
 	{
 		auto gameObject = std::make_shared<dae::GameObject>();
-		gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(comp.idx, gameObject, scale, level, comp.type, peterPepper));
+		gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(comp.idx, gameObject, scale, level, comp.type));
 		scene.lock()->Add(gameObject);
 		m_pIngredients.push_back(gameObject->GetComponent<IngredientComponent>());
 	}
@@ -53,4 +53,9 @@ void BurgerComponent::StaticUpdate()
 
 void BurgerComponent::Render(const dae::Transform&) const
 {
+}
+
+const std::vector<std::weak_ptr<IngredientComponent>> BurgerComponent::getIngredients() const
+{
+	return m_pIngredients;
 }

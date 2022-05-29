@@ -81,9 +81,12 @@ const int LevelComponent::GetFloorOffset() const
 	return m_FloorOffset;
 }
 
-const std::pair<int, int> LevelComponent::GetLadderAccess() const
+void LevelComponent::SetNodeOffset(const glm::vec2& pos)
 {
-	return m_LadderAccessSize;
+	for (auto node : m_Grid)
+	{
+		node.second.lock()->GetOwner().lock()->SetPosition(pos);
+	}
 }
 
 void LevelComponent::ReadFile(const std::string& filePath, int scale, const std::weak_ptr<dae::Scene>& scene)
@@ -96,6 +99,7 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale, const std:
 	std::regex nodeRegex{ "<index (\\d*), index (\\d*)>\\s*<(\\d*), (\\d*)>" };
 	std::smatch matches{};
 	std::ifstream in{ filePath };
+	std::pair<int, int> ladderAccessSize;
 
 	if (!in)
 		return;
@@ -125,8 +129,8 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale, const std:
 		if (std::regex_match(line, ladderaccessRegex))
 		{
 			std::regex_search(line, matches, ladderaccessRegex);
-			m_LadderAccessSize.first = std::stoi(matches[1]) * scale;
-			m_LadderAccessSize.second = std::stoi(matches[2]) * scale;
+			ladderAccessSize.first = std::stoi(matches[1]) * scale;
+			ladderAccessSize.second = std::stoi(matches[2]) * scale;
 		}
 		if (std::regex_match(line, FloorOffsetRegex))
 		{
@@ -157,6 +161,7 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale, const std:
 			else
 				node.nodeSize.second = m_EvenTileSize.second;
 
+			node.ladderAccessSize = ladderAccessSize;
 			auto obj = std::make_shared<dae::GameObject>();
 			obj->AddComponent<NodeComponent>(std::make_shared<NodeComponent>(obj, node));
 			auto comp = obj->GetComponent<NodeComponent>();
@@ -174,7 +179,17 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale, const std:
 	std::pair<std::string, glm::vec2> info;
 	for (auto node : m_Grid)
 	{
-		
+		//Add connections
+		int idxX = node.first.first;
+		int idxY = node.first.second;
+		if (m_Grid.find({ idxX - 1, idxY }) != m_Grid.end() && m_Grid[{idxX - 1, idxY}].lock()->IsFloor())
+			node.second.lock()->SetConnection(m_Grid[{idxX - 1, idxY}], Direction::LEFT);
+		if (m_Grid.find({ idxX + 1, idxY }) != m_Grid.end() && m_Grid[{idxX + 1, idxY}].lock()->IsFloor())
+			node.second.lock()->SetConnection(m_Grid[{idxX + 1, idxY}], Direction::RIGHT);
+		if (m_Grid.find({ idxX, idxY - 1 }) != m_Grid.end() && m_Grid[{idxX, idxY - 1}].lock()->HasLadderAccess())
+			node.second.lock()->SetConnection(m_Grid[{idxX, idxY - 1}], Direction::DOWN);
+		if (m_Grid.find({ idxX, idxY + 1 }) != m_Grid.end() && m_Grid[{idxX, idxY + 1}].lock()->HasLadderAccess())
+			node.second.lock()->SetConnection(m_Grid[{idxX, idxY + 1}], Direction::UP);
 
 		//info.second.x = static_cast<float>(multiplier) * static_cast<float>(size);
 		//info.second.x += static_cast<float>(node.first.first % 2) * static_cast<float>(m_OddTileSize.first);

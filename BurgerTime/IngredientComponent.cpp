@@ -1,12 +1,11 @@
 #include "IngredientComponent.h"
 #include "TextureManagerComponent.h"
 #include "GameObject.h"
+#include <iostream>
 
 
-IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level, IngredientType type, std::weak_ptr<PeterPepperComponent>& peterPepper)
+IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level, IngredientType type)
 	: BaseComponent(owner)
-	, m_pPlayer{peterPepper}
-	, m_pLevel{level}
 	, m_TextureSize{8 * scale}
 	, m_DropHeight{ 8 * scale / 5 }
 {
@@ -44,6 +43,7 @@ IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::sha
 	auto map = level.lock()->GetGrid();
 	pos.x = map[idx].lock()->GetNodePos().first + map[idx].lock()->GetNodeSize().first / 2 + level.lock()->GetOwner().lock()->GetTransform().GetPosition().x;
 	pos.y = map[idx].lock()->GetNodePos().second + level.lock()->GetOwner().lock()->GetTransform().GetPosition().y;
+	m_pNode = map[idx];
 	GetOwner().lock()->SetPosition(pos);
 	std::vector<std::pair<const std::string, glm::vec2>> textureInfo;
 	std::pair<std::string, glm::vec2> info;
@@ -68,27 +68,7 @@ IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::sha
 
 void IngredientComponent::Update()
 {
-	auto playerPos = m_pPlayer.lock()->GetOwner().lock()->GetTransform().GetPosition();
-	if (m_pLevel.lock()->CoordinateToIndex(playerPos) == m_pLevel.lock()->CoordinateToIndex(GetOwner().lock()->GetTransform().GetPosition()))
-	{
-		for (int i = 0; i < m_pPartitions.size(); ++i)
-		{
-			if (!m_pPartitions[i].hasDropped && ((playerPos.x >= m_pPartitions[i].botLeft.x + m_TextureSize / 2 && m_PrevPlayerPos.x < m_pPartitions[i].botLeft.x + m_TextureSize / 2) ||
-				(playerPos.x < m_pPartitions[i].botLeft.x + m_TextureSize / 2 && m_PrevPlayerPos.x >= m_pPartitions[i].botLeft.x + m_TextureSize / 2)))
-			{
-				auto text = GetOwner().lock()->GetComponent<dae::TextureManagerComponent>();
-				auto offset = text.lock()->getOffset(i);
-				offset.y -= m_DropHeight;
-				text.lock()->setOffset(i, offset);
-				m_pPartitions[i].hasDropped = true;
-				if (hasDropped())
-				{
-					InitiateDrop();
-				}
-			}
-		}
-	}
-	m_PrevPlayerPos = playerPos;
+	
 }
 
 void IngredientComponent::StaticUpdate()
@@ -124,4 +104,36 @@ const bool IngredientComponent::hasDropped() const
 		if (!par.hasDropped)
 			return false;
 	return true;
+}
+
+const std::weak_ptr<NodeComponent> IngredientComponent::getNode() const
+{
+	return m_pNode;
+}
+
+void IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& player)
+{
+	auto playerPos = player.lock()->GetOwner().lock()->GetTransform().GetPosition();
+	//std::cout << player.lock()->getNode().lock()->GetNodePos().first << " " << player.lock()->getNode().lock()->GetNodePos().first << "\n";
+	//std::cout <<m_pNode.lock()->GetNodePos().first << " " << m_pNode.lock()->GetNodePos().first << "\n\n";
+	if (player.lock()->getNode().lock() == m_pNode.lock())
+	{
+		for (int i = 0; i < m_pPartitions.size(); ++i)
+		{
+			if (!m_pPartitions[i].hasDropped && ((playerPos.x >= m_pPartitions[i].botLeft.x + m_TextureSize / 2 && m_PrevPlayerPos.x < m_pPartitions[i].botLeft.x + m_TextureSize / 2) ||
+				(playerPos.x < m_pPartitions[i].botLeft.x + m_TextureSize / 2 && m_PrevPlayerPos.x >= m_pPartitions[i].botLeft.x + m_TextureSize / 2)))
+			{
+				auto text = GetOwner().lock()->GetComponent<dae::TextureManagerComponent>();
+				auto offset = text.lock()->getOffset(i);
+				offset.y -= m_DropHeight;
+				text.lock()->setOffset(i, offset);
+				m_pPartitions[i].hasDropped = true;
+				if (hasDropped())
+				{
+					InitiateDrop();
+				}
+			}
+		}
+	}
+	m_PrevPlayerPos = playerPos;
 }
