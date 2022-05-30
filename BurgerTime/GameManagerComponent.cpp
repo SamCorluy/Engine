@@ -16,7 +16,27 @@ void GameManagerComponent::Update()
 {
 	CheckBurgerOverlap();
 	auto grid = m_pLevel.lock()->GetGrid();
-	m_TempPath = FindPath(grid[{0, 0}], m_pPlayer.lock()->getNode());
+	//m_TempPath = FindPath(grid[{0, 0}], m_pPlayer.lock()->getNode());
+	for (auto enemy: m_pEnemies)
+	{
+		if (!enemy.lock()->ReachedChoicePoint())
+			continue;
+		m_TempPath = FindPath(enemy.lock()->getNode(), m_pPlayer.lock()->getNode(), enemy.lock()->getPrevNode());
+		//std::cout << hotDog.lock()->getNode().lock()->GetNodePos().first << " " << hotDog.lock()->getPrevNode().lock()->GetNodePos().first << "\n";
+		if (m_TempPath.size() >= 2)
+			enemy.lock()->Move(m_TempPath[1]);
+		else
+		{
+			for (auto node : m_pPlayer.lock()->getNode().lock()->GetConnections())
+			{
+				if (node.lock() != enemy.lock()->getPrevNode().lock())
+				{
+					enemy.lock()->Move(node);
+					return;
+				}
+			}
+		}
+	}
 }
 
 void GameManagerComponent::StaticUpdate()
@@ -83,6 +103,20 @@ void GameManagerComponent::InitSinglePlayer()
 	dae::InputManager::GetInstance().AddControllerInput(0x5823, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayer, Action::WalkingLeft));
 	dae::InputManager::GetInstance().AddControllerInput(0x5822, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayer, Action::WalkingRight));
 
+	std::vector<std::shared_ptr<dae::GameObject>> enemyComponents;
+	startNode = grid[{8, 0}];
+	enemyComponents.push_back(std::make_shared<dae::GameObject>());
+	enemyComponents.back()->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(enemyComponents.back(), 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/HotDog"));
+	m_pEnemies.push_back(enemyComponents.back()->GetComponent<EnemyComponent>());
+	enemyComponents.push_back(std::make_shared<dae::GameObject>());
+	startNode = grid[{0, 18}];
+	enemyComponents.back()->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(enemyComponents.back(), 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Pickle"));
+	m_pEnemies.push_back(enemyComponents.back()->GetComponent<EnemyComponent>());
+	enemyComponents.push_back(std::make_shared<dae::GameObject>());
+	startNode = grid[{8, 18}];
+	enemyComponents.back()->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(enemyComponents.back(), 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Egg"));
+	m_pEnemies.push_back(enemyComponents.back()->GetComponent<EnemyComponent>());
+
 	std::vector<BurgerInit> initData;
 	initData.push_back(BurgerInit{ {1,0},IngredientType::BunBot });
 	initData.push_back(BurgerInit{ {1,4},IngredientType::Lettuce });
@@ -126,9 +160,11 @@ void GameManagerComponent::InitSinglePlayer()
 	m_pBurgers.push_back(burgerComponents.back()->GetComponent<BurgerComponent>());
 	for(auto obj : burgerComponents)
 		m_pScene.lock()->Add(obj);
+	for(auto hotdog: enemyComponents)
+		m_pScene.lock()->Add(hotdog);
 	m_pScene.lock()->Add(playerObject);
 
-	m_TempPath = FindPath(grid[{0, 0}], grid[{8, 18}]);
+	//m_TempPath = FindPath(grid[{0, 0}], grid[{8, 18}]);
 	/*std::pair<int, int> idx{ 0,0 };
 	auto prevPos{ grid[idx].lock()->GetNodePos() };
 	for (auto node : m_TempPath)
@@ -164,7 +200,7 @@ void GameManagerComponent::CheckBurgerOverlap()
 	}
 }
 
-std::vector<std::weak_ptr<NodeComponent>> GameManagerComponent::FindPath(std::weak_ptr<NodeComponent> start, std::weak_ptr<NodeComponent> end)
+std::vector<std::weak_ptr<NodeComponent>> GameManagerComponent::FindPath(std::weak_ptr<NodeComponent> start, std::weak_ptr<NodeComponent> end, std::weak_ptr<NodeComponent> prevNode)
 {
 	std::queue<std::weak_ptr<NodeComponent>> openList; // Frontier - Expanding edge
 	std::map<std::weak_ptr<NodeComponent>, std::weak_ptr<NodeComponent>, std::owner_less<std::weak_ptr<NodeComponent>>> closedList; // Already checked nodes
@@ -182,6 +218,8 @@ std::vector<std::weak_ptr<NodeComponent>> GameManagerComponent::FindPath(std::we
 		// Looping over all connections from current node
 		for (auto connection : pCurrentNode.lock()->GetConnections())
 		{
+			if (pCurrentNode.lock() == start.lock() && connection.lock() == prevNode.lock())
+				continue;
 			std::weak_ptr<NodeComponent> nextNode = connection;
 			if (closedList.find(nextNode) == closedList.end())
 			{

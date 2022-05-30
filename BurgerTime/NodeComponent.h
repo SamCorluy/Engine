@@ -26,6 +26,7 @@ public:
 	void Render(const dae::Transform& pos) const override;
 
 	std::weak_ptr<NodeComponent> GetConnection(Direction dir) const;
+	std::weak_ptr<NodeComponent> GetConnectionIgnoringWalkable(Direction dir) const;
 	std::vector<std::weak_ptr<NodeComponent>> GetConnections() const;
 	void SetConnection(const std::weak_ptr<NodeComponent> pConnection, Direction dir);
 

@@ -163,6 +163,7 @@
     <ClCompile Include="CharacterMoveCommand.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameManagerComponent.cpp" />
+    <ClCompile Include="EnemyComponent.cpp" />
     <ClCompile Include="IngredientComponent.cpp" />
     <ClCompile Include="LevelComponent.cpp" />
     <ClCompile Include="main.cpp" />
@@ -174,6 +175,7 @@
     <ClInclude Include="CharacterMoveCommand.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameManagerComponent.h" />
+    <ClInclude Include="EnemyComponent.h" />
     <ClInclude Include="IngredientComponent.h" />
     <ClInclude Include="LevelComponent.h" />
     <ClInclude Include="NodeComponent.h" />

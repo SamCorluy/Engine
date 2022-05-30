@@ -2,6 +2,7 @@
 #include "LevelComponent.h"
 #include "PeterPepperComponent.h"
 #include "BurgerComponent.h"
+#include "EnemyComponent.h"
 class GameManagerComponent final : public dae::BaseComponent
 {
 public:
@@ -17,7 +18,8 @@ private:
 	std::weak_ptr<LevelComponent> m_pLevel;
 	std::weak_ptr<PeterPepperComponent> m_pPlayer;
 	std::vector<std::weak_ptr<BurgerComponent>> m_pBurgers;
-	std::vector<std::weak_ptr<NodeComponent>> FindPath(std::weak_ptr<NodeComponent> start, std::weak_ptr<NodeComponent> end);
+	std::vector<std::weak_ptr<NodeComponent>> FindPath(std::weak_ptr<NodeComponent> start, std::weak_ptr<NodeComponent> end, std::weak_ptr<NodeComponent> prevNode);
 	std::vector<std::weak_ptr<NodeComponent>> m_TempPath;
+	std::vector<std::weak_ptr<EnemyComponent>> m_pEnemies;
 };
 

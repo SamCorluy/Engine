@@ -28,17 +28,31 @@ void NodeComponent::Render(const dae::Transform&) const
 
 std::weak_ptr<NodeComponent> NodeComponent::GetConnection(Direction dir) const
 {
+	if(!m_pConnections[static_cast<int>(dir)].expired())
+		if(((dir == Direction::LEFT || dir == Direction::RIGHT) && m_pConnections[static_cast<int>(dir)].lock()->m_Floor && m_Floor)
+			|| ((dir == Direction::UP || dir == Direction::DOWN) && m_pConnections[static_cast<int>(dir)].lock()->m_LadderAccess && m_LadderAccess))
+			return m_pConnections[static_cast<int>(dir)];
+	return std::shared_ptr<NodeComponent>(nullptr);
+}
+
+std::weak_ptr<NodeComponent> NodeComponent::GetConnectionIgnoringWalkable(Direction dir) const
+{
 	return m_pConnections[static_cast<int>(dir)];
 }
 
 std::vector<std::weak_ptr<NodeComponent>> NodeComponent::GetConnections() const
 {
 	std::vector<std::weak_ptr<NodeComponent>> temp;
-	for (auto con : m_pConnections)
+	for (size_t i = 0; i < m_pConnections.size(); ++i)
 	{
-		if (!con.expired())
-			temp.push_back(con);
+		if (!GetConnection((Direction)i).expired())
+			temp.push_back(m_pConnections[i]);
 	}
+	//for (auto con : m_pConnections)
+	//{
+	//	if (!con.expired() && (con.lock()->m_LadderAccess || con.lock()->m_Floor))
+	//		temp.push_back(con);
+	//}
 	return temp;
 }
 

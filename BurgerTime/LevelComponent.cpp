@@ -182,13 +182,13 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale, const std:
 		//Add connections
 		int idxX = node.first.first;
 		int idxY = node.first.second;
-		if (m_Grid.find({ idxX - 1, idxY }) != m_Grid.end() && m_Grid[{idxX - 1, idxY}].lock()->IsFloor())
+		if (m_Grid.find({ idxX - 1, idxY }) != m_Grid.end() /*&& m_Grid[{idxX - 1, idxY}].lock()->IsFloor()*/)
 			node.second.lock()->SetConnection(m_Grid[{idxX - 1, idxY}], Direction::LEFT);
-		if (m_Grid.find({ idxX + 1, idxY }) != m_Grid.end() && m_Grid[{idxX + 1, idxY}].lock()->IsFloor())
+		if (m_Grid.find({ idxX + 1, idxY }) != m_Grid.end() /* && m_Grid[{idxX + 1, idxY}].lock()->IsFloor()*/)
 			node.second.lock()->SetConnection(m_Grid[{idxX + 1, idxY}], Direction::RIGHT);
-		if (m_Grid.find({ idxX, idxY - 1 }) != m_Grid.end() && m_Grid[{idxX, idxY - 1}].lock()->HasLadderAccess())
+		if (m_Grid.find({ idxX, idxY - 1 }) != m_Grid.end() /*&& m_Grid[{idxX, idxY - 1}].lock()->HasLadderAccess()*/)
 			node.second.lock()->SetConnection(m_Grid[{idxX, idxY - 1}], Direction::DOWN);
-		if (m_Grid.find({ idxX, idxY + 1 }) != m_Grid.end() && m_Grid[{idxX, idxY + 1}].lock()->HasLadderAccess())
+		if (m_Grid.find({ idxX, idxY + 1 }) != m_Grid.end() /*&& m_Grid[{idxX, idxY + 1}].lock()->HasLadderAccess()*/)
 			node.second.lock()->SetConnection(m_Grid[{idxX, idxY + 1}], Direction::UP);
 
 		//info.second.x = static_cast<float>(multiplier) * static_cast<float>(size);

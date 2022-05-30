@@ -44,9 +44,12 @@ IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::sha
 	pos.x = map[idx].lock()->GetNodePos().first + map[idx].lock()->GetNodeSize().first / 2 + level.lock()->GetOwner().lock()->GetTransform().GetPosition().x;
 	pos.y = map[idx].lock()->GetNodePos().second + level.lock()->GetOwner().lock()->GetTransform().GetPosition().y;
 	m_pNode = map[idx];
+	m_pStartNode = m_pNode;
 	GetOwner().lock()->SetPosition(pos);
 	std::vector<std::pair<const std::string, glm::vec2>> textureInfo;
 	std::pair<std::string, glm::vec2> info;
+	info.second.y = 0;
+	m_pBurgerOffset = (int)info.second.y;
 	for (int i = 1; i < 5; ++i)
 	{
 		info.first = filePath + std::to_string(i) + ".png";
@@ -55,7 +58,6 @@ IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::sha
 		int c = a + b;
 		//info.second.x = static_cast<float>(-(16 * scale) + (8 * scale * i));
 		info.second.x = static_cast<float>(c);
-		info.second.y = -static_cast<float>(m_TextureSize / 3);
 		textureInfo.push_back(info);
 		IngredientPartition part;
 		part.hasDropped = false;
@@ -68,7 +70,9 @@ IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::sha
 
 void IngredientComponent::Update()
 {
-	
+	auto pos = GetOwner().lock()->GetTransform().GetPosition();
+	if (pos.y < m_pNode.lock()->GetOwner().lock()->GetTransform().GetPosition().y + m_pNode.lock()->GetNodePos().second && !m_pNode.lock()->GetConnectionIgnoringWalkable(Direction::DOWN).expired())
+		m_pNode = m_pNode.lock()->GetConnectionIgnoringWalkable(Direction::DOWN);
 }
 
 void IngredientComponent::StaticUpdate()
@@ -87,15 +91,21 @@ const int IngredientComponent::GetTextureHeight() const
 void IngredientComponent::InitiateDrop()
 {
 	auto pos = GetOwner().lock()->GetTransform().GetPosition();
-	pos.y -= m_DropHeight;
-	GetOwner().lock()->SetPosition(pos);
+	bool walkedOn = false;
 	for (int i = 0; i < m_pPartitions.size(); ++i)
 	{
 		auto text = GetOwner().lock()->GetComponent<dae::TextureManagerComponent>();
 		auto offset = text.lock()->getOffset(i);
-		offset.y += m_DropHeight;
+		if (offset.y == m_pBurgerOffset - m_DropHeight)
+		{
+			walkedOn = true;
+			offset.y += m_DropHeight;
+		}
 		text.lock()->setOffset(i, offset);
 	}
+	if(walkedOn)
+		pos.y -= m_DropHeight;
+	GetOwner().lock()->SetPosition(pos);
 }
 
 const bool IngredientComponent::hasDropped() const
@@ -106,9 +116,14 @@ const bool IngredientComponent::hasDropped() const
 	return true;
 }
 
-const std::weak_ptr<NodeComponent> IngredientComponent::getNode() const
+void IngredientComponent::setDropped(bool dropped)
 {
-	return m_pNode;
+	for (size_t i = 0; i < m_pPartitions.size(); ++i)
+		m_pPartitions[i].hasDropped = dropped;
+	if (!dropped)
+		m_pStartNode = m_pNode;
+	else
+		InitiateDrop();
 }
 
 void IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& player)
@@ -136,4 +151,19 @@ void IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& play
 		}
 	}
 	m_PrevPlayerPos = playerPos;
+}
+
+const std::weak_ptr<NodeComponent> IngredientComponent::GetNode() const
+{
+	return m_pNode;
+}
+
+const std::weak_ptr<NodeComponent> IngredientComponent::GetStartNode() const
+{
+	return m_pStartNode;
+}
+
+const int IngredientComponent::getBurgerOffset() const
+{
+	return m_pBurgerOffset;
 }
