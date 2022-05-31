@@ -28,6 +28,8 @@ namespace dae
 		template<typename T> void AddComponent(const std::weak_ptr<BaseComponent>& comp);
 		template<typename T> std::weak_ptr<T> GetComponent() const;
 		template<typename T> void RemoveComponent();
+		void Remove();
+		bool NeedsRemoval();
 
 		glm::vec2 GetPosition() const;
 		void SetPosition(float x, float y);
@@ -37,6 +39,7 @@ namespace dae
 	private:
 		Transform m_Transform;
 		std::vector<std::shared_ptr<BaseComponent>> m_pComponentObjects;
+		bool m_Remove{false};
 	};
 
 	template<typename T> void dae::GameObject::AddComponent(const std::weak_ptr<BaseComponent>& comp)

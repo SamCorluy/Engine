@@ -95,6 +95,8 @@ SaltComponent::SaltComponent(const std::shared_ptr<dae::GameObject>& owner, int 
 void SaltComponent::Update()
 {
 	m_ElapsedTime += ElapsedTime::GetInstance().GetElapsedTime();
+	if (IsDone())
+		GetOwner().lock()->Remove();
 }
 
 void SaltComponent::StaticUpdate()
@@ -108,4 +110,9 @@ void SaltComponent::Render(const dae::Transform&) const
 const bool SaltComponent::IsDone() const
 {
 	return m_Duration <= m_ElapsedTime;
+}
+
+const std::pair<int, int> SaltComponent::GetRectSize() const
+{
+	return m_RectSize;
 }

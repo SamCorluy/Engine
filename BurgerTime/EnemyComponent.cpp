@@ -12,6 +12,10 @@ EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, in
 	, m_FloorOffset{ floorOffset }
 	, m_ReachedChoicePoint{ true }
 	, m_RectSize{ 16 * scale, 16 * scale }
+	, m_DeathDuration{ animDurationInit.kill}
+	, m_StunDuration{animDurationInit.stun * 3.f}
+	, m_Stunned{false}
+	, m_Dead{false}
 {
 	// Initialize subject
 	owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
@@ -25,6 +29,10 @@ EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, in
 	animInitList.push_back(dae::AnimationInit(2, animDurationInit.down, fileName));
 	fileName = textFolder + "/Up.png";
 	animInitList.push_back(dae::AnimationInit(2, animDurationInit.up, fileName));
+	fileName = textFolder + "/Stunned.png";
+	animInitList.push_back(dae::AnimationInit(2, animDurationInit.stun, fileName));
+	fileName = textFolder + "/Death.png";
+	animInitList.push_back(dae::AnimationInit(4, animDurationInit.kill, fileName));
 	owner->AddComponent<dae::AnimationComponent>(std::make_shared<dae::AnimationComponent>(owner, animInitList, scale));
 
 	// Handle spawnpoint
@@ -41,7 +49,44 @@ EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, in
 
 void EnemyComponent::Update()
 {
-	if (m_pTargetNode.expired())
+	if (m_Dead)
+	{
+		m_ElapsedTime += ElapsedTime::GetInstance().GetElapsedTime();
+		if (m_ElapsedTime >= m_DeathDuration)
+			GetOwner().lock()->Remove();
+		return;
+	}
+	if (m_Stunned)
+	{
+		m_ElapsedTime += ElapsedTime::GetInstance().GetElapsedTime();
+		if (m_ElapsedTime >= m_StunDuration)
+		{
+			m_Stunned = false;
+			auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
+			switch (m_Direction)
+			{
+			case Direction::LEFT:
+				comp.lock()->SetActiveAnimation(0);
+				comp.lock()->SetFlip(false);
+				break;
+			case Direction::RIGHT:
+				comp.lock()->SetActiveAnimation(0);
+				comp.lock()->SetFlip(true);
+				break;
+			case Direction::UP:
+				comp.lock()->SetActiveAnimation(2);
+				comp.lock()->SetFlip(false);
+				break;
+			case Direction::DOWN:
+				comp.lock()->SetActiveAnimation(1);
+				comp.lock()->SetFlip(false);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	if (m_Stunned || m_pTargetNode.expired())
 		return;
 
 	auto levelPos = m_pCurrentNode.lock()->GetOwner().lock()->GetTransform().GetPosition();
@@ -67,7 +112,7 @@ void EnemyComponent::Update()
 		if (pos.x == levelPos.x + m_pTargetNode.lock()->GetNodePos().first + m_pTargetNode.lock()->GetNodeSize().first / 2)
 			return;
 		pos.x += 100.f * ElapsedTime::GetInstance().GetElapsedTime();
-		if (pos.x > levelPos.x + m_pCurrentNode.lock()->GetNodePos().first)
+		if (pos.x > levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + m_pCurrentNode.lock()->GetNodeSize().first)
 		{
 			m_pCurrentNode = m_pTargetNode;
 			m_pPrevNode = m_pTargetNode.lock()->GetConnection(Direction::LEFT);
@@ -83,7 +128,7 @@ void EnemyComponent::Update()
 		if (pos.y == levelPos.y + m_pTargetNode.lock()->GetNodePos().second + m_FloorOffset)
 			return;
 		pos.y += 100.f * ElapsedTime::GetInstance().GetElapsedTime();
-		if (pos.y > levelPos.y + m_pCurrentNode.lock()->GetNodePos().second)
+		if (pos.y > levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_pCurrentNode.lock()->GetNodeSize().second)
 		{
 			m_pCurrentNode = m_pTargetNode;
 			m_pPrevNode = m_pTargetNode.lock()->GetConnection(Direction::DOWN);
@@ -133,6 +178,8 @@ const std::weak_ptr<NodeComponent> EnemyComponent::getPrevNode() const
 
 void EnemyComponent::Move(std::weak_ptr<NodeComponent> targetNode)
 {
+	if (m_Stunned || m_Dead)
+		return;
 	if (m_pCurrentNode.lock()->HasLadderAccess() && m_pCurrentNode.lock()->IsFloor() &&
 		((!m_pCurrentNode.lock()->GetConnection(Direction::UP).expired() && m_pCurrentNode.lock()->GetConnection(Direction::UP).lock() != m_pPrevNode.lock())
 			||(!m_pCurrentNode.lock()->GetConnection(Direction::DOWN).expired() && m_pCurrentNode.lock()->GetConnection(Direction::DOWN).lock() != m_pPrevNode.lock())))
@@ -193,4 +240,29 @@ void EnemyComponent::Move(std::weak_ptr<NodeComponent> targetNode)
 const bool EnemyComponent::ReachedChoicePoint() const
 {
 	return m_ReachedChoicePoint;
+}
+
+const std::pair<int, int> EnemyComponent::GetRectSize() const
+{
+	return m_RectSize;
+}
+
+void EnemyComponent::Stun()
+{
+	if (m_Dead)
+		return;
+	m_Stunned = true;
+	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
+	comp.lock()->SetActiveAnimation(3);
+	m_ElapsedTime = 0.f;
+}
+
+void EnemyComponent::Kill()
+{
+	if (m_Dead)
+		return;
+	m_Dead = true;
+	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
+	comp.lock()->SetActiveAnimation(4);
+	m_ElapsedTime = 0.f;
 }

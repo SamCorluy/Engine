@@ -38,6 +38,7 @@ public:
 	const int GetBurgerOffset() const;
 	const int GetPlayerIdx() const;
 	void SetExtraDrops(int extraDrops);
+	const std::pair<int, int> GetRectSize() const;
 private:
 	std::vector<IngredientPartition> m_pPartitions;
 	//std::weak_ptr<PeterPepperComponent> m_pPlayer;

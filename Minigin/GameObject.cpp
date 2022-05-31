@@ -49,3 +49,13 @@ void dae::GameObject::Render() const
 		object->Render(m_Transform);
 	}
 }
+
+void dae::GameObject::Remove()
+{
+	m_Remove = true;
+}
+
+bool dae::GameObject::NeedsRemoval()
+{
+	return m_Remove;
+}

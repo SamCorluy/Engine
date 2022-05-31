@@ -16,7 +16,7 @@ enum class Action
 class PeterPepperComponent final : public dae::BaseComponent
 {
 public:
-	PeterPepperComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, const std::weak_ptr<dae::Scene>& scene);
+	PeterPepperComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, const std::weak_ptr<dae::Scene>& scene, int lives);
 	virtual void Update() override;
 	virtual void StaticUpdate() override;
 	virtual void Render(const dae::Transform& pos) const override;
@@ -25,6 +25,8 @@ public:
 	const std::weak_ptr<SaltComponent> GetSalt() const;
 	void Move(Action action);
 	void ThrowSalt();
+	void Die();
+	const std::pair<int, int> GetRectSize() const;
 private:
 	std::weak_ptr<dae::Subject> m_pSubject;
 	bool m_MovementProcessed;
@@ -39,5 +41,6 @@ private:
 	std::weak_ptr<SaltComponent> m_pSaltComponent;
 	std::weak_ptr<dae::Scene> m_pScene;
 	std::pair<int, int> m_RectSize;
+	int m_Lives;
 };
 

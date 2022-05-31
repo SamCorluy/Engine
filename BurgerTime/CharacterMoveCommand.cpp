@@ -9,5 +9,6 @@ CharacterMoveCommand::CharacterMoveCommand(const std::weak_ptr<PeterPepperCompon
 
 void CharacterMoveCommand::Execute()
 {
-	m_pTarget.lock()->Move(m_Action);
+	if(!m_pTarget.expired())
+		m_pTarget.lock()->Move(m_Action);
 }

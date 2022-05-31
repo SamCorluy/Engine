@@ -8,5 +8,6 @@ ThrowSaltCommand::ThrowSaltCommand(const std::weak_ptr<PeterPepperComponent>& ta
 
 void ThrowSaltCommand::Execute()
 {
-	m_pTarget.lock()->ThrowSalt();
+	if (!m_pTarget.expired())
+		m_pTarget.lock()->ThrowSalt();
 }

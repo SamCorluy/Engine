@@ -17,6 +17,7 @@ void Scene::Add(const std::shared_ptr<GameObject>& object)
 
 void Scene::Update()
 {
+	m_Objects.erase(std::remove_if(m_Objects.begin(), m_Objects.end(), [](std::shared_ptr<GameObject>& object) { return object->NeedsRemoval(); }), m_Objects.end());
 	for(auto& object : m_Objects)
 	{
 		object->Update();

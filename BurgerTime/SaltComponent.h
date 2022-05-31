@@ -14,6 +14,7 @@ public:
 
 	//const std::weak_ptr<NodeComponent> getNode() const;
 	const bool IsDone() const;
+	const std::pair<int, int> GetRectSize() const;
 private:
 	std::weak_ptr<NodeComponent> m_pNode;
 	const int m_FloorOffset;

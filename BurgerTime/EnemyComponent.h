@@ -10,10 +10,14 @@ struct AnimDurationInit
 	float up;
 	float down;
 	float walk;
-	AnimDurationInit(float u, float d, float w)
-		:up{u}
+	float kill;
+	float stun;
+	AnimDurationInit(float u, float d, float w, float k, float s)
+		: up{u}
 		, down{d}
 		, walk{w}
+		, kill{k}
+		, stun{s}
 	{}
 };
 class EnemyComponent final : public dae::BaseComponent
@@ -28,6 +32,9 @@ public:
 	const std::weak_ptr<NodeComponent> getPrevNode() const;
 	void Move(std::weak_ptr<NodeComponent> targetNode);
 	const bool ReachedChoicePoint() const;
+	const std::pair<int, int> GetRectSize() const;
+	void Stun();
+	void Kill();
 private:
 	std::weak_ptr<dae::Subject> m_pSubject;
 	std::weak_ptr<NodeComponent> m_pCurrentNode;
@@ -37,5 +44,10 @@ private:
 	Direction m_Direction;
 	bool m_ReachedChoicePoint;
 	std::pair<int, int> m_RectSize;
+	bool m_Stunned;
+	bool m_Dead;
+	const float m_StunDuration;
+	const float m_DeathDuration;
+	float m_ElapsedTime;
 };
 

@@ -188,3 +188,8 @@ void IngredientComponent::SetExtraDrops(int extraDrops)
 {
 	m_ExtraDrops = extraDrops;
 }
+
+const std::pair<int, int> IngredientComponent::GetRectSize() const
+{
+	return m_RectSize;
+}

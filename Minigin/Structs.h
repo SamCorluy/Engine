@@ -1,8 +1,20 @@
 #pragma once
 struct Rect
 {
-	int x{ 0 };
-	int y{ 0 };
-	int width{ 0 };
-	int height{ 0 };
+	int x;
+	int y;
+	int width;
+	int height;
+	Rect()
+		: x{ 0 }
+		, y{ 0 }
+		, width{ 0 }
+		, height{ 0 }
+	{}
+	Rect(int x, int y, int w, int h)
+		: x{ x }
+		, y{ y }
+		, width{ w }
+		, height{ h }
+	{}
 };

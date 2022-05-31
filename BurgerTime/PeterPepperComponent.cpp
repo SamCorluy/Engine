@@ -4,12 +4,12 @@
 #include<vector>
 #include <iostream>
 #include "ElapsedTime.h"
-PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, const std::weak_ptr<dae::Scene>& scene)
+PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, const std::weak_ptr<dae::Scene>& scene, int lives)
 	:BaseComponent(owner)
 	, m_MovementProcessed{false}
 	, m_pCurrentNode{ node }
 	, m_FloorOffset{floorOffset}
-	, m_SaltCooldown{5.f}
+	, m_SaltCooldown{2.f}
 	, m_ThrowDuration{0.4f}
 	, m_ElapsedTime{0.f}
 	, m_ThrowingSalt{false}
@@ -17,6 +17,7 @@ PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject
 	, m_pScene{scene}
 	, m_Direction{Direction::RIGHT}
 	, m_RectSize{ 16 * scale, 16 * scale }
+	, m_Lives{lives}
 {
 	// Initialize subject
 	owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
@@ -236,5 +237,19 @@ void PeterPepperComponent::ThrowSalt()
 		auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
 		comp.lock()->SetActiveAnimation(texture);
 		comp.lock()->SetFlip(flip);
+		m_pSaltComponent = obj->GetComponent<SaltComponent>();
 	}
+}
+
+void PeterPepperComponent::Die()
+{
+	--m_Lives;
+	std::cout << m_Lives << "\n";
+	if (m_Lives <= 0)
+		GetOwner().lock()->Remove();
+}
+
+const std::pair<int, int> PeterPepperComponent::GetRectSize() const
+{
+	return m_RectSize;
 }
