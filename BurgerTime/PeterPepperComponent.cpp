@@ -16,6 +16,7 @@ PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject
 	, m_CanThrow{true}
 	, m_pScene{scene}
 	, m_Direction{Direction::RIGHT}
+	, m_RectSize{ 16 * scale, 16 * scale }
 {
 	// Initialize subject
 	owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
@@ -87,6 +88,11 @@ void PeterPepperComponent::Render(const dae::Transform&) const
 const std::weak_ptr<NodeComponent> PeterPepperComponent::getNode() const
 {
 	return m_pCurrentNode;
+}
+
+const std::weak_ptr<SaltComponent> PeterPepperComponent::GetSalt() const
+{
+	return m_pSaltComponent;
 }
 
 void PeterPepperComponent::Move(Action action)
@@ -198,33 +204,34 @@ void PeterPepperComponent::ThrowSalt()
 	{
 		m_CanThrow = false;
 		m_ThrowingSalt = true;
-		std::weak_ptr<NodeComponent> spawnNode;
-		if (m_pCurrentNode.lock()->GetConnection(m_Direction).expired())
-			spawnNode = m_pCurrentNode;
-		else
-			spawnNode = m_pCurrentNode.lock()->GetConnection(m_Direction);
 		size_t texture{};
 		bool flip{false};
+		auto pos = GetOwner().lock()->GetTransform().GetPosition();
+		//float offset = static_cast<float>(m_RectSize.first);
 		switch (m_Direction)
 		{
 		case Direction::LEFT:
+			pos.x -= m_RectSize.first;
 			texture = 4;
 			break;
 		case Direction::RIGHT:
+			pos.x += m_RectSize.first;
 			flip = true;
 			texture = 4;
 			break;
 		case Direction::UP:
+			pos.y += m_RectSize.second;
 			texture = 6;
 			break;
 		case Direction::DOWN:
+			pos.y -= m_RectSize.second;
 			texture = 5;
 			break;
 		default:
 			break;
 		}
 		auto obj = std::make_shared<dae::GameObject>();
-		obj->AddComponent<SaltComponent>(std::make_shared<SaltComponent>(obj, 3, spawnNode, m_FloorOffset, m_Direction));
+		obj->AddComponent<SaltComponent>(std::make_shared<SaltComponent>(obj, 3, m_pCurrentNode, pos, m_FloorOffset, m_Direction));
 		m_pScene.lock()->Add(obj);
 		auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
 		comp.lock()->SetActiveAnimation(texture);

@@ -11,6 +11,7 @@ EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, in
 	, m_pPrevNode{ node }
 	, m_FloorOffset{ floorOffset }
 	, m_ReachedChoicePoint{ true }
+	, m_RectSize{ 16 * scale, 16 * scale }
 {
 	// Initialize subject
 	owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
@@ -138,7 +139,7 @@ void EnemyComponent::Move(std::weak_ptr<NodeComponent> targetNode)
 	{
 		int chance = 40;
 		int percentage = rand()%101;
-		std::cout << percentage << "\n";
+		//std::cout << percentage << "\n";
 		if (chance >= percentage)
 		{
 			if (m_pCurrentNode.lock()->GetConnection(Direction::UP).expired() || m_pCurrentNode.lock()->GetConnection(Direction::UP).lock() == m_pPrevNode.lock())

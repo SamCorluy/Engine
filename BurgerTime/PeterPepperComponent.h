@@ -22,6 +22,7 @@ public:
 	virtual void Render(const dae::Transform& pos) const override;
 
 	const std::weak_ptr<NodeComponent> getNode() const;
+	const std::weak_ptr<SaltComponent> GetSalt() const;
 	void Move(Action action);
 	void ThrowSalt();
 private:
@@ -37,5 +38,6 @@ private:
 	Direction m_Direction;
 	std::weak_ptr<SaltComponent> m_pSaltComponent;
 	std::weak_ptr<dae::Scene> m_pScene;
+	std::pair<int, int> m_RectSize;
 };
 

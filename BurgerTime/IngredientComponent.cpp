@@ -6,8 +6,11 @@
 
 IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level, IngredientType type)
 	: BaseComponent(owner)
-	, m_TextureSize{8 * scale}
+	//, m_TextureSize{8 * scale}
 	, m_DropHeight{ 8 * scale / 5 }
+	, m_PlayerIdx{0}
+	, m_ExtraDrops{0}
+	, m_RectSize{ 32 * scale, 8 * scale }
 {
 	std::string filePath{"Textures/Burger/"};
 	switch (type)
@@ -53,8 +56,8 @@ IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::sha
 	for (int i = 1; i < 5; ++i)
 	{
 		info.first = filePath + std::to_string(i) + ".png";
-		int a = -m_TextureSize * 3;
-		int b = m_TextureSize * i;
+		int a = -m_RectSize.second * 3;
+		int b = m_RectSize.second * i;
 		int c = a + b;
 		//info.second.x = static_cast<float>(-(16 * scale) + (8 * scale * i));
 		info.second.x = static_cast<float>(c);
@@ -88,8 +91,9 @@ const int IngredientComponent::GetTextureHeight() const
 	return m_TextureHeight;
 }
 
-void IngredientComponent::InitiateDrop()
+void IngredientComponent::InitiateDrop(int playerIdx)
 {
+	m_PlayerIdx = playerIdx;
 	auto pos = GetOwner().lock()->GetTransform().GetPosition();
 	bool walkedOn = false;
 	for (int i = 0; i < m_pPartitions.size(); ++i)
@@ -116,17 +120,23 @@ const bool IngredientComponent::hasDropped() const
 	return true;
 }
 
-void IngredientComponent::setDropped(bool dropped)
+void IngredientComponent::setDropped(bool dropped, int playerIdx)
 {
-	for (size_t i = 0; i < m_pPartitions.size(); ++i)
-		m_pPartitions[i].hasDropped = dropped;
 	if (!dropped)
 		m_pStartNode = m_pNode;
-	else
-		InitiateDrop();
+	if (m_ExtraDrops > 0 && !dropped)
+	{
+		dropped = true;
+		--m_ExtraDrops;
+		//std::cout << dropped << "\n";
+	}
+	for (size_t i = 0; i < m_pPartitions.size(); ++i)
+		m_pPartitions[i].hasDropped = dropped;
+	if(dropped)
+		InitiateDrop(playerIdx);
 }
 
-void IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& player)
+bool IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& player, int playerIdx)
 {
 	auto playerPos = player.lock()->GetOwner().lock()->GetTransform().GetPosition();
 	//std::cout << player.lock()->getNode().lock()->GetNodePos().first << " " << player.lock()->getNode().lock()->GetNodePos().first << "\n";
@@ -135,8 +145,8 @@ void IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& play
 	{
 		for (int i = 0; i < m_pPartitions.size(); ++i)
 		{
-			if (!m_pPartitions[i].hasDropped && ((playerPos.x >= m_pPartitions[i].botLeft.x + m_TextureSize / 2 && m_PrevPlayerPos.x < m_pPartitions[i].botLeft.x + m_TextureSize / 2) ||
-				(playerPos.x < m_pPartitions[i].botLeft.x + m_TextureSize / 2 && m_PrevPlayerPos.x >= m_pPartitions[i].botLeft.x + m_TextureSize / 2)))
+			if (!m_pPartitions[i].hasDropped && ((playerPos.x >= m_pPartitions[i].botLeft.x + m_RectSize.second / 2 && m_PrevPlayerPos.x < m_pPartitions[i].botLeft.x + m_RectSize.second / 2) ||
+				(playerPos.x < m_pPartitions[i].botLeft.x + m_RectSize.second / 2 && m_PrevPlayerPos.x >= m_pPartitions[i].botLeft.x + m_RectSize.second / 2)))
 			{
 				auto text = GetOwner().lock()->GetComponent<dae::TextureManagerComponent>();
 				auto offset = text.lock()->getOffset(i);
@@ -145,12 +155,13 @@ void IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& play
 				m_pPartitions[i].hasDropped = true;
 				if (hasDropped())
 				{
-					InitiateDrop();
+					InitiateDrop(playerIdx);
 				}
 			}
 		}
 	}
 	m_PrevPlayerPos = playerPos;
+	return hasDropped();
 }
 
 const std::weak_ptr<NodeComponent> IngredientComponent::GetNode() const
@@ -163,7 +174,17 @@ const std::weak_ptr<NodeComponent> IngredientComponent::GetStartNode() const
 	return m_pStartNode;
 }
 
-const int IngredientComponent::getBurgerOffset() const
+const int IngredientComponent::GetBurgerOffset() const
 {
 	return m_pBurgerOffset;
+}
+
+const int IngredientComponent::GetPlayerIdx() const
+{
+	return m_PlayerIdx;
+}
+
+void IngredientComponent::SetExtraDrops(int extraDrops)
+{
+	m_ExtraDrops = extraDrops;
 }

@@ -36,5 +36,6 @@ private:
 	const int m_FloorOffset;
 	Direction m_Direction;
 	bool m_ReachedChoicePoint;
+	std::pair<int, int> m_RectSize;
 };
 

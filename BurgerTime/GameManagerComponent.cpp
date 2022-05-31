@@ -201,7 +201,13 @@ void GameManagerComponent::CheckBurgerOverlap()
 	{
 		for (auto ingredient : burger.lock()->getIngredients())
 		{
-			ingredient.lock()->CheckOverlap(m_pPlayer);
+			bool wasDropped = ingredient.lock()->hasDropped();
+			if (ingredient.lock()->CheckOverlap(m_pPlayer, 0) && !wasDropped)
+			{
+				int amount = rand() % 3;
+				ingredient.lock()->SetExtraDrops(amount);
+				std::cout << amount << "\n";
+			}
 		}
 	}
 }

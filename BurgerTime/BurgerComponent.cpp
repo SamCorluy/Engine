@@ -28,7 +28,7 @@ void BurgerComponent::Update()
 
 		if (i == 0)
 		{
-			pos.y -= ElapsedTime::GetInstance().GetElapsedTime() * 50.f;
+			pos.y -= ElapsedTime::GetInstance().GetElapsedTime() * dropVelocity;
 		}
 		else
 		{
@@ -37,7 +37,7 @@ void BurgerComponent::Update()
 			if (pos.y < posBelow.y + ingredientBelow.lock()->GetTextureHeight())
 			{
 				pos.y = posBelow.y + ingredientBelow.lock()->GetTextureHeight();
-				ingredientBelow.lock()->setDropped(true);
+				ingredientBelow.lock()->setDropped(true, ingredient.lock()->GetPlayerIdx());
 				continue;
 			}
 			else
@@ -46,10 +46,12 @@ void BurgerComponent::Update()
 			}
 		}
 		if (ingredient.lock()->GetNode().lock() != ingredient.lock()->GetStartNode().lock() && ingredient.lock()->GetNode().lock()->IsFloor())
-			if (ingredient.lock()->GetNode().lock()->GetOwner().lock()->GetTransform().GetPosition().y + ingredient.lock()->GetNode().lock()->GetNodePos().second - ingredient.lock()->getBurgerOffset() >= pos.y)
+			if (ingredient.lock()->GetNode().lock()->GetOwner().lock()->GetTransform().GetPosition().y + ingredient.lock()->GetNode().lock()->GetNodePos().second - ingredient.lock()->GetBurgerOffset() >= pos.y)
 			{
-				pos.y = ingredient.lock()->GetNode().lock()->GetOwner().lock()->GetTransform().GetPosition().y + ingredient.lock()->GetNode().lock()->GetNodePos().second - ingredient.lock()->getBurgerOffset();
-				ingredient.lock()->setDropped(false);
+				pos.y = ingredient.lock()->GetNode().lock()->GetOwner().lock()->GetTransform().GetPosition().y + ingredient.lock()->GetNode().lock()->GetNodePos().second - ingredient.lock()->GetBurgerOffset();
+				ingredient.lock()->setDropped(false, ingredient.lock()->GetPlayerIdx());
+				if (ingredient.lock()->hasDropped())
+					continue;
 			}
 		ingredient.lock()->GetOwner().lock()->SetPosition(pos);
 	}
