@@ -5,7 +5,7 @@
 #include <iostream>
 #include "ElapsedTime.h"
 
-EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, std::string textFolder)
+EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, std::string textFolder, AnimDurationInit animDurationInit)
 	:BaseComponent(owner)
 	, m_pCurrentNode{ node }
 	, m_pPrevNode{ node }
@@ -19,11 +19,11 @@ EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, in
 	// Handling animation info
 	std::vector<dae::AnimationInit> animInitList;
 	std::string fileName = textFolder + "/Walk.png";
-	animInitList.push_back(dae::AnimationInit(2, 0.3f, fileName));
+	animInitList.push_back(dae::AnimationInit(2, animDurationInit.walk, fileName));
 	fileName = textFolder + "/Down.png";
-	animInitList.push_back(dae::AnimationInit(2, 0.3f, fileName));
+	animInitList.push_back(dae::AnimationInit(2, animDurationInit.down, fileName));
 	fileName = textFolder + "/Up.png";
-	animInitList.push_back(dae::AnimationInit(2, 0.3f, fileName));
+	animInitList.push_back(dae::AnimationInit(2, animDurationInit.up, fileName));
 	owner->AddComponent<dae::AnimationComponent>(std::make_shared<dae::AnimationComponent>(owner, animInitList, scale));
 
 	// Handle spawnpoint

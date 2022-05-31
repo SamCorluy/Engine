@@ -169,6 +169,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NodeComponent.cpp" />
     <ClCompile Include="PeterPepperComponent.cpp" />
+    <ClCompile Include="SaltComponent.cpp" />
+    <ClCompile Include="ThrowSaltCommand.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BurgerComponent.h" />
@@ -180,6 +182,8 @@
     <ClInclude Include="LevelComponent.h" />
     <ClInclude Include="NodeComponent.h" />
     <ClInclude Include="PeterPepperComponent.h" />
+    <ClInclude Include="SaltComponent.h" />
+    <ClInclude Include="ThrowSaltCommand.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

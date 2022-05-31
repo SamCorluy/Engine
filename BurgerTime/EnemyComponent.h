@@ -5,10 +5,21 @@
 #include "Subject.h"
 #include "NodeComponent.h"
 #include <string>
+struct AnimDurationInit
+{
+	float up;
+	float down;
+	float walk;
+	AnimDurationInit(float u, float d, float w)
+		:up{u}
+		, down{d}
+		, walk{w}
+	{}
+};
 class EnemyComponent final : public dae::BaseComponent
 {
 public:
-	EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, std::string textFolder);
+	EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, std::string textFolder, AnimDurationInit animDurationInit);
 	virtual void Update() override;
 	virtual void StaticUpdate() override;
 	virtual void Render(const dae::Transform& pos) const override;

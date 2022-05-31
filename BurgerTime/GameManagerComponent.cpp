@@ -2,6 +2,7 @@
 #include "Renderer.h"
 #include "InputManager.h"
 #include "CharacterMoveCommand.h"
+#include "ThrowSaltCommand.h"
 #include <queue>
 #include <iostream>
 
@@ -92,12 +93,13 @@ void GameManagerComponent::InitSinglePlayer()
 	auto startNode = grid[{0, 0}];
 
 	auto playerObject = std::make_shared<dae::GameObject>();
-	playerObject->AddComponent<PeterPepperComponent>(std::make_shared<PeterPepperComponent>(playerObject, 3, startNode, m_pLevel.lock()->GetFloorOffset()));
+	playerObject->AddComponent<PeterPepperComponent>(std::make_shared<PeterPepperComponent>(playerObject, 3, startNode, m_pLevel.lock()->GetFloorOffset(), m_pScene));
 	m_pPlayer = playerObject->GetComponent<PeterPepperComponent>();
 	dae::InputManager::GetInstance().AddKeyboardInput('w', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayer, Action::ClimbingUp));
 	dae::InputManager::GetInstance().AddKeyboardInput('s', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayer, Action::ClimbingDown));
 	dae::InputManager::GetInstance().AddKeyboardInput('a', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayer, Action::WalkingLeft));
 	dae::InputManager::GetInstance().AddKeyboardInput('d', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayer, Action::WalkingRight));
+	dae::InputManager::GetInstance().AddKeyboardInput('e', dae::InputType::Hold, std::make_shared<ThrowSaltCommand>(m_pPlayer));
 	dae::InputManager::GetInstance().AddControllerInput(0x5820, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayer, Action::ClimbingUp));
 	dae::InputManager::GetInstance().AddControllerInput(0x5821, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayer, Action::ClimbingDown));
 	dae::InputManager::GetInstance().AddControllerInput(0x5823, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayer, Action::WalkingLeft));
@@ -105,16 +107,20 @@ void GameManagerComponent::InitSinglePlayer()
 
 	std::vector<std::shared_ptr<dae::GameObject>> enemyComponents;
 	startNode = grid[{8, 0}];
+	AnimDurationInit animInit(0.25f, 0.25f, 0.25f);
 	enemyComponents.push_back(std::make_shared<dae::GameObject>());
-	enemyComponents.back()->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(enemyComponents.back(), 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/HotDog"));
-	m_pEnemies.push_back(enemyComponents.back()->GetComponent<EnemyComponent>());
-	enemyComponents.push_back(std::make_shared<dae::GameObject>());
-	startNode = grid[{0, 18}];
-	enemyComponents.back()->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(enemyComponents.back(), 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Pickle"));
+	enemyComponents.back()->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(enemyComponents.back(), 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/HotDog", animInit));
 	m_pEnemies.push_back(enemyComponents.back()->GetComponent<EnemyComponent>());
 	enemyComponents.push_back(std::make_shared<dae::GameObject>());
 	startNode = grid[{8, 18}];
-	enemyComponents.back()->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(enemyComponents.back(), 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Egg"));
+	enemyComponents.back()->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(enemyComponents.back(), 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Egg", animInit));
+	m_pEnemies.push_back(enemyComponents.back()->GetComponent<EnemyComponent>());
+	startNode = grid[{0, 18}];
+	animInit.walk = 0.1f;
+	animInit.up = 0.12f;
+	animInit.down = 0.12f;
+	enemyComponents.push_back(std::make_shared<dae::GameObject>());
+	enemyComponents.back()->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(enemyComponents.back(), 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Pickle", animInit));
 	m_pEnemies.push_back(enemyComponents.back()->GetComponent<EnemyComponent>());
 
 	std::vector<BurgerInit> initData;

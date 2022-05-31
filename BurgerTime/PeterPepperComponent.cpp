@@ -4,12 +4,18 @@
 #include<vector>
 #include <iostream>
 #include "ElapsedTime.h"
-
-PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset)
+PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, const std::weak_ptr<dae::Scene>& scene)
 	:BaseComponent(owner)
 	, m_MovementProcessed{false}
 	, m_pCurrentNode{ node }
 	, m_FloorOffset{floorOffset}
+	, m_SaltCooldown{5.f}
+	, m_ThrowDuration{0.4f}
+	, m_ElapsedTime{0.f}
+	, m_ThrowingSalt{false}
+	, m_CanThrow{true}
+	, m_pScene{scene}
+	, m_Direction{Direction::RIGHT}
 {
 	// Initialize subject
 	owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
@@ -24,6 +30,12 @@ PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject
 	fileName = "Textures/PeterPepper/peterPepperLadderUp.png";
 	animInitList.push_back(dae::AnimationInit(2, 0.2f, fileName));
 	fileName = "Textures/PeterPepper/PeterPepperIdle.png";
+	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName));
+	fileName = "Textures/PeterPepper/PeterPepperThrowSaltWalk.png";
+	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName));
+	fileName = "Textures/PeterPepper/PeterPepperThrowSaltDown.png";
+	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName));
+	fileName = "Textures/PeterPepper/PeterPepperThrowSaltUp.png";
 	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName));
 	owner->AddComponent<dae::AnimationComponent>(std::make_shared<dae::AnimationComponent>(owner, animInitList, scale));
 
@@ -47,7 +59,21 @@ void PeterPepperComponent::Update()
 		comp.lock()->SetActiveAnimation(3);
 		comp.lock()->SetFlip(false);
 	}
-	m_MovementProcessed = false;
+	if(!m_ThrowingSalt)
+		m_MovementProcessed = false;
+	if(!m_CanThrow)
+	{
+		m_ElapsedTime += ElapsedTime::GetInstance().GetElapsedTime();
+		if (m_ElapsedTime >= m_SaltCooldown)
+		{
+			m_ElapsedTime = 0.f;
+			m_CanThrow = true;
+		}
+		if (m_ElapsedTime >= m_ThrowDuration)
+		{
+			m_ThrowingSalt = false;
+		}
+	}
 }
 
 void PeterPepperComponent::StaticUpdate()
@@ -65,6 +91,8 @@ const std::weak_ptr<NodeComponent> PeterPepperComponent::getNode() const
 
 void PeterPepperComponent::Move(Action action)
 {
+	if (m_ThrowingSalt)
+		return;
 	auto rectSize = GetOwner().lock()->GetComponent<dae::AnimationComponent>().lock()->getActiveAnimRec();
 	//auto grid = m_pLevel.lock()->GetGrid();
 	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
@@ -88,6 +116,7 @@ void PeterPepperComponent::Move(Action action)
 		if (pos.y > levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset || pos.y < levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset)
 			pos.y = levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset;
 		comp.lock()->SetActiveAnimation(0);
+		m_Direction = Direction::LEFT;
 		comp.lock()->SetFlip(false);
 		pos.x -= 100.f * ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.x < m_pCurrentNode.lock()->GetNodePos().first + levelPos.x)
@@ -107,6 +136,7 @@ void PeterPepperComponent::Move(Action action)
 		if (pos.y > levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset || pos.y < levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset)
 			pos.y = levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset;
 		comp.lock()->SetActiveAnimation(0);
+		m_Direction = Direction::RIGHT;
 		comp.lock()->SetFlip(true);
 		pos.x += 100.f * ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.x > m_pCurrentNode.lock()->GetNodePos().first + levelPos.x + m_pCurrentNode.lock()->GetNodeSize().first)
@@ -125,6 +155,7 @@ void PeterPepperComponent::Move(Action action)
 			&& (levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + (m_pCurrentNode.lock()->GetNodeSize().first + ladderRect.first) / 2) >= (pos.x))
 		{
 			comp.lock()->SetActiveAnimation(2);
+			m_Direction = Direction::UP;
 			comp.lock()->SetFlip(false);
 			pos.x = levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + m_pCurrentNode.lock()->GetNodeSize().first / 2;
 			pos.y += 100.f * ElapsedTime::GetInstance().GetElapsedTime();
@@ -145,6 +176,7 @@ void PeterPepperComponent::Move(Action action)
 			&& (levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + (m_pCurrentNode.lock()->GetNodeSize().first + ladderRect.first) / 2) >= (pos.x))
 		{
 			comp.lock()->SetActiveAnimation(1);
+			m_Direction = Direction::DOWN;
 			comp.lock()->SetFlip(false);
 			pos.x = levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + m_pCurrentNode.lock()->GetNodeSize().first / 2;
 			pos.y -= 100.f * ElapsedTime::GetInstance().GetElapsedTime();
@@ -157,4 +189,45 @@ void PeterPepperComponent::Move(Action action)
 		break;
 	}
 	m_MovementProcessed = true;
+}
+
+void PeterPepperComponent::ThrowSalt()
+{
+	m_MovementProcessed = true;
+	if (m_CanThrow)
+	{
+		m_CanThrow = false;
+		m_ThrowingSalt = true;
+		std::weak_ptr<NodeComponent> spawnNode;
+		if (m_pCurrentNode.lock()->GetConnection(m_Direction).expired())
+			spawnNode = m_pCurrentNode;
+		else
+			spawnNode = m_pCurrentNode.lock()->GetConnection(m_Direction);
+		size_t texture{};
+		bool flip{false};
+		switch (m_Direction)
+		{
+		case Direction::LEFT:
+			texture = 4;
+			break;
+		case Direction::RIGHT:
+			flip = true;
+			texture = 4;
+			break;
+		case Direction::UP:
+			texture = 6;
+			break;
+		case Direction::DOWN:
+			texture = 5;
+			break;
+		default:
+			break;
+		}
+		auto obj = std::make_shared<dae::GameObject>();
+		obj->AddComponent<SaltComponent>(std::make_shared<SaltComponent>(obj, 3, spawnNode, m_FloorOffset, m_Direction));
+		m_pScene.lock()->Add(obj);
+		auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
+		comp.lock()->SetActiveAnimation(texture);
+		comp.lock()->SetFlip(flip);
+	}
 }
