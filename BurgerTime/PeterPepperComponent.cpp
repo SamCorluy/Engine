@@ -4,10 +4,12 @@
 #include<vector>
 #include <iostream>
 #include "ElapsedTime.h"
+#include "Observer.h"
 PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, const std::weak_ptr<dae::Scene>& scene, int lives)
 	:BaseComponent(owner)
 	, m_MovementProcessed{false}
 	, m_pCurrentNode{ node }
+	, m_pStartNode{ node }
 	, m_FloorOffset{floorOffset}
 	, m_SaltCooldown{2.f}
 	, m_ThrowDuration{0.4f}
@@ -18,6 +20,8 @@ PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject
 	, m_Direction{Direction::RIGHT}
 	, m_RectSize{ 16 * scale, 16 * scale }
 	, m_Lives{lives}
+	, m_DieDuration{ 2.f }
+	, m_Dead{false}
 {
 	// Initialize subject
 	owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
@@ -26,19 +30,21 @@ PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject
 	// Handling animation info
 	std::vector<dae::AnimationInit> animInitList;
 	std::string fileName{ "Textures/PeterPepper/PeterPepperWalkSideWays.png" };
-	animInitList.push_back(dae::AnimationInit(3, 0.32f, fileName));
+	animInitList.push_back(dae::AnimationInit(3, 0.32f, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = "Textures/PeterPepper/peterPepperLadderDown.png";
-	animInitList.push_back(dae::AnimationInit(2, 0.2f, fileName));
+	animInitList.push_back(dae::AnimationInit(2, 0.2f, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = "Textures/PeterPepper/peterPepperLadderUp.png";
-	animInitList.push_back(dae::AnimationInit(2, 0.2f, fileName));
+	animInitList.push_back(dae::AnimationInit(2, 0.2f, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = "Textures/PeterPepper/PeterPepperIdle.png";
-	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName));
+	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = "Textures/PeterPepper/PeterPepperThrowSaltWalk.png";
-	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName));
+	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = "Textures/PeterPepper/PeterPepperThrowSaltDown.png";
-	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName));
+	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = "Textures/PeterPepper/PeterPepperThrowSaltUp.png";
-	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName));
+	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName, { -m_RectSize.first / 2, 0 }));
+	fileName = "Textures/PeterPepper/PeterPepperDeath.png";
+	animInitList.push_back(dae::AnimationInit(12, m_DieDuration, fileName, { -m_RectSize.first / 2, 0 }));
 	owner->AddComponent<dae::AnimationComponent>(std::make_shared<dae::AnimationComponent>(owner, animInitList, scale));
 
 	// Handle spawnpoint
@@ -55,6 +61,11 @@ PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject
 
 void PeterPepperComponent::Update()
 {
+	if (m_Dead)
+	{
+		m_ElapsedTime += ElapsedTime::GetInstance().GetElapsedTime();
+		return;
+	}
 	if (!m_MovementProcessed)
 	{
 		auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
@@ -98,7 +109,7 @@ const std::weak_ptr<SaltComponent> PeterPepperComponent::GetSalt() const
 
 void PeterPepperComponent::Move(Action action)
 {
-	if (m_ThrowingSalt)
+	if (m_ThrowingSalt || m_Dead)
 		return;
 	auto rectSize = GetOwner().lock()->GetComponent<dae::AnimationComponent>().lock()->getActiveAnimRec();
 	//auto grid = m_pLevel.lock()->GetGrid();
@@ -243,10 +254,44 @@ void PeterPepperComponent::ThrowSalt()
 
 void PeterPepperComponent::Die()
 {
+	if (m_Dead)
+		return;
+	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
+	comp.lock()->SetActiveAnimation(7);
 	--m_Lives;
+	if (!m_pSubject.expired())
+		m_pSubject.lock()->Notify(dae::Event::CHARACTER_DEAD, m_Lives);
+	m_ElapsedTime = 0.f;
+	m_CanThrow = false;
+	m_ThrowingSalt = false;
+	m_Dead = true;
 	std::cout << m_Lives << "\n";
 	if (m_Lives <= 0)
 		GetOwner().lock()->Remove();
+}
+
+void PeterPepperComponent::Reset()
+{
+	m_Dead = false;
+	m_CanThrow = true;
+	m_ThrowingSalt = false;
+	m_MovementProcessed = false;
+	m_pCurrentNode = m_pStartNode;
+	glm::vec2 pos;
+	auto nodeTransform = m_pCurrentNode.lock()->GetOwner().lock()->GetTransform().GetPosition();
+	pos.x = nodeTransform.x + m_pCurrentNode.lock()->GetNodePos().first + m_pCurrentNode.lock()->GetNodeSize().first / 2.f;
+	pos.y = nodeTransform.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset;
+	GetOwner().lock()->SetPosition(pos);
+}
+
+bool PeterPepperComponent::IsDead()
+{
+	return m_Dead;
+}
+
+bool PeterPepperComponent::DeathAnimationFinished()
+{
+	return m_Dead && m_ElapsedTime >= m_DieDuration;
 }
 
 const std::pair<int, int> PeterPepperComponent::GetRectSize() const

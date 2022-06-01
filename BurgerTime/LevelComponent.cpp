@@ -25,13 +25,17 @@ void LevelComponent::Render(const dae::Transform&) const
 
 std::pair<int, int> LevelComponent::getLevelSize()
 {
-	std::pair<int, int> size;
-	int Odd = (int)std::ceil(m_GridSize.first / 2.f);
-	int Even = Odd - m_GridSize.first % 2;
-	size.first = Odd * m_OddTileSize.first + Even * m_EvenTileSize.first;
-	Odd = (int)std::ceil(m_GridSize.second / 2.f);
-	Even = Odd - m_GridSize.second % 2;
-	size.second = Odd * m_OddTileSize.second + Even * m_EvenTileSize.second;
+	std::pair<int, int> size{0,0};
+	for (int i{ 0 }; i < m_GridSize.first; ++i)
+		size.first += m_Grid[{i, 0}].lock()->GetNodeSize().first;
+	for (int i{ 0 }; i < m_GridSize.second; ++i)
+		size.second += m_Grid[{0, i}].lock()->GetNodeSize().second;
+	//int Odd = (int)std::ceil(m_GridSize.first / 2.f);
+	//int Even = Odd - m_GridSize.first % 2;
+	//size.first = Odd * m_OddTileSize.first + Even * m_EvenTileSize.first;
+	//Odd = (int)std::ceil(m_GridSize.second / 2.f);
+	//Even = Odd - m_GridSize.second % 2;
+	//size.second = Odd * m_OddTileSize.second + Even * m_EvenTileSize.second;
 	return size;
 }
 
@@ -97,6 +101,7 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale, const std:
 	std::regex ladderaccessRegex{ "<LadderAccessSize>\\s*<(\\d*), (\\d*)>" };
 	std::regex FloorOffsetRegex{ "<FloorOffset>\\s*<(\\d*)>" };
 	std::regex nodeRegex{ "<index (\\d*), index (\\d*)>\\s*<(\\d*), (\\d*)>" };
+	std::regex VoidTileHeightRegex{ "<TileHeightVoid>\\s*<(\\d*)>" };
 	std::smatch matches{};
 	std::ifstream in{ filePath };
 	std::pair<int, int> ladderAccessSize;
@@ -108,6 +113,11 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale, const std:
 	{
 		std::string line;
 		std::getline(in, line);
+		if (std::regex_match(line, VoidTileHeightRegex))
+		{
+			std::regex_search(line, matches, VoidTileHeightRegex);
+			m_TileHeightVoid = std::stoi(matches[1]) * scale;
+		}
 		if (std::regex_match(line, gridSizeRegex))
 		{
 			std::regex_search(line, matches, gridSizeRegex);
@@ -149,14 +159,20 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale, const std:
 			node.nodePos.first = multiplier * size;
 			node.nodePos.first += (std::stoi(matches[1]) % 2) * m_OddTileSize.first;
 			size = m_OddTileSize.second + m_EvenTileSize.second;
-			multiplier = (int)std::floor(std::stoi(matches[2]) / 2.f);
-			node.nodePos.second = multiplier * size;
-			node.nodePos.second += (std::stoi(matches[2]) % 2) * m_OddTileSize.second;
+			//int firstSize = m_TileHeightVoid + m_EvenTileSize.second;
+			float mul = (std::stoi(matches[2]) + 1) / 2.f;
+			if (std::stoi(matches[2]) > 0)
+				node.nodePos.second = m_TileHeightVoid;
+			node.nodePos.second += (int)std::ceil(mul) * m_EvenTileSize.second;
+			if (std::stoi(matches[2]) > 1)
+				node.nodePos.second += ((int)std::floor(mul)-1) * m_OddTileSize.second;
 			if (std::stoi(matches[1]) % 2 == 0)
 				node.nodeSize.first = m_OddTileSize.first;
 			else
 				node.nodeSize.first = m_EvenTileSize.first;
-			if (std::stoi(matches[2]) % 2 == 0)
+			if (std::stoi(matches[2]) == 0)
+				node.nodeSize.second = m_TileHeightVoid;
+			else if (std::stoi(matches[2]) % 2 == 0)
 				node.nodeSize.second = m_OddTileSize.second;
 			else
 				node.nodeSize.second = m_EvenTileSize.second;

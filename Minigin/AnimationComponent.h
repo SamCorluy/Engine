@@ -12,10 +12,12 @@ namespace dae
 		size_t frames;
 		float duration;
 		const std::string fileName;
-		AnimationInit(size_t fr, float d, const std::string& f)
+		std::pair<int, int> offset;
+		AnimationInit(size_t fr, float d, const std::string& f, std::pair<int, int> o)
 			: frames{fr}
 			, duration{d}
 			, fileName{f}
+			, offset{o}
 		{}
 	};
 	class Texture2D;
@@ -26,6 +28,7 @@ namespace dae
 		std::shared_ptr<Texture2D> texture;
 		float accumTime;
 		glm::vec2 animRect;
+		std::pair<int, int> offset;
 	};
 	class AnimationComponent final : public BaseComponent
 	{

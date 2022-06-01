@@ -6,8 +6,7 @@ namespace dae
 	enum class Event
 	{
 		CHARACTER_DEAD,
-		BURGER_DROP,
-		ENEMY_KILL
+		SCORE_CHANGE
 	};
 
 	class Observer

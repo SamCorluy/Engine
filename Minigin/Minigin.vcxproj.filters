@@ -135,6 +135,9 @@
     <ClInclude Include="TextureManagerComponent.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
+    <ClInclude Include="CounterComponent.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Observer.cpp">
@@ -213,6 +216,9 @@
       <Filter>Source Files\HelperClasses</Filter>
     </ClCompile>
     <ClCompile Include="TextureManagerComponent.cpp">
+      <Filter>Source Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="CounterComponent.cpp">
       <Filter>Source Files\Components</Filter>
     </ClCompile>
   </ItemGroup>

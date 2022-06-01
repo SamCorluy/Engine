@@ -22,6 +22,7 @@ namespace dae
 		void Render(const Transform& pos) const override;
 
 		void AddTexture(const std::string& fileName, glm::vec2 offset);
+		void RemoveLastTexture();
 		const glm::vec2 getOffset(size_t idx) const;
 		void setOffset(size_t idx, glm::vec2 offset);
 

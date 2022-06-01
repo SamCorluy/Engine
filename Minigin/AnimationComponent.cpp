@@ -48,8 +48,10 @@ void dae::AnimationComponent::Render(const Transform& pos) const
 		srcRect.height = height;
 		auto rect = m_Textures[m_ActiveTexture].animRect;
 		Rect dstRect;
-		dstRect.x = static_cast<int>(position.x - (rect.x / 2.f));
-		dstRect.y = windowHeight - static_cast<int>(position.y + rect.y);
+		dstRect.x = static_cast<int>(position.x) + m_Textures[m_ActiveTexture].offset.first;
+		dstRect.y = windowHeight - static_cast<int>(position.y + rect.y) + m_Textures[m_ActiveTexture].offset.second;
+		//dstRect.x = static_cast<int>(position.x) - (rect.x / 2.f));
+		//dstRect.y = windowHeight - static_cast<int>(position.y + rect.y);
 		dstRect.width = static_cast<int>(rect.x);
 		dstRect.height = static_cast<int>(rect.y);
 		Renderer::GetInstance().RenderTexture(*m_Textures[m_ActiveTexture].texture, srcRect, dstRect, m_Flip);
@@ -63,6 +65,7 @@ void dae::AnimationComponent::AddTexture(const AnimationInit animInfo)
 	animation.duration = animInfo.duration;
 	animation.texture = ResourceManager::GetInstance().LoadTexture(animInfo.fileName);
 	animation.frames = animInfo.frames;
+	animation.offset = animInfo.offset;
 	int width, height;
 	SDL_QueryTexture(animation.texture->GetSDLTexture(), NULL, NULL, &width, &height);
 	animation.animRect.x = static_cast<float>((width / animation.frames) * m_Scale);

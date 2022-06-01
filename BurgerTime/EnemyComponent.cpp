@@ -5,17 +5,18 @@
 #include <iostream>
 #include "ElapsedTime.h"
 
-EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, std::string textFolder, AnimDurationInit animDurationInit)
+EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, std::string textFolder, AnimDurationInit animDurationInit, int points)
 	:BaseComponent(owner)
 	, m_pCurrentNode{ node }
 	, m_pPrevNode{ node }
 	, m_FloorOffset{ floorOffset }
 	, m_ReachedChoicePoint{ true }
-	, m_RectSize{ 16 * scale, 16 * scale }
+	, m_RectSize{ 8 * scale, 16 * scale }
 	, m_DeathDuration{ animDurationInit.kill}
-	, m_StunDuration{animDurationInit.stun * 3.f}
+	, m_StunDuration{animDurationInit.stun * 5.f}
 	, m_Stunned{false}
 	, m_Dead{false}
+	, m_Points{points}
 {
 	// Initialize subject
 	owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
@@ -24,15 +25,15 @@ EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, in
 	// Handling animation info
 	std::vector<dae::AnimationInit> animInitList;
 	std::string fileName = textFolder + "/Walk.png";
-	animInitList.push_back(dae::AnimationInit(2, animDurationInit.walk, fileName));
+	animInitList.push_back(dae::AnimationInit(2, animDurationInit.walk, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = textFolder + "/Down.png";
-	animInitList.push_back(dae::AnimationInit(2, animDurationInit.down, fileName));
+	animInitList.push_back(dae::AnimationInit(2, animDurationInit.down, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = textFolder + "/Up.png";
-	animInitList.push_back(dae::AnimationInit(2, animDurationInit.up, fileName));
+	animInitList.push_back(dae::AnimationInit(2, animDurationInit.up, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = textFolder + "/Stunned.png";
-	animInitList.push_back(dae::AnimationInit(2, animDurationInit.stun, fileName));
+	animInitList.push_back(dae::AnimationInit(2, animDurationInit.stun, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = textFolder + "/Death.png";
-	animInitList.push_back(dae::AnimationInit(4, animDurationInit.kill, fileName));
+	animInitList.push_back(dae::AnimationInit(4, animDurationInit.kill, fileName, { -m_RectSize.first / 2, 0 }));
 	owner->AddComponent<dae::AnimationComponent>(std::make_shared<dae::AnimationComponent>(owner, animInitList, scale));
 
 	// Handle spawnpoint
@@ -261,8 +262,14 @@ void EnemyComponent::Kill()
 {
 	if (m_Dead)
 		return;
+	m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, m_Points);
 	m_Dead = true;
 	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
 	comp.lock()->SetActiveAnimation(4);
 	m_ElapsedTime = 0.f;
+}
+
+const bool EnemyComponent::IsStunned() const
+{
+	return m_Stunned;
 }

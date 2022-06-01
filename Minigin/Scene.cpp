@@ -12,31 +12,29 @@ Scene::~Scene() = default;
 
 void Scene::Add(const std::shared_ptr<GameObject>& object)
 {
-	m_Objects.push_back(object);
+	m_ObjectQueue.push_back(object);
 }
 
 void Scene::Update()
 {
-	m_Objects.erase(std::remove_if(m_Objects.begin(), m_Objects.end(), [](std::shared_ptr<GameObject>& object) { return object->NeedsRemoval(); }), m_Objects.end());
-	for(auto& object : m_Objects)
-	{
+	for (auto& object : m_ObjectQueue)
+		m_Objects.push_back(object);
+	if(m_ObjectQueue.size() > 0)
+		m_ObjectQueue.clear();
+	for (auto& object : m_Objects)
 		object->Update();
-	}
+	m_Objects.erase(std::remove_if(m_Objects.begin(), m_Objects.end(), [](std::shared_ptr<GameObject>& object) { return object->NeedsRemoval(); }), m_Objects.end());
 }
 
 void dae::Scene::StaticUpdate()
 {
 	for (auto& object : m_Objects)
-	{
 		object->StaticUpdate();
-	}
 }
 
 void Scene::Render() const
 {
-	for (const auto& object : m_Objects)
-	{
+	for (auto& object : m_Objects)
 		object->Render();
-	}
 }
 

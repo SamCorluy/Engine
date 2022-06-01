@@ -6,6 +6,9 @@
 #include <queue>
 #include <iostream>
 #include "ElapsedTime.h"
+#include "HealthComponent.h"
+#include "HealthObserver.h"
+#include "ResourceManager.h"
 
 GameManagerComponent::GameManagerComponent(const std::shared_ptr<dae::GameObject> owner, const std::weak_ptr<dae::Scene>& scene)
 	: BaseComponent(owner)
@@ -22,6 +25,12 @@ GameManagerComponent::GameManagerComponent(const std::shared_ptr<dae::GameObject
 
 void GameManagerComponent::Update()
 {
+	if (!m_pPlayer.expired() && m_pPlayer.lock()->IsDead())
+	{
+		if (m_pPlayer.lock()->DeathAnimationFinished())
+			Reset();
+		return;
+	}
 	m_pHotDogs.erase(std::remove_if(m_pHotDogs.begin(), m_pHotDogs.end(), [](std::weak_ptr<EnemyComponent>& enemy) { return enemy.expired(); }), m_pHotDogs.end());
 	m_pEggs.erase(std::remove_if(m_pEggs.begin(), m_pEggs.end(), [](std::weak_ptr<EnemyComponent>& enemy) { return enemy.expired(); }), m_pEggs.end());
 	m_pPickles.erase(std::remove_if(m_pPickles.begin(), m_pPickles.end(), [](std::weak_ptr<EnemyComponent>& enemy) { return enemy.expired(); }), m_pPickles.end());
@@ -49,6 +58,7 @@ void GameManagerComponent::Update()
 	CheckBurgerOverlap();
 	HandleFallingBurgers();
 	HandleSalt();
+	CheckPlayerOverlap();
 	auto grid = m_pLevel.lock()->GetGrid();
 	//m_TempPath = FindPath(grid[{0, 0}], m_pPlayer.lock()->getNode());
 	DeterminePathEnemies(m_pEggs);
@@ -113,6 +123,14 @@ void GameManagerComponent::DeterminePathEnemies(std::vector<std::weak_ptr<EnemyC
 
 void GameManagerComponent::InitSinglePlayer()
 {
+	auto scoreObject = std::make_shared<dae::GameObject>();
+	auto font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 18);
+	scoreObject->AddComponent<CounterComponent>(std::make_shared<CounterComponent>(scoreObject, font, 0));
+	scoreObject->SetPosition(0.f, 700.f);
+	m_pScene.lock()->Add(scoreObject);
+	m_pPointsObserver = std::make_shared<PointsObserver>(scoreObject->GetComponent<CounterComponent>());
+
+	
 	//Initialize level component
 	auto levelObject = std::make_shared<dae::GameObject>();
 	levelObject->AddComponent<LevelComponent>(std::make_shared<LevelComponent>(levelObject, "../Data/Level.txt", 3, m_pScene));
@@ -135,10 +153,17 @@ void GameManagerComponent::InitSinglePlayer()
 
 	//Temp spawn node for player, will be updated later
 	auto grid = m_pLevel.lock()->GetGrid();
-	auto startNode = grid[{0, 0}];
+	auto startNode = grid[{0, 1}];
 
 	auto playerObject = std::make_shared<dae::GameObject>();
 	playerObject->AddComponent<PeterPepperComponent>(std::make_shared<PeterPepperComponent>(playerObject, 3, startNode, m_pLevel.lock()->GetFloorOffset(), m_pScene, 5));
+
+	auto healthObject = std::make_shared<dae::GameObject>();
+	healthObject->AddComponent<HealthComponent>(std::make_shared<HealthComponent>(healthObject, 3, 5));
+	healthObject->SetPosition(10.f, 10.f);
+	m_pScene.lock()->Add(healthObject);
+
+	playerObject->GetComponent<dae::Subject>().lock()->AddObserver(std::make_shared<HealthObserver>(healthObject->GetComponent<HealthComponent>()));
 	m_pPlayer = playerObject->GetComponent<PeterPepperComponent>();
 	dae::InputManager::GetInstance().AddKeyboardInput('w', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayer, Action::ClimbingUp));
 	dae::InputManager::GetInstance().AddKeyboardInput('s', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayer, Action::ClimbingDown));
@@ -151,66 +176,74 @@ void GameManagerComponent::InitSinglePlayer()
 	dae::InputManager::GetInstance().AddControllerInput(0x5822, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayer, Action::WalkingRight));
 
 	std::vector<std::shared_ptr<dae::GameObject>> enemyComponents;
-	startNode = grid[{8, 0}];
+	startNode = grid[{8, 1}];
 	AnimDurationInit animInit(0.25f, 0.25f, 0.25f, 0.5f, 0.3f);
 	enemyComponents.push_back(std::make_shared<dae::GameObject>());
-	enemyComponents.back()->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(enemyComponents.back(), 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/HotDog", animInit));
+	enemyComponents.back()->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(enemyComponents.back(), 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/HotDog", animInit, 100));
 	m_pHotDogs.push_back(enemyComponents.back()->GetComponent<EnemyComponent>());
 	enemyComponents.push_back(std::make_shared<dae::GameObject>());
-	startNode = grid[{8, 18}];
-	enemyComponents.back()->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(enemyComponents.back(), 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Egg", animInit));
+	startNode = grid[{8, 19}];
+	enemyComponents.back()->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(enemyComponents.back(), 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Egg", animInit, 300));
 	m_pEggs.push_back(enemyComponents.back()->GetComponent<EnemyComponent>());
-	startNode = grid[{0, 18}];
+	startNode = grid[{0, 19}];
 	animInit.walk = 0.1f;
 	animInit.up = 0.12f;
 	animInit.down = 0.12f;
 	enemyComponents.push_back(std::make_shared<dae::GameObject>());
-	enemyComponents.back()->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(enemyComponents.back(), 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Pickle", animInit));
+	enemyComponents.back()->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(enemyComponents.back(), 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Pickle", animInit, 200));
 	m_pPickles.push_back(enemyComponents.back()->GetComponent<EnemyComponent>());
 
 	std::vector<BurgerInit> initData;
-	initData.push_back(BurgerInit{ {1,0},IngredientType::BunBot });
-	initData.push_back(BurgerInit{ {1,4},IngredientType::Lettuce });
-	initData.push_back(BurgerInit{ {1,10},IngredientType::Patty });
-	initData.push_back(BurgerInit{ {1,14},IngredientType::Tomato });
-	initData.push_back(BurgerInit{ {1,18},IngredientType::BunTop });
+	initData.push_back(BurgerInit{ {1,1},IngredientType::BunBot });
+	initData.push_back(BurgerInit{ {1,5},IngredientType::Lettuce });
+	initData.push_back(BurgerInit{ {1,11},IngredientType::Patty });
+	initData.push_back(BurgerInit{ {1,15},IngredientType::Tomato });
+	initData.push_back(BurgerInit{ {1,19},IngredientType::BunTop });
 
+	startNode = grid[{1, 0}];
 	std::vector<std::shared_ptr<dae::GameObject>> burgerComponents;
 	burgerComponents.push_back(std::make_shared<dae::GameObject>());
-	burgerComponents.back()->AddComponent<BurgerComponent>(std::make_shared<BurgerComponent>(m_pScene, initData, burgerComponents.back(), 3, m_pLevel));
+	burgerComponents.back()->AddComponent<BurgerComponent>(std::make_shared<BurgerComponent>(startNode, m_pScene, initData, burgerComponents.back(), 3, m_pLevel));
 	m_pBurgers.push_back(burgerComponents.back()->GetComponent<BurgerComponent>());
 	initData.clear();
-	initData.push_back(BurgerInit{ {3,0},IngredientType::BunBot });
-	initData.push_back(BurgerInit{ {3,4},IngredientType::Tomato });
-	initData.push_back(BurgerInit{ {3,8},IngredientType::Patty });
-	initData.push_back(BurgerInit{ {3,12},IngredientType::Cheese });
-	initData.push_back(BurgerInit{ {3,18},IngredientType::BunTop });
+	initData.push_back(BurgerInit{ {3,1},IngredientType::BunBot });
+	initData.push_back(BurgerInit{ {3,5},IngredientType::Tomato });
+	initData.push_back(BurgerInit{ {3,9},IngredientType::Patty });
+	initData.push_back(BurgerInit{ {3,13},IngredientType::Cheese });
+	initData.push_back(BurgerInit{ {3,19},IngredientType::BunTop });
 
+	startNode = grid[{3, 0}];
 	burgerComponents.push_back(std::make_shared<dae::GameObject>());
-	burgerComponents.back()->AddComponent<BurgerComponent>(std::make_shared<BurgerComponent>(m_pScene, initData, burgerComponents.back(), 3, m_pLevel));
+	burgerComponents.back()->AddComponent<BurgerComponent>(std::make_shared<BurgerComponent>(startNode, m_pScene, initData, burgerComponents.back(), 3, m_pLevel));
 	m_pBurgers.push_back(burgerComponents.back()->GetComponent<BurgerComponent>());
 	initData.clear();
-	initData.push_back(BurgerInit{ {5,0},IngredientType::BunBot });
-	initData.push_back(BurgerInit{ {5,4},IngredientType::Lettuce });
-	initData.push_back(BurgerInit{ {5,8},IngredientType::Cheese });
-	initData.push_back(BurgerInit{ {5,14},IngredientType::Patty });
-	initData.push_back(BurgerInit{ {5,18},IngredientType::BunTop });
+	initData.push_back(BurgerInit{ {5,1},IngredientType::BunBot });
+	initData.push_back(BurgerInit{ {5,5},IngredientType::Lettuce });
+	initData.push_back(BurgerInit{ {5,9},IngredientType::Cheese });
+	initData.push_back(BurgerInit{ {5,15},IngredientType::Patty });
+	initData.push_back(BurgerInit{ {5,19},IngredientType::BunTop });
 
+	startNode = grid[{5, 0}];
 	burgerComponents.push_back(std::make_shared<dae::GameObject>());
-	burgerComponents.back()->AddComponent<BurgerComponent>(std::make_shared<BurgerComponent>(m_pScene, initData, burgerComponents.back(), 3, m_pLevel));
+	burgerComponents.back()->AddComponent<BurgerComponent>(std::make_shared<BurgerComponent>(startNode, m_pScene, initData, burgerComponents.back(), 3, m_pLevel));
 	m_pBurgers.push_back(burgerComponents.back()->GetComponent<BurgerComponent>());
 	initData.clear();
-	initData.push_back(BurgerInit{ {7,0},IngredientType::BunBot });
-	initData.push_back(BurgerInit{ {7,6},IngredientType::Patty });
-	initData.push_back(BurgerInit{ {7,10},IngredientType::Cheese });
-	initData.push_back(BurgerInit{ {7,14},IngredientType::Patty });
-	initData.push_back(BurgerInit{ {7,18},IngredientType::BunTop });
+	initData.push_back(BurgerInit{ {7,1},IngredientType::BunBot });
+	initData.push_back(BurgerInit{ {7,7},IngredientType::Patty });
+	initData.push_back(BurgerInit{ {7,11},IngredientType::Cheese });
+	initData.push_back(BurgerInit{ {7,15},IngredientType::Patty });
+	initData.push_back(BurgerInit{ {7,19},IngredientType::BunTop });
 
+	startNode = grid[{7, 0}];
 	burgerComponents.push_back(std::make_shared<dae::GameObject>());
-	burgerComponents.back()->AddComponent<BurgerComponent>(std::make_shared<BurgerComponent>(m_pScene, initData, burgerComponents.back(), 3, m_pLevel));
+	burgerComponents.back()->AddComponent<BurgerComponent>(std::make_shared<BurgerComponent>(startNode, m_pScene, initData, burgerComponents.back(), 3, m_pLevel));
 	m_pBurgers.push_back(burgerComponents.back()->GetComponent<BurgerComponent>());
-	for(auto obj : burgerComponents)
+	for (auto obj : burgerComponents)
+	{
 		m_pScene.lock()->Add(obj);
+		for(auto ingr : obj->GetComponent<BurgerComponent>().lock()->getIngredients())
+			ingr.lock()->GetOwner().lock()->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
+	}
 	for(auto enemy: enemyComponents)
 		m_pScene.lock()->Add(enemy);
 	m_pScene.lock()->Add(playerObject);
@@ -306,6 +339,59 @@ void GameManagerComponent::CheckBurgerOverlap()
 	}
 }
 
+void GameManagerComponent::CheckPlayerOverlap()
+{
+	if (!m_pPlayer.expired() && !m_pPlayer.lock()->IsDead())
+	{
+		auto pos = m_pPlayer.lock()->GetOwner().lock()->GetTransform().GetPosition();
+		auto size = m_pPlayer.lock()->GetRectSize();
+		pos.x -= size.first / 2;
+		Rect PlayerRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
+		for (auto hotdog : m_pHotDogs)
+		{
+			if (m_pPlayer.lock()->getNode().lock() != hotdog.lock()->getNode().lock() || hotdog.lock()->IsStunned())
+				continue;
+			pos = hotdog.lock()->GetOwner().lock()->GetTransform().GetPosition();
+			size = hotdog.lock()->GetRectSize();
+			pos.x -= size.first / 2;
+			Rect enemyRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
+			if (CheckRectOverlap(PlayerRect, enemyRect))
+			{
+				m_pPlayer.lock()->Die();
+				return;
+			}
+		}
+		for (auto egg : m_pEggs)
+		{
+			if (m_pPlayer.lock()->getNode().lock() != egg.lock()->getNode().lock() || egg.lock()->IsStunned())
+				continue;
+			pos = egg.lock()->GetOwner().lock()->GetTransform().GetPosition();
+			size = egg.lock()->GetRectSize();
+			pos.x -= size.first / 2;
+			Rect enemyRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
+			if (CheckRectOverlap(PlayerRect, enemyRect))
+			{
+				m_pPlayer.lock()->Die();
+				return;
+			}
+		}
+		for (auto pickle : m_pPickles)
+		{
+			if (m_pPlayer.lock()->getNode().lock() != pickle.lock()->getNode().lock() || pickle.lock()->IsStunned())
+				continue;
+			pos = pickle.lock()->GetOwner().lock()->GetTransform().GetPosition();
+			size = pickle.lock()->GetRectSize();
+			pos.x -= size.first / 2;
+			Rect enemyRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
+			if (CheckRectOverlap(PlayerRect, enemyRect))
+			{
+				m_pPlayer.lock()->Die();
+				return;
+			}
+		}
+	}
+}
+
 const bool GameManagerComponent::CheckRectOverlap(Rect rectOne, Rect rectTwo)
 {
 	return (rectOne.x < rectTwo.x + rectTwo.width && rectOne.x + rectOne.width > rectTwo.x &&
@@ -316,10 +402,11 @@ void GameManagerComponent::SpawnHotDog()
 {
 	m_CurrentHotDogSpawnCoolDown = m_HotDogSpawnCoolDown;
 	auto grid = m_pLevel.lock()->GetGrid();
-	auto startNode = grid[{8, 0}];
+	auto startNode = grid[{8, 1}];
 	AnimDurationInit animInit(0.25f, 0.25f, 0.25f, 0.5f, 0.3f);
 	auto obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/HotDog", animInit));
+	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/HotDog", animInit, 100));
+	obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
 	m_pScene.lock()->Add(obj);
 	m_pHotDogs.push_back(obj->GetComponent<EnemyComponent>());
 }
@@ -328,10 +415,11 @@ void GameManagerComponent::SpawnEgg()
 {
 	m_currentEggSpawnCoolDown = m_EggSpawnCoolDown;
 	auto grid = m_pLevel.lock()->GetGrid();
-	auto startNode = grid[{8, 18}];
+	auto startNode = grid[{8, 19}];
 	AnimDurationInit animInit(0.25f, 0.25f, 0.25f, 0.5f, 0.3f);
 	auto obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Egg", animInit));
+	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Egg", animInit, 300));
+	obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
 	m_pScene.lock()->Add(obj);
 	m_pEggs.push_back(obj->GetComponent<EnemyComponent>());
 }
@@ -340,10 +428,11 @@ void GameManagerComponent::SpawnPickle()
 {
 	m_CurrentPickleSpawnCoolDown = m_PickleSpawnCoolDown;
 	auto grid = m_pLevel.lock()->GetGrid();
-	auto startNode = grid[{0, 18}];
+	auto startNode = grid[{0, 19}];
 	AnimDurationInit animInit(0.1f, 0.12f, 0.12f, 0.5f, 0.3f);
 	auto obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Pickle", animInit));
+	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Pickle", animInit, 200));
+	obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
 	m_pScene.lock()->Add(obj);
 	m_pPickles.push_back(obj->GetComponent<EnemyComponent>());
 }
@@ -400,6 +489,8 @@ void GameManagerComponent::HandleFallingBurgers()
 
 void GameManagerComponent::HandleSalt()
 {
+	if (m_pPlayer.expired())
+		return;
 	auto salt = m_pPlayer.lock()->GetSalt();
 	if (!salt.expired())
 	{
@@ -435,6 +526,24 @@ void GameManagerComponent::HandleSalt()
 				pickle.lock()->Stun();
 		}
 	}
+}
+
+void GameManagerComponent::Reset()
+{
+	for (auto egg : m_pEggs)
+		if(!egg.expired())
+			egg.lock()->GetOwner().lock()->Remove();
+	m_pEggs.clear();
+	for (auto hotDog : m_pHotDogs)
+		if (!hotDog.expired())
+			hotDog.lock()->GetOwner().lock()->Remove();
+	m_pHotDogs.clear();
+	for (auto pickle : m_pPickles)
+		if (!pickle.expired())
+			pickle.lock()->GetOwner().lock()->Remove();
+	m_pPickles.clear();
+
+	m_pPlayer.lock()->Reset();
 }
 
 std::vector<std::weak_ptr<NodeComponent>> GameManagerComponent::FindPath(std::weak_ptr<NodeComponent> start, std::weak_ptr<NodeComponent> end, std::weak_ptr<NodeComponent> prevNode)

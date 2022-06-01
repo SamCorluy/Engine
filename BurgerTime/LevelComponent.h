@@ -31,6 +31,7 @@ private:
 	std::pair<int, int> m_GridSize;
 	std::pair<int, int> m_EvenTileSize;
 	std::pair<int, int> m_OddTileSize;
+	int m_TileHeightVoid;
 	//std::pair<int, int> m_LadderAccessSize;
 	int m_FloorOffset;
 };

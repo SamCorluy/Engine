@@ -7,7 +7,7 @@
 
 void dae::GameObject::Update()
 {
-	for (auto object : m_pComponentObjects)
+	for (auto& object : m_pComponentObjects)
 	{
 		object->Update();
 	}
@@ -15,7 +15,7 @@ void dae::GameObject::Update()
 
 void dae::GameObject::StaticUpdate()
 {
-	for (auto object : m_pComponentObjects)
+	for (auto& object : m_pComponentObjects)
 	{
 		object->StaticUpdate();
 	}
@@ -44,7 +44,7 @@ const dae::Transform& dae::GameObject::GetTransform() const
 
 void dae::GameObject::Render() const
 {
-	for (auto object : m_pComponentObjects)
+	for (auto& object : m_pComponentObjects)
 	{
 		object->Render(m_Transform);
 	}

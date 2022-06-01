@@ -26,6 +26,7 @@ namespace dae
 
 		std::string m_Name;
 		std::vector<std::shared_ptr<GameObject>> m_Objects{};
+		std::vector<std::shared_ptr<GameObject>> m_ObjectQueue{};
 
 		static unsigned int m_IdCounter; 
 	};

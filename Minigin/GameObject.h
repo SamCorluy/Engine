@@ -38,7 +38,7 @@ namespace dae
 		const Transform& GetTransform() const;
 	private:
 		Transform m_Transform;
-		std::vector<std::shared_ptr<BaseComponent>> m_pComponentObjects;
+		std::vector<std::shared_ptr<BaseComponent>> m_pComponentObjects{};
 		bool m_Remove{false};
 	};
 

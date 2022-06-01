@@ -32,7 +32,7 @@ SaltComponent::SaltComponent(const std::shared_ptr<dae::GameObject>& owner, int 
 	default:
 		break;
 	}
-	animInitList.push_back(dae::AnimationInit(4, m_Duration, fileName));
+	animInitList.push_back(dae::AnimationInit(4, m_Duration, fileName, {-m_RectSize.first / 2, 0}));
 	owner->AddComponent<dae::AnimationComponent>(std::make_shared<dae::AnimationComponent>(owner, animInitList, scale));
 	owner->GetComponent<dae::AnimationComponent>().lock()->SetFlip(flip);
 

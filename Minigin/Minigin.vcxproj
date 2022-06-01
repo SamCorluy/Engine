@@ -248,6 +248,7 @@ xcopy $(SolutionDir)3rdParty\SDL2_mixer-2.0.4\lib\x64\*.dll $(OutputPath) /Y</Co
     <ClInclude Include="..\3rdParty\SDL2_mixer-2.0.4\include\SDL_mixer.h" />
     <ClInclude Include="BaseCommand.h" />
     <ClInclude Include="BaseComponent.h" />
+    <ClInclude Include="CounterComponent.h" />
     <ClInclude Include="ElapsedTime.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="FpsComponent.h" />
@@ -277,6 +278,7 @@ xcopy $(SolutionDir)3rdParty\SDL2_mixer-2.0.4\lib\x64\*.dll $(OutputPath) /Y</Co
   <ItemGroup>
     <ClCompile Include="BaseCommand.cpp" />
     <ClCompile Include="BaseComponent.cpp" />
+    <ClCompile Include="CounterComponent.cpp" />
     <ClCompile Include="ElapsedTime.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="FpsComponent.cpp" />

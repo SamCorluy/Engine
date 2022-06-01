@@ -2,12 +2,16 @@
 #include "GameObject.h"
 #include "ElapsedTime.h"
 #include <iostream>
+#include "TextureManagerComponent.h"
 
 const float dropVelocity{ 100.f };
 
-BurgerComponent::BurgerComponent(const std::weak_ptr<dae::Scene>& scene, std::vector<BurgerInit> burgerInit, const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level)
+BurgerComponent::BurgerComponent(const std::weak_ptr<NodeComponent> node, const std::weak_ptr<dae::Scene>& scene, std::vector<BurgerInit> burgerInit, const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level)
 	: BaseComponent(owner)
+	, m_RectSize{ 40 * scale, 6 * scale }
 {
+	// Initialize subject
+
 	for (auto comp : burgerInit)
 	{
 		auto gameObject = std::make_shared<dae::GameObject>();
@@ -15,6 +19,17 @@ BurgerComponent::BurgerComponent(const std::weak_ptr<dae::Scene>& scene, std::ve
 		scene.lock()->Add(gameObject);
 		m_pIngredients.push_back(gameObject->GetComponent<IngredientComponent>());
 	}
+	glm::vec2 pos;
+	pos.x = node.lock()->GetNodePos().first + node.lock()->GetNodeSize().first / 2 + node.lock()->GetOwner().lock()->GetTransform().GetPosition().x;
+	pos.y = node.lock()->GetNodePos().second + node.lock()->GetOwner().lock()->GetTransform().GetPosition().y;
+	GetOwner().lock()->SetPosition(pos);
+	std::vector<std::pair<const std::string, glm::vec2>> textureInfo;
+	std::pair<std::string, glm::vec2> info;
+	info.second.y = static_cast<float>( - m_RectSize.second / 2);
+	info.first = "Textures/Burger/Plate.png";
+	info.second.x = static_cast<float>(-m_RectSize.first / 2);
+	textureInfo.push_back(info);
+	GetOwner().lock()->AddComponent<dae::TextureManagerComponent>(std::make_shared<dae::TextureManagerComponent>(GetOwner().lock(), textureInfo, scale));
 }
 
 void BurgerComponent::Update()
@@ -23,8 +38,9 @@ void BurgerComponent::Update()
 	{
 		auto ingredient = m_pIngredients[i];
 		auto pos = ingredient.lock()->GetOwner().lock()->GetTransform().GetPosition();
-		if (!ingredient.lock()->hasDropped() || pos.y < 0)
+		if (!ingredient.lock()->hasDropped())
 			continue;
+
 
 		if (i == 0)
 		{
@@ -53,6 +69,11 @@ void BurgerComponent::Update()
 				if (ingredient.lock()->hasDropped())
 					continue;
 			}
+		if (pos.y <= GetOwner().lock()->GetTransform().GetPosition().y + 1.f)
+		{
+			pos.y = GetOwner().lock()->GetTransform().GetPosition().y;
+			ingredient.lock()->GetOwner().lock()->SetPosition(pos);
+		}
 		ingredient.lock()->GetOwner().lock()->SetPosition(pos);
 	}
 }

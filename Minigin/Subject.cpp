@@ -2,35 +2,18 @@
 #include "Subject.h"
 
 dae::Subject::Subject(const std::shared_ptr<GameObject>& owner)
-	: numbObservers(0)
-	, BaseComponent(owner)
+	: BaseComponent(owner)
 {
 }
 
-void dae::Subject::AddObserver(Observer* observer)
+void dae::Subject::AddObserver(std::shared_ptr<Observer> observer)
 {
-	if (numbObservers < MAX_OBSERVERS)
-	{
-		observers[numbObservers] = observer;
-		++numbObservers;
-	}
+	observers.push_back(observer);
 }
 
-void dae::Subject::RemoveObserver(Observer* observer)
+void dae::Subject::RemoveObserver(std::shared_ptr<Observer> observer)
 {
-	{
-		for (int i = 0; i < numbObservers; i++)
-		{
-			if (observers[i] == observer)
-			{
-				delete observers[i];
-				observers[i] = observers[MAX_OBSERVERS - 1];
-				observers[MAX_OBSERVERS - 1] = nullptr;
-				--numbObservers;
-				break;
-			}
-		}
-	}
+	observers.erase(std::remove(observers.begin(), observers.end(), observer), observers.end());
 }
 
 void dae::Subject::StaticUpdate()
@@ -47,12 +30,12 @@ void dae::Subject::Render(const Transform&) const
 
 void dae::Subject::Notify(Event event, const std::weak_ptr<GameObject>& gameObject)
 {
-	for (int i = 0; i < numbObservers; ++i)
+	for (int i = 0; i < observers.size(); ++i)
 		observers[i]->Notify(event, gameObject);
 }
 
 void dae::Subject::Notify(Event event, int data)
 {
-	for (int i = 0; i < numbObservers; ++i)
+	for (int i = 0; i < observers.size(); ++i)
 		observers[i]->Notify(event, data);
 }

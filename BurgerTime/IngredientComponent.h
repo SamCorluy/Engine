@@ -40,6 +40,7 @@ public:
 	void SetExtraDrops(int extraDrops);
 	const std::pair<int, int> GetRectSize() const;
 private:
+	std::weak_ptr<dae::Subject> m_pSubject;
 	std::vector<IngredientPartition> m_pPartitions;
 	//std::weak_ptr<PeterPepperComponent> m_pPlayer;
 	std::weak_ptr<NodeComponent> m_pNode;

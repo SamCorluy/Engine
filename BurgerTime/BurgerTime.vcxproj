@@ -164,11 +164,14 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameManagerComponent.cpp" />
     <ClCompile Include="EnemyComponent.cpp" />
+    <ClCompile Include="HealthComponent.cpp" />
+    <ClCompile Include="HealthObserver.cpp" />
     <ClCompile Include="IngredientComponent.cpp" />
     <ClCompile Include="LevelComponent.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NodeComponent.cpp" />
     <ClCompile Include="PeterPepperComponent.cpp" />
+    <ClCompile Include="PointsObserver.cpp" />
     <ClCompile Include="SaltComponent.cpp" />
     <ClCompile Include="ThrowSaltCommand.cpp" />
   </ItemGroup>
@@ -178,10 +181,13 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameManagerComponent.h" />
     <ClInclude Include="EnemyComponent.h" />
+    <ClInclude Include="HealthComponent.h" />
+    <ClInclude Include="HealthObserver.h" />
     <ClInclude Include="IngredientComponent.h" />
     <ClInclude Include="LevelComponent.h" />
     <ClInclude Include="NodeComponent.h" />
     <ClInclude Include="PeterPepperComponent.h" />
+    <ClInclude Include="PointsObserver.h" />
     <ClInclude Include="SaltComponent.h" />
     <ClInclude Include="ThrowSaltCommand.h" />
   </ItemGroup>

@@ -23,7 +23,7 @@ struct AnimDurationInit
 class EnemyComponent final : public dae::BaseComponent
 {
 public:
-	EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, std::string textFolder, AnimDurationInit animDurationInit);
+	EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, std::string textFolder, AnimDurationInit animDurationInit, int points);
 	virtual void Update() override;
 	virtual void StaticUpdate() override;
 	virtual void Render(const dae::Transform& pos) const override;
@@ -35,6 +35,7 @@ public:
 	const std::pair<int, int> GetRectSize() const;
 	void Stun();
 	void Kill();
+	const bool IsStunned() const;
 private:
 	std::weak_ptr<dae::Subject> m_pSubject;
 	std::weak_ptr<NodeComponent> m_pCurrentNode;
@@ -49,5 +50,6 @@ private:
 	const float m_StunDuration;
 	const float m_DeathDuration;
 	float m_ElapsedTime;
+	const int m_Points;
 };
 

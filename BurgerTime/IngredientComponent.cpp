@@ -12,6 +12,8 @@ IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::sha
 	, m_ExtraDrops{0}
 	, m_RectSize{ 32 * scale, 8 * scale }
 {
+	owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
+	m_pSubject = owner->GetComponent<dae::Subject>();
 	std::string filePath{"Textures/Burger/"};
 	switch (type)
 	{
@@ -110,6 +112,20 @@ void IngredientComponent::InitiateDrop(int playerIdx)
 	if(walkedOn)
 		pos.y -= m_DropHeight;
 	GetOwner().lock()->SetPosition(pos);
+	if(m_ExtraDrops == 0)
+		m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, 50);
+	else if(m_ExtraDrops == 1)
+		m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, 500);
+	else if (m_ExtraDrops == 2)
+		m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, 1000);
+	else if (m_ExtraDrops == 3)
+		m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, 2000);
+	else if (m_ExtraDrops == 4)
+		m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, 4000);
+	else if (m_ExtraDrops == 5)
+		m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, 8000);
+	else if (m_ExtraDrops == 6)
+		m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, 16000);
 }
 
 const bool IngredientComponent::hasDropped() const
