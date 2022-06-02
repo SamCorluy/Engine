@@ -30,17 +30,19 @@ public:
 	virtual void Render(const dae::Transform& pos) const override;
 	const int GetTextureHeight() const;
 	const bool hasDropped() const;
-	void setDropped(bool dropped, int playerIdx);
-	void InitiateDrop(int playerIdx);
-	bool CheckOverlap(std::weak_ptr<PeterPepperComponent>& player, int playerIdx);
+	void setDropped(bool dropped, std::weak_ptr<PeterPepperComponent>& player);
+	void InitiateDrop(std::weak_ptr<PeterPepperComponent>& player, int extraDrops = 0);
+	bool CheckOverlap(std::weak_ptr<PeterPepperComponent>& player);
 	const std::weak_ptr<NodeComponent> GetNode() const;
 	const std::weak_ptr<NodeComponent> GetStartNode() const;
 	const int GetBurgerOffset() const;
-	const int GetPlayerIdx() const;
-	void SetExtraDrops(int extraDrops);
+	const std::weak_ptr<PeterPepperComponent> GetPlayer() const;
+	//void SetExtraDrops(int extraDrops);
 	const std::pair<int, int> GetRectSize() const;
+	void SetReachedPlate();
+	const bool HasReachedPlate() const;
 private:
-	std::weak_ptr<dae::Subject> m_pSubject;
+	//std::weak_ptr<dae::Subject> m_pSubject;
 	std::vector<IngredientPartition> m_pPartitions;
 	//std::weak_ptr<PeterPepperComponent> m_pPlayer;
 	std::weak_ptr<NodeComponent> m_pNode;
@@ -50,8 +52,9 @@ private:
 	int m_TextureHeight;
 	const int m_DropHeight;
 	int m_pBurgerOffset;
-	int m_PlayerIdx;
+	std::weak_ptr<PeterPepperComponent> m_pPlayer;
 	int m_ExtraDrops;
 	std::pair<int, int> m_RectSize;
+	bool m_ReachedPlate = false;
 };
 

@@ -19,8 +19,8 @@ EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, in
 	, m_Points{points}
 {
 	// Initialize subject
-	owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
-	m_pSubject = owner->GetComponent<dae::Subject>();
+	//owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
+	//m_pSubject = owner->GetComponent<dae::Subject>();
 
 	// Handling animation info
 	std::vector<dae::AnimationInit> animInitList;
@@ -258,11 +258,11 @@ void EnemyComponent::Stun()
 	m_ElapsedTime = 0.f;
 }
 
-void EnemyComponent::Kill()
+void EnemyComponent::Kill(std::weak_ptr<PeterPepperComponent>& player)
 {
 	if (m_Dead)
 		return;
-	m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, m_Points);
+	player.lock()->AddPoints(m_Points);
 	m_Dead = true;
 	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
 	comp.lock()->SetActiveAnimation(4);

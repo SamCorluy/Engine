@@ -36,44 +36,65 @@ void BurgerComponent::Update()
 {
 	for (size_t i = 0; i < m_pIngredients.size(); ++i)
 	{
+		//Get current ingredient and its position
 		auto ingredient = m_pIngredients[i];
 		auto pos = ingredient.lock()->GetOwner().lock()->GetTransform().GetPosition();
-		if (!ingredient.lock()->hasDropped())
+
+		//Ignore if not dropping or reached plate
+		if (!ingredient.lock()->hasDropped() || ingredient.lock()->HasReachedPlate())
 			continue;
 
-
+		//If first ingredient, don't need to check for ingredients below
 		if (i == 0)
 		{
 			pos.y -= ElapsedTime::GetInstance().GetElapsedTime() * dropVelocity;
+			//If ingredient reached plate
+			if (pos.y <= GetOwner().lock()->GetTransform().GetPosition().y + 1.f)
+			{
+				pos.y = GetOwner().lock()->GetTransform().GetPosition().y + 1.f;
+				ingredient.lock()->SetReachedPlate();
+				//ingredient.lock()->GetOwner().lock()->SetPosition(pos);
+			}
 		}
 		else
 		{
+			//Getting ingredient below and its position
 			auto ingredientBelow = m_pIngredients[i - 1];
 			auto posBelow = ingredientBelow.lock()->GetOwner().lock()->GetTransform().GetPosition();
+			//Check if current ingredient positioned below the top of the ingredient below
 			if (pos.y < posBelow.y + ingredientBelow.lock()->GetTextureHeight())
 			{
+				//Drop ingredient below and then continue to next ingredient
 				pos.y = posBelow.y + ingredientBelow.lock()->GetTextureHeight();
-				ingredientBelow.lock()->setDropped(true, ingredient.lock()->GetPlayerIdx());
-				continue;
+				if (ingredientBelow.lock()->HasReachedPlate())
+					ingredient.lock()->SetReachedPlate();
+				else
+				{
+					auto player = ingredient.lock()->GetPlayer();
+					ingredientBelow.lock()->setDropped(true, player);
+				}
+				//continue;
 			}
 			else
 			{
+				//Else continue dropping burger
 				pos.y -= ElapsedTime::GetInstance().GetElapsedTime() * dropVelocity;
 			}
 		}
-		if (ingredient.lock()->GetNode().lock() != ingredient.lock()->GetStartNode().lock() && ingredient.lock()->GetNode().lock()->IsFloor())
-			if (ingredient.lock()->GetNode().lock()->GetOwner().lock()->GetTransform().GetPosition().y + ingredient.lock()->GetNode().lock()->GetNodePos().second - ingredient.lock()->GetBurgerOffset() >= pos.y)
+		//Check if burger is not on the start floor but current loccation is floor
+		auto currentNode = ingredient.lock()->GetNode();
+		auto nodePos = currentNode.lock()->GetOwner().lock()->GetTransform().GetPosition();
+		if (!ingredient.lock()->HasReachedPlate() && currentNode.lock() != ingredient.lock()->GetStartNode().lock() && currentNode.lock()->IsFloor())
+			//Check if burger passed or is on the current floor
+			if (nodePos.y + currentNode.lock()->GetNodePos().second - ingredient.lock()->GetBurgerOffset() >= pos.y)
 			{
-				pos.y = ingredient.lock()->GetNode().lock()->GetOwner().lock()->GetTransform().GetPosition().y + ingredient.lock()->GetNode().lock()->GetNodePos().second - ingredient.lock()->GetBurgerOffset();
-				ingredient.lock()->setDropped(false, ingredient.lock()->GetPlayerIdx());
+				//Stop at floor and if still dropping continue to next ingredient
+				auto player = ingredient.lock()->GetPlayer();
+				ingredient.lock()->setDropped(false, player);
 				if (ingredient.lock()->hasDropped())
 					continue;
+				pos.y = nodePos.y + currentNode.lock()->GetNodePos().second - ingredient.lock()->GetBurgerOffset();
 			}
-		if (pos.y <= GetOwner().lock()->GetTransform().GetPosition().y + 1.f)
-		{
-			pos.y = GetOwner().lock()->GetTransform().GetPosition().y;
-			ingredient.lock()->GetOwner().lock()->SetPosition(pos);
-		}
 		ingredient.lock()->GetOwner().lock()->SetPosition(pos);
 	}
 }

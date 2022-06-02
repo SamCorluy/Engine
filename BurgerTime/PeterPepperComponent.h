@@ -30,6 +30,7 @@ public:
 	bool IsDead();
 	bool DeathAnimationFinished();
 	const std::pair<int, int> GetRectSize() const;
+	void AddPoints(int points);
 private:
 	std::weak_ptr<dae::Subject> m_pSubject;
 	bool m_MovementProcessed;
@@ -48,5 +49,7 @@ private:
 	std::weak_ptr<dae::Scene> m_pScene;
 	std::pair<int, int> m_RectSize;
 	int m_Lives;
+	int m_Points = 0;
+	int m_SaltCharges = 5;
 };
 

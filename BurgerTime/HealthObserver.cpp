@@ -1,6 +1,5 @@
 #include "HealthObserver.h"
 #include "GameObject.h"
-#include "PeterPepperComponent.h"
 
 HealthObserver::HealthObserver(const std::weak_ptr<HealthComponent>& healthComp)
 	: Observer()

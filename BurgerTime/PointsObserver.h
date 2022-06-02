@@ -10,6 +10,5 @@ public:
 	void Notify(dae::Event event, int data) override;
 private:
 	std::weak_ptr<CounterComponent> m_pCounterComponent;
-	int m_Points = 0;
 };
 

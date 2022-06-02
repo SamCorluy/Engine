@@ -8,6 +8,8 @@
 #include "ElapsedTime.h"
 #include "HealthComponent.h"
 #include "HealthObserver.h"
+#include "SaltDisplayComponent.h"
+#include "SaltObserver.h"
 #include "ResourceManager.h"
 
 GameManagerComponent::GameManagerComponent(const std::shared_ptr<dae::GameObject> owner, const std::weak_ptr<dae::Scene>& scene)
@@ -123,14 +125,6 @@ void GameManagerComponent::DeterminePathEnemies(std::vector<std::weak_ptr<EnemyC
 
 void GameManagerComponent::InitSinglePlayer()
 {
-	auto scoreObject = std::make_shared<dae::GameObject>();
-	auto font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 18);
-	scoreObject->AddComponent<CounterComponent>(std::make_shared<CounterComponent>(scoreObject, font, 0));
-	scoreObject->SetPosition(0.f, 700.f);
-	m_pScene.lock()->Add(scoreObject);
-	m_pPointsObserver = std::make_shared<PointsObserver>(scoreObject->GetComponent<CounterComponent>());
-
-	
 	//Initialize level component
 	auto levelObject = std::make_shared<dae::GameObject>();
 	levelObject->AddComponent<LevelComponent>(std::make_shared<LevelComponent>(levelObject, "../Data/Level.txt", 3, m_pScene));
@@ -157,13 +151,27 @@ void GameManagerComponent::InitSinglePlayer()
 
 	auto playerObject = std::make_shared<dae::GameObject>();
 	playerObject->AddComponent<PeterPepperComponent>(std::make_shared<PeterPepperComponent>(playerObject, 3, startNode, m_pLevel.lock()->GetFloorOffset(), m_pScene, 5));
+	
+	auto scoreObject = std::make_shared<dae::GameObject>();
+	auto font = dae::ResourceManager::GetInstance().LoadFont("emulogic.ttf", 20);
+	scoreObject->AddComponent<CounterComponent>(std::make_shared<CounterComponent>(scoreObject, font, 0));
+	scoreObject->SetPosition(0.f, 10.f);
+	m_pScene.lock()->Add(scoreObject);
+	//m_pPointsObserver = std::make_shared<PointsObserver>(scoreObject->GetComponent<CounterComponent>());
 
 	auto healthObject = std::make_shared<dae::GameObject>();
 	healthObject->AddComponent<HealthComponent>(std::make_shared<HealthComponent>(healthObject, 3, 5));
 	healthObject->SetPosition(10.f, 10.f);
 	m_pScene.lock()->Add(healthObject);
 
+	auto saltObject = std::make_shared<dae::GameObject>();
+	saltObject->AddComponent<SaltDisplayComponent>(std::make_shared<SaltDisplayComponent>(saltObject, 3, 5));
+	saltObject->SetPosition(150.f, 10.f);
+	m_pScene.lock()->Add(saltObject);
+
 	playerObject->GetComponent<dae::Subject>().lock()->AddObserver(std::make_shared<HealthObserver>(healthObject->GetComponent<HealthComponent>()));
+	playerObject->GetComponent<dae::Subject>().lock()->AddObserver(std::make_shared<SaltObserver>(saltObject->GetComponent<SaltDisplayComponent>()));
+	playerObject->GetComponent<dae::Subject>().lock()->AddObserver(std::make_shared<PointsObserver>(scoreObject->GetComponent<CounterComponent>()));
 	m_pPlayer = playerObject->GetComponent<PeterPepperComponent>();
 	dae::InputManager::GetInstance().AddKeyboardInput('w', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayer, Action::ClimbingUp));
 	dae::InputManager::GetInstance().AddKeyboardInput('s', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayer, Action::ClimbingDown));
@@ -241,8 +249,8 @@ void GameManagerComponent::InitSinglePlayer()
 	for (auto obj : burgerComponents)
 	{
 		m_pScene.lock()->Add(obj);
-		for(auto ingr : obj->GetComponent<BurgerComponent>().lock()->getIngredients())
-			ingr.lock()->GetOwner().lock()->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
+		//for(auto ingr : obj->GetComponent<BurgerComponent>().lock()->getIngredients())
+		//	ingr.lock()->GetOwner().lock()->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
 	}
 	for(auto enemy: enemyComponents)
 		m_pScene.lock()->Add(enemy);
@@ -282,7 +290,7 @@ void GameManagerComponent::CheckBurgerOverlap()
 		for (auto ingredient : burger.lock()->getIngredients())
 		{
 			bool wasDropped = ingredient.lock()->hasDropped();
-			if (ingredient.lock()->CheckOverlap(m_pPlayer, 0) && !wasDropped)
+			if (ingredient.lock()->CheckOverlap(m_pPlayer) && !wasDropped)
 			{
 				auto pos = ingredient.lock()->GetOwner().lock()->GetTransform().GetPosition();
 				auto size = ingredient.lock()->GetRectSize();
@@ -299,7 +307,7 @@ void GameManagerComponent::CheckBurgerOverlap()
 					Rect enemyRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
 					if (CheckRectOverlap(ingredientRect, enemyRect))
 					{
-						enemy.lock()->Kill();
+						enemy.lock()->Kill(m_pPlayer);
 						++extraDrops;
 					}
 				}
@@ -313,7 +321,7 @@ void GameManagerComponent::CheckBurgerOverlap()
 					Rect enemyRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
 					if (CheckRectOverlap(ingredientRect, enemyRect))
 					{
-						enemy.lock()->Kill();
+						enemy.lock()->Kill(m_pPlayer);
 						++extraDrops;
 					}
 				}
@@ -327,12 +335,12 @@ void GameManagerComponent::CheckBurgerOverlap()
 					Rect enemyRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
 					if (CheckRectOverlap(ingredientRect, enemyRect))
 					{
-						enemy.lock()->Kill();
+						enemy.lock()->Kill(m_pPlayer);
 						++extraDrops;
 					}
 				}
 				//int amount = rand() % 3;
-				ingredient.lock()->SetExtraDrops(extraDrops);
+				ingredient.lock()->InitiateDrop(m_pPlayer, extraDrops);
 				//std::cout << amount << "\n";
 			}
 		}
@@ -406,7 +414,7 @@ void GameManagerComponent::SpawnHotDog()
 	AnimDurationInit animInit(0.25f, 0.25f, 0.25f, 0.5f, 0.3f);
 	auto obj = std::make_shared<dae::GameObject>();
 	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/HotDog", animInit, 100));
-	obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
+	//obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
 	m_pScene.lock()->Add(obj);
 	m_pHotDogs.push_back(obj->GetComponent<EnemyComponent>());
 }
@@ -419,7 +427,7 @@ void GameManagerComponent::SpawnEgg()
 	AnimDurationInit animInit(0.25f, 0.25f, 0.25f, 0.5f, 0.3f);
 	auto obj = std::make_shared<dae::GameObject>();
 	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Egg", animInit, 300));
-	obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
+	//obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
 	m_pScene.lock()->Add(obj);
 	m_pEggs.push_back(obj->GetComponent<EnemyComponent>());
 }
@@ -432,7 +440,7 @@ void GameManagerComponent::SpawnPickle()
 	AnimDurationInit animInit(0.1f, 0.12f, 0.12f, 0.5f, 0.3f);
 	auto obj = std::make_shared<dae::GameObject>();
 	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Pickle", animInit, 200));
-	obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
+	//obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
 	m_pScene.lock()->Add(obj);
 	m_pPickles.push_back(obj->GetComponent<EnemyComponent>());
 }
@@ -445,6 +453,7 @@ void GameManagerComponent::HandleFallingBurgers()
 		{
 			if (ingredient.lock()->hasDropped())
 			{
+				auto player = ingredient.lock()->GetPlayer();
 				auto pos = ingredient.lock()->GetOwner().lock()->GetTransform().GetPosition();
 				auto size = ingredient.lock()->GetRectSize();
 				pos.x -= size.first / 2;
@@ -458,7 +467,7 @@ void GameManagerComponent::HandleFallingBurgers()
 					pos.x -= size.first / 2;
 					Rect enemyRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
 					if (CheckRectOverlap(ingredientRect, enemyRect))
-						hotdog.lock()->Kill();
+						hotdog.lock()->Kill(player);
 				}
 				for (auto egg : m_pEggs)
 				{
@@ -469,7 +478,7 @@ void GameManagerComponent::HandleFallingBurgers()
 					pos.x -= size.first / 2;
 					Rect enemyRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
 					if (CheckRectOverlap(ingredientRect, enemyRect))
-						egg.lock()->Kill();
+						egg.lock()->Kill(player);
 				}
 				for (auto pickle : m_pPickles)
 				{
@@ -480,7 +489,7 @@ void GameManagerComponent::HandleFallingBurgers()
 					pos.x -= size.first / 2;
 					Rect enemyRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
 					if (CheckRectOverlap(ingredientRect, enemyRect))
-						pickle.lock()->Kill();
+						pickle.lock()->Kill(player);
 				}
 			}
 		}

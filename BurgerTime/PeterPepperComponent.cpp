@@ -11,7 +11,7 @@ PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject
 	, m_pCurrentNode{ node }
 	, m_pStartNode{ node }
 	, m_FloorOffset{floorOffset}
-	, m_SaltCooldown{2.f}
+	, m_SaltCooldown{1.2f}
 	, m_ThrowDuration{0.4f}
 	, m_ElapsedTime{0.f}
 	, m_ThrowingSalt{false}
@@ -212,8 +212,11 @@ void PeterPepperComponent::Move(Action action)
 void PeterPepperComponent::ThrowSalt()
 {
 	m_MovementProcessed = true;
-	if (m_CanThrow)
+	if (m_CanThrow && m_SaltCharges > 0)
 	{
+		--m_SaltCharges;
+		if (!m_pSubject.expired())
+			m_pSubject.lock()->Notify(dae::Event::SALT_THROW, m_SaltCharges);
 		m_CanThrow = false;
 		m_ThrowingSalt = true;
 		size_t texture{};
@@ -297,4 +300,10 @@ bool PeterPepperComponent::DeathAnimationFinished()
 const std::pair<int, int> PeterPepperComponent::GetRectSize() const
 {
 	return m_RectSize;
+}
+
+void PeterPepperComponent::AddPoints(int points)
+{
+	m_Points += points;
+	m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, m_Points);
 }

@@ -1,36 +1,36 @@
-#include "HealthComponent.h"
+#include "SaltDisplayComponent.h"
 #include "GameObject.h"
 #include "TextureManagerComponent.h"
 
-HealthComponent::HealthComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, int health)
-	: BaseComponent(owner)
+SaltDisplayComponent::SaltDisplayComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, int charges)
+	:BaseComponent(owner)
 	, m_RectSize{ 7 * scale, 8 * scale }
 {
 	std::vector<std::pair<const std::string, glm::vec2>> textureInfo;
 	std::pair<std::string, glm::vec2> info;
 	info.second.y = 0;
-	for (int i = 0; i < health; ++i)
+	for (int i = 0; i < charges; ++i)
 	{
-		info.first = "Textures/Health.png";
-		info.second.x = static_cast<float>((m_RectSize.first + 1) * i);
+		info.first = "Textures/Salt.png";
+		info.second.x = static_cast<float>((m_RectSize.first +1)* i);
 		textureInfo.push_back(info);
 	}
 	GetOwner().lock()->AddComponent<dae::TextureManagerComponent>(std::make_shared<dae::TextureManagerComponent>(GetOwner().lock(), textureInfo, scale));
 }
 
-void HealthComponent::Update()
+void SaltDisplayComponent::Update()
 {
 }
 
-void HealthComponent::StaticUpdate()
+void SaltDisplayComponent::StaticUpdate()
 {
 }
 
-void HealthComponent::Render(const dae::Transform&) const
+void SaltDisplayComponent::Render(const dae::Transform&) const
 {
 }
 
-void HealthComponent::RemoveLife() const
+void SaltDisplayComponent::RemoveCharge() const
 {
 	GetOwner().lock()->GetComponent<dae::TextureManagerComponent>().lock()->RemoveLastTexture();
 }

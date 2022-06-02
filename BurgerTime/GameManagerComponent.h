@@ -34,7 +34,7 @@ private:
 	std::vector<std::weak_ptr<EnemyComponent>> m_pHotDogs;
 	std::vector<std::weak_ptr<EnemyComponent>> m_pEggs;
 	std::vector<std::weak_ptr<EnemyComponent>> m_pPickles;
-	std::shared_ptr<PointsObserver> m_pPointsObserver;
+	//std::shared_ptr<PointsObserver> m_pPointsObserver;
 	const float m_HotDogSpawnCoolDown;
 	float m_CurrentHotDogSpawnCoolDown;
 	const float m_PickleSpawnCoolDown;

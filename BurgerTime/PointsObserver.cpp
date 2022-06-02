@@ -14,7 +14,6 @@ void PointsObserver::Notify(dae::Event event, int data)
 {
 	if (event == dae::Event::SCORE_CHANGE)
 	{
-		m_Points += data;
-		m_pCounterComponent.lock()->SetCounter(m_Points);
+		m_pCounterComponent.lock()->SetCounter(data);
 	}
 }

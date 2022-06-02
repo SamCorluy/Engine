@@ -173,6 +173,8 @@
     <ClCompile Include="PeterPepperComponent.cpp" />
     <ClCompile Include="PointsObserver.cpp" />
     <ClCompile Include="SaltComponent.cpp" />
+    <ClCompile Include="SaltDisplayComponent.cpp" />
+    <ClCompile Include="SaltObserver.cpp" />
     <ClCompile Include="ThrowSaltCommand.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -189,6 +191,8 @@
     <ClInclude Include="PeterPepperComponent.h" />
     <ClInclude Include="PointsObserver.h" />
     <ClInclude Include="SaltComponent.h" />
+    <ClInclude Include="SaltDisplayComponent.h" />
+    <ClInclude Include="SaltObserver.h" />
     <ClInclude Include="ThrowSaltCommand.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

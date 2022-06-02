@@ -8,12 +8,12 @@ IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::sha
 	: BaseComponent(owner)
 	//, m_TextureSize{8 * scale}
 	, m_DropHeight{ 8 * scale / 5 }
-	, m_PlayerIdx{0}
+	, m_pPlayer{std::shared_ptr<PeterPepperComponent>(nullptr)}
 	, m_ExtraDrops{0}
 	, m_RectSize{ 32 * scale, 8 * scale }
 {
-	owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
-	m_pSubject = owner->GetComponent<dae::Subject>();
+	//owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
+	//m_pSubject = owner->GetComponent<dae::Subject>();
 	std::string filePath{"Textures/Burger/"};
 	switch (type)
 	{
@@ -93,9 +93,10 @@ const int IngredientComponent::GetTextureHeight() const
 	return m_TextureHeight;
 }
 
-void IngredientComponent::InitiateDrop(int playerIdx)
+void IngredientComponent::InitiateDrop(std::weak_ptr<PeterPepperComponent>& player, int extraDrops)
 {
-	m_PlayerIdx = playerIdx;
+	m_ExtraDrops = extraDrops;
+	m_pPlayer = player;
 	auto pos = GetOwner().lock()->GetTransform().GetPosition();
 	bool walkedOn = false;
 	for (int i = 0; i < m_pPartitions.size(); ++i)
@@ -112,20 +113,21 @@ void IngredientComponent::InitiateDrop(int playerIdx)
 	if(walkedOn)
 		pos.y -= m_DropHeight;
 	GetOwner().lock()->SetPosition(pos);
-	if(m_ExtraDrops == 0)
-		m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, 50);
-	else if(m_ExtraDrops == 1)
-		m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, 500);
+	int points = 50;
+	if(m_ExtraDrops == 1)
+		points = 500;
 	else if (m_ExtraDrops == 2)
-		m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, 1000);
+		points = 1000;
 	else if (m_ExtraDrops == 3)
-		m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, 2000);
+		points = 2000;
 	else if (m_ExtraDrops == 4)
-		m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, 4000);
+		points = 4000;
 	else if (m_ExtraDrops == 5)
-		m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, 8000);
-	else if (m_ExtraDrops == 6)
-		m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, 16000);
+		points = 8000;
+	else if (m_ExtraDrops >= 6)
+		points = 16000;
+		//m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, 16000);
+	m_pPlayer.lock()->AddPoints(points);
 }
 
 const bool IngredientComponent::hasDropped() const
@@ -136,23 +138,24 @@ const bool IngredientComponent::hasDropped() const
 	return true;
 }
 
-void IngredientComponent::setDropped(bool dropped, int playerIdx)
+void IngredientComponent::setDropped(bool dropped, std::weak_ptr<PeterPepperComponent>& player)
 {
+	bool SetDrop = dropped;
 	if (!dropped)
 		m_pStartNode = m_pNode;
 	if (m_ExtraDrops > 0 && !dropped)
 	{
-		dropped = true;
+		SetDrop = true;
 		--m_ExtraDrops;
 		//std::cout << dropped << "\n";
 	}
 	for (size_t i = 0; i < m_pPartitions.size(); ++i)
-		m_pPartitions[i].hasDropped = dropped;
+		m_pPartitions[i].hasDropped = SetDrop;
 	if(dropped)
-		InitiateDrop(playerIdx);
+		InitiateDrop(player);
 }
 
-bool IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& player, int playerIdx)
+bool IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& player)
 {
 	auto playerPos = player.lock()->GetOwner().lock()->GetTransform().GetPosition();
 	//std::cout << player.lock()->getNode().lock()->GetNodePos().first << " " << player.lock()->getNode().lock()->GetNodePos().first << "\n";
@@ -169,10 +172,10 @@ bool IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& play
 				offset.y -= m_DropHeight;
 				text.lock()->setOffset(i, offset);
 				m_pPartitions[i].hasDropped = true;
-				if (hasDropped())
-				{
-					InitiateDrop(playerIdx);
-				}
+				//if (hasDropped())
+				//{
+				//	InitiateDrop(playerIdx);
+				//}
 			}
 		}
 	}
@@ -195,17 +198,27 @@ const int IngredientComponent::GetBurgerOffset() const
 	return m_pBurgerOffset;
 }
 
-const int IngredientComponent::GetPlayerIdx() const
+const std::weak_ptr<PeterPepperComponent> IngredientComponent::GetPlayer() const
 {
-	return m_PlayerIdx;
+	return m_pPlayer;
 }
 
-void IngredientComponent::SetExtraDrops(int extraDrops)
-{
-	m_ExtraDrops = extraDrops;
-}
+//void IngredientComponent::SetExtraDrops(int extraDrops)
+//{
+//	m_ExtraDrops = extraDrops;
+//}
 
 const std::pair<int, int> IngredientComponent::GetRectSize() const
 {
 	return m_RectSize;
+}
+
+void IngredientComponent::SetReachedPlate()
+{
+	m_ReachedPlate = true;
+}
+
+const bool IngredientComponent::HasReachedPlate() const
+{
+	return m_ReachedPlate;
 }

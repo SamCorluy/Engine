@@ -5,6 +5,7 @@
 #include "Subject.h"
 #include "NodeComponent.h"
 #include <string>
+#include "PeterPepperComponent.h"
 struct AnimDurationInit
 {
 	float up;
@@ -34,10 +35,10 @@ public:
 	const bool ReachedChoicePoint() const;
 	const std::pair<int, int> GetRectSize() const;
 	void Stun();
-	void Kill();
+	void Kill(std::weak_ptr<PeterPepperComponent>& player);
 	const bool IsStunned() const;
 private:
-	std::weak_ptr<dae::Subject> m_pSubject;
+	//std::weak_ptr<dae::Subject> m_pSubject;
 	std::weak_ptr<NodeComponent> m_pCurrentNode;
 	std::weak_ptr<NodeComponent> m_pPrevNode;
 	std::weak_ptr<NodeComponent> m_pTargetNode;
