@@ -17,6 +17,7 @@ EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, in
 	, m_Stunned{false}
 	, m_Dead{false}
 	, m_Points{points}
+	, m_ElapsedTime{0}
 {
 	// Initialize subject
 	//owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
@@ -185,7 +186,7 @@ void EnemyComponent::Move(std::weak_ptr<NodeComponent> targetNode)
 		((!m_pCurrentNode.lock()->GetConnection(Direction::UP).expired() && m_pCurrentNode.lock()->GetConnection(Direction::UP).lock() != m_pPrevNode.lock())
 			||(!m_pCurrentNode.lock()->GetConnection(Direction::DOWN).expired() && m_pCurrentNode.lock()->GetConnection(Direction::DOWN).lock() != m_pPrevNode.lock())))
 	{
-		int chance = 40;
+		int chance = 90;
 		int percentage = rand()%101;
 		//std::cout << percentage << "\n";
 		if (chance >= percentage)
@@ -262,7 +263,8 @@ void EnemyComponent::Kill(std::weak_ptr<PeterPepperComponent>& player)
 {
 	if (m_Dead)
 		return;
-	player.lock()->AddPoints(m_Points);
+	if(!player.expired())
+		player.lock()->AddPoints(m_Points);
 	m_Dead = true;
 	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
 	comp.lock()->SetActiveAnimation(4);

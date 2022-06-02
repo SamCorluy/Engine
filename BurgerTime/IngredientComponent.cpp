@@ -128,7 +128,8 @@ void IngredientComponent::InitiateDrop(std::weak_ptr<PeterPepperComponent>& play
 	else if (m_ExtraDrops >= 6)
 		points = 16000;
 		//m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, 16000);
-	m_pPlayer.lock()->AddPoints(points);
+	if(!m_pPlayer.expired())
+		m_pPlayer.lock()->AddPoints(points);
 }
 
 const bool IngredientComponent::hasDropped() const
