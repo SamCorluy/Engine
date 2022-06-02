@@ -9,7 +9,7 @@ namespace dae
 	{
 		friend std::weak_ptr<Scene> SceneManager::CreateScene(const std::string& name);
 	public:
-		void Add(const std::shared_ptr<GameObject>& object);
+		void Add(const std::shared_ptr<GameObject>& object, size_t i = 0);
 
 		void Update();
 		void StaticUpdate();
@@ -25,10 +25,11 @@ namespace dae
 		explicit Scene(const std::string& name);
 
 		std::string m_Name;
-		std::vector<std::shared_ptr<GameObject>> m_Objects{};
-		std::vector<std::shared_ptr<GameObject>> m_ObjectQueue{};
+		std::vector<std::pair<std::shared_ptr<GameObject>, size_t>> m_Objects{};
+		std::vector<std::pair<std::shared_ptr<GameObject>, size_t>> m_ObjectQueue{};
 
-		static unsigned int m_IdCounter; 
+		static unsigned int m_IdCounter;
+		bool m_ChangeOrder = false;
 	};
 
 }

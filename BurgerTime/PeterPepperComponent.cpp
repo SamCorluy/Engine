@@ -273,18 +273,25 @@ void PeterPepperComponent::Die()
 		GetOwner().lock()->Remove();
 }
 
-void PeterPepperComponent::Reset()
+void PeterPepperComponent::Reset(const std::weak_ptr<NodeComponent>& node)
 {
+	m_pStartNode = node;
 	m_Dead = false;
 	m_CanThrow = true;
 	m_ThrowingSalt = false;
 	m_MovementProcessed = false;
 	m_pCurrentNode = m_pStartNode;
+	m_ElapsedTime = 0.f;
 	glm::vec2 pos;
 	auto nodeTransform = m_pCurrentNode.lock()->GetOwner().lock()->GetTransform().GetPosition();
 	pos.x = nodeTransform.x + m_pCurrentNode.lock()->GetNodePos().first + m_pCurrentNode.lock()->GetNodeSize().first / 2.f;
 	pos.y = nodeTransform.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset;
 	GetOwner().lock()->SetPosition(pos);
+}
+
+void PeterPepperComponent::Respawn()
+{
+	Reset(m_pStartNode);
 }
 
 bool PeterPepperComponent::IsDead()

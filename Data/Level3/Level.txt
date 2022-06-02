@@ -1,0 +1,274 @@
+<identifier>	<x, y>
+<GridSize>	<9, 24>
+<TileSizeOdd>	<16, 8>
+<TileSizeEven>	<32, 8>
+<LadderAccessSize>	<4, 3>
+<PlayerOneSpawn>	<6,1>
+<PlayerTwoSpawn>	<7,1>
+<HotDogSpawn>	<0,9>
+<EggSpawn>	<8,23>
+<PickleSpawn>	<0,23>
+
+<identifier>	<x>
+<FloorOffset>	<3>
+<TileHeightVoid>	<64>
+
+<IngredientType>	<loc x, loc y>
+<BunBot>	<3,9>
+<Tomato>	<3,11>
+<Patty>	<3,13>
+<Lettuce>	<3,15>
+<Patty>	<3,17>
+<Lettuce>	<3,19>
+<Tomato>	<3,21>
+<BunTop>	<3,23>
+
+<BunBot>	<5,9>
+<Lettuce>	<5,11>
+<Tomato>	<5,13>
+<Patty>	<5,15>
+<Lettuce>	<5,17>
+<Patty>	<5,19>
+<Tomato>	<5,21>
+<BunTop>	<5,23>
+
+<loc x, loc y>	<floor, ladderAccess(Color)>
+<index 0, index 0>	<0, 0>
+<index 1, index 0>	<0, 0>
+<index 2, index 0>	<0, 0>
+<index 3, index 0>	<0, 0>
+<index 4, index 0>	<0, 0>
+<index 5, index 0>	<0, 0>
+<index 6, index 0>	<0, 0>
+<index 7, index 0>	<0, 0>
+<index 8, index 0>	<0, 0>
+
+<index 0, index 1>	<0, 0>
+<index 1, index 1>	<0, 0>
+<index 2, index 1>	<0, 0>
+<index 3, index 1>	<0, 0>
+<index 4, index 1>	<0, 0>
+<index 5, index 1>	<0, 0>
+<index 6, index 1>	<1, 1>
+<index 7, index 1>	<1, 0>
+<index 8, index 1>	<1, 1>
+
+<index 0, index 2>	<0, 0>
+<index 1, index 2>	<0, 0>
+<index 2, index 2>	<0, 0>
+<index 3, index 2>	<0, 0>
+<index 4, index 2>	<0, 0>
+<index 5, index 2>	<0, 0>
+<index 6, index 2>	<0, 1>
+<index 7, index 2>	<0, 0>
+<index 8, index 2>	<0, 1>
+
+<index 0, index 3>	<0, 0>
+<index 1, index 3>	<0, 0>
+<index 2, index 3>	<0, 0>
+<index 3, index 3>	<0, 0>
+<index 4, index 3>	<0, 0>
+<index 5, index 3>	<0, 0>
+<index 6, index 3>	<0, 1>
+<index 7, index 3>	<0, 0>
+<index 8, index 3>	<0, 1>
+
+<index 0, index 4>	<0, 0>
+<index 1, index 4>	<0, 0>
+<index 2, index 4>	<0, 0>
+<index 3, index 4>	<0, 0>
+<index 4, index 4>	<0, 0>
+<index 5, index 4>	<0, 0>
+<index 6, index 4>	<0, 1>
+<index 7, index 4>	<0, 0>
+<index 8, index 4>	<0, 1>
+
+<index 0, index 5>	<0, 0>
+<index 1, index 5>	<0, 0>
+<index 2, index 5>	<0, 0>
+<index 3, index 5>	<0, 0>
+<index 4, index 5>	<0, 0>
+<index 5, index 5>	<0, 0>
+<index 6, index 5>	<0, 1>
+<index 7, index 5>	<0, 0>
+<index 8, index 5>	<0, 1>
+
+<index 0, index 6>	<0, 0>
+<index 1, index 6>	<0, 0>
+<index 2, index 6>	<0, 0>
+<index 3, index 6>	<0, 0>
+<index 4, index 6>	<0, 0>
+<index 5, index 6>	<0, 0>
+<index 6, index 6>	<0, 1>
+<index 7, index 6>	<0, 0>
+<index 8, index 6>	<0, 1>
+
+<index 0, index 7>	<0, 0>
+<index 1, index 7>	<0, 0>
+<index 2, index 7>	<0, 0>
+<index 3, index 7>	<0, 0>
+<index 4, index 7>	<0, 0>
+<index 5, index 7>	<0, 0>
+<index 6, index 7>	<1, 1>
+<index 7, index 7>	<1, 1>
+<index 8, index 7>	<1, 1>
+
+<index 0, index 8>	<0, 0>
+<index 1, index 8>	<0, 0>
+<index 2, index 8>	<0, 0>
+<index 3, index 8>	<0, 0>
+<index 4, index 8>	<0, 0>
+<index 5, index 8>	<0, 0>
+<index 6, index 8>	<0, 0>
+<index 7, index 8>	<0, 1>
+<index 8, index 8>	<0, 1>
+
+<index 0, index 9>	<1, 1>
+<index 1, index 9>	<1, 0>
+<index 2, index 9>	<1, 0>
+<index 3, index 9>	<1, 0>
+<index 4, index 9>	<1, 0>
+<index 5, index 9>	<1, 0>
+<index 6, index 9>	<1, 1>
+<index 7, index 9>	<0, 1>
+<index 8, index 9>	<0, 1>
+
+<index 0, index 10>	<0, 1>
+<index 1, index 10>	<0, 0>
+<index 2, index 10>	<0, 0>
+<index 3, index 10>	<0, 0>
+<index 4, index 10>	<0, 0>
+<index 5, index 10>	<0, 0>
+<index 6, index 10>	<0, 1>
+<index 7, index 10>	<0, 1>
+<index 8, index 10>	<0, 1>
+
+<index 0, index 11>	<1, 1>
+<index 1, index 11>	<1, 0>
+<index 2, index 11>	<1, 0>
+<index 3, index 11>	<1, 0>
+<index 4, index 11>	<1, 0>
+<index 5, index 11>	<1, 0>
+<index 6, index 11>	<1, 1>
+<index 7, index 11>	<0, 1>
+<index 8, index 11>	<0, 1>
+
+<index 0, index 12>	<0, 1>
+<index 1, index 12>	<0, 0>
+<index 2, index 12>	<0, 0>
+<index 3, index 12>	<0, 0>
+<index 4, index 12>	<0, 0>
+<index 5, index 12>	<0, 0>
+<index 6, index 12>	<0, 1>
+<index 7, index 12>	<0, 1>
+<index 8, index 12>	<0, 1>
+
+<index 0, index 13>	<1, 1>
+<index 1, index 13>	<1, 0>
+<index 2, index 13>	<1, 1>
+<index 3, index 13>	<1, 0>
+<index 4, index 13>	<1, 0>
+<index 5, index 13>	<1, 0>
+<index 6, index 13>	<1, 1>
+<index 7, index 13>	<0, 1>
+<index 8, index 13>	<0, 1>
+
+<index 0, index 14>	<0, 1>
+<index 1, index 14>	<0, 0>
+<index 2, index 14>	<0, 1>
+<index 3, index 14>	<0, 0>
+<index 4, index 14>	<0, 0>
+<index 5, index 14>	<0, 0>
+<index 6, index 14>	<0, 0>
+<index 7, index 14>	<0, 1>
+<index 8, index 14>	<0, 1>
+
+<index 0, index 15>	<1, 1>
+<index 1, index 15>	<1, 0>
+<index 2, index 15>	<1, 1>
+<index 3, index 15>	<1, 0>
+<index 4, index 15>	<1, 0>
+<index 5, index 15>	<1, 0>
+<index 6, index 15>	<1, 1>
+<index 7, index 15>	<1, 1>
+<index 8, index 15>	<1, 1>
+
+<index 0, index 16>	<0, 1>
+<index 1, index 16>	<0, 0>
+<index 2, index 16>	<0, 0>
+<index 3, index 16>	<0, 0>
+<index 4, index 16>	<0, 0>
+<index 5, index 16>	<0, 0>
+<index 6, index 16>	<0, 1>
+<index 7, index 16>	<0, 1>
+<index 8, index 16>	<0, 1>
+
+<index 0, index 17>	<1, 1>
+<index 1, index 17>	<1, 0>
+<index 2, index 17>	<1, 0>
+<index 3, index 17>	<1, 0>
+<index 4, index 17>	<1, 0>
+<index 5, index 17>	<1, 0>
+<index 6, index 17>	<1, 1>
+<index 7, index 17>	<0, 1>
+<index 8, index 17>	<0, 1>
+
+<index 0, index 18>	<0, 1>
+<index 1, index 18>	<0, 0>
+<index 2, index 18>	<0, 0>
+<index 3, index 18>	<0, 0>
+<index 4, index 18>	<0, 0>
+<index 5, index 18>	<0, 0>
+<index 6, index 18>	<0, 0>
+<index 7, index 18>	<0, 1>
+<index 8, index 18>	<0, 1>
+
+<index 0, index 19>	<1, 1>
+<index 1, index 19>	<1, 0>
+<index 2, index 19>	<1, 0>
+<index 3, index 19>	<1, 0>
+<index 4, index 19>	<1, 1>
+<index 5, index 19>	<1, 0>
+<index 6, index 19>	<1, 1>
+<index 7, index 19>	<0, 1>
+<index 8, index 19>	<0, 1>
+
+<index 0, index 20>	<0, 0>
+<index 1, index 20>	<0, 0>
+<index 2, index 20>	<0, 0>
+<index 3, index 20>	<0, 0>
+<index 4, index 20>	<0, 1>
+<index 5, index 20>	<0, 0>
+<index 6, index 20>	<0, 1>
+<index 7, index 20>	<0, 1>
+<index 8, index 20>	<0, 1>
+
+<index 0, index 21>	<1, 1>
+<index 1, index 21>	<1, 0>
+<index 2, index 21>	<1, 0>
+<index 3, index 21>	<1, 0>
+<index 4, index 21>	<1, 1>
+<index 5, index 21>	<1, 0>
+<index 6, index 21>	<1, 1>
+<index 7, index 21>	<1, 1>
+<index 8, index 21>	<1, 1>
+
+<index 0, index 22>	<0, 1>
+<index 1, index 22>	<0, 0>
+<index 2, index 22>	<0, 0>
+<index 3, index 22>	<0, 0>
+<index 4, index 22>	<0, 0>
+<index 5, index 22>	<0, 0>
+<index 6, index 22>	<0, 0>
+<index 7, index 22>	<0, 1>
+<index 8, index 22>	<0, 1>
+
+<index 0, index 23>	<1, 1>
+<index 1, index 23>	<1, 0>
+<index 2, index 23>	<1, 0>
+<index 3, index 23>	<1, 0>
+<index 4, index 23>	<1, 0>
+<index 5, index 23>	<1, 0>
+<index 6, index 23>	<1, 0>
+<index 7, index 23>	<1, 1>
+<index 8, index 23>	<1, 1>

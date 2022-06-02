@@ -11,6 +11,7 @@ IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::sha
 	, m_pPlayer{std::shared_ptr<PeterPepperComponent>(nullptr)}
 	, m_ExtraDrops{0}
 	, m_RectSize{ 32 * scale, 8 * scale }
+	, m_PrevPlayerPos{ {0.f,0.f},{0.f,0.f} }
 {
 	//owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
 	//m_pSubject = owner->GetComponent<dae::Subject>();
@@ -155,7 +156,7 @@ void IngredientComponent::setDropped(bool dropped, std::weak_ptr<PeterPepperComp
 		InitiateDrop(player);
 }
 
-bool IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& player)
+bool IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& player, size_t idx)
 {
 	auto playerPos = player.lock()->GetOwner().lock()->GetTransform().GetPosition();
 	//std::cout << player.lock()->getNode().lock()->GetNodePos().first << " " << player.lock()->getNode().lock()->GetNodePos().first << "\n";
@@ -164,8 +165,8 @@ bool IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& play
 	{
 		for (int i = 0; i < m_pPartitions.size(); ++i)
 		{
-			if (!m_pPartitions[i].hasDropped && ((playerPos.x >= m_pPartitions[i].botLeft.x + m_RectSize.second / 2 && m_PrevPlayerPos.x < m_pPartitions[i].botLeft.x + m_RectSize.second / 2) ||
-				(playerPos.x < m_pPartitions[i].botLeft.x + m_RectSize.second / 2 && m_PrevPlayerPos.x >= m_pPartitions[i].botLeft.x + m_RectSize.second / 2)))
+			if (!m_pPartitions[i].hasDropped && ((playerPos.x >= m_pPartitions[i].botLeft.x + m_RectSize.second / 2 && m_PrevPlayerPos[idx].x < m_pPartitions[i].botLeft.x + m_RectSize.second / 2) ||
+				(playerPos.x < m_pPartitions[i].botLeft.x + m_RectSize.second / 2 && m_PrevPlayerPos[idx].x >= m_pPartitions[i].botLeft.x + m_RectSize.second / 2)))
 			{
 				auto text = GetOwner().lock()->GetComponent<dae::TextureManagerComponent>();
 				auto offset = text.lock()->getOffset(i);
@@ -179,7 +180,7 @@ bool IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& play
 			}
 		}
 	}
-	m_PrevPlayerPos = playerPos;
+	m_PrevPlayerPos[idx] = playerPos;
 	return hasDropped();
 }
 

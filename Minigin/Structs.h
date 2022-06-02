@@ -18,3 +18,17 @@ struct Rect
 		, height{ h }
 	{}
 };
+enum class IngredientType
+{
+	BunTop,
+	BunBot,
+	Patty,
+	Lettuce,
+	Cheese,
+	Tomato
+};
+struct BurgerInit
+{
+	std::pair<int, int> idx;
+	IngredientType type;
+};

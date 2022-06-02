@@ -6,20 +6,12 @@
 #include "LevelComponent.h"
 #include "PeterPepperComponent.h"
 #include <vector>
+#include "Structs.h"
 
 struct IngredientPartition
 {
 	bool hasDropped;
 	glm::vec2 botLeft;
-};
-enum class IngredientType
-{
-	BunTop,
-	BunBot,
-	Patty,
-	Lettuce,
-	Cheese,
-	Tomato
 };
 class IngredientComponent final : public dae::BaseComponent
 {
@@ -32,7 +24,7 @@ public:
 	const bool hasDropped() const;
 	void setDropped(bool dropped, std::weak_ptr<PeterPepperComponent>& player);
 	void InitiateDrop(std::weak_ptr<PeterPepperComponent>& player, int extraDrops = 0);
-	bool CheckOverlap(std::weak_ptr<PeterPepperComponent>& player);
+	bool CheckOverlap(std::weak_ptr<PeterPepperComponent>& player, size_t idx);
 	const std::weak_ptr<NodeComponent> GetNode() const;
 	const std::weak_ptr<NodeComponent> GetStartNode() const;
 	const int GetBurgerOffset() const;
@@ -47,7 +39,7 @@ private:
 	//std::weak_ptr<PeterPepperComponent> m_pPlayer;
 	std::weak_ptr<NodeComponent> m_pNode;
 	std::weak_ptr<NodeComponent> m_pStartNode;
-	glm::vec2 m_PrevPlayerPos{};
+	std::vector<glm::vec2> m_PrevPlayerPos{};
 	//const int m_TextureSize;
 	int m_TextureHeight;
 	const int m_DropHeight;

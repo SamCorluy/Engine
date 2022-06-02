@@ -85,6 +85,36 @@ const int LevelComponent::GetFloorOffset() const
 	return m_FloorOffset;
 }
 
+std::vector<std::vector<BurgerInit>> LevelComponent::GetBurgerInit() const
+{
+	return m_BurgerData;
+}
+
+const std::pair<int, int> LevelComponent::GetPlayerOneSpawn() const
+{
+	return m_PlayerOneSpawn;
+}
+
+const std::pair<int, int> LevelComponent::GetPlayerTwoSpawn() const
+{
+	return m_PlayerTwoSpawn;
+}
+
+const std::pair<int, int> LevelComponent::GetHotDogSpawn() const
+{
+	return m_HotDogSpawn;
+}
+
+const std::pair<int, int> LevelComponent::GetEggSpawn() const
+{
+	return m_EggSpawn;
+}
+
+const std::pair<int, int> LevelComponent::GetPickleSpawn() const
+{
+	return m_PickleSpawn;
+}
+
 void LevelComponent::SetNodeOffset(const glm::vec2& pos)
 {
 	for (auto node : m_Grid)
@@ -95,6 +125,17 @@ void LevelComponent::SetNodeOffset(const glm::vec2& pos)
 
 void LevelComponent::ReadFile(const std::string& filePath, int scale, const std::weak_ptr<dae::Scene>& scene)
 {
+	m_PlayerOneSpawn;
+	m_PlayerTwoSpawn;
+	m_HotDogSpawn;
+	m_EggSpawn;
+	m_PickleSpawn;
+
+	std::regex playerOneRegex{ "<PlayerOneSpawn>\\s*<(\\d*),(\\d*)>" };
+	std::regex playerTwoRegex{ "<PlayerTwoSpawn>\\s*<(\\d*),(\\d*)>" };
+	std::regex hotDogRegex{ "<HotDogSpawn>\\s*<(\\d*),(\\d*)>" };
+	std::regex eggRegex{ "<EggSpawn>\\s*<(\\d*),(\\d*)>" };
+	std::regex pickleRegex{ "<PickleSpawn>\\s*<(\\d*),(\\d*)>" };
 	std::regex gridSizeRegex{ "<GridSize>\\s*<(\\d*), (\\d*)>" };
 	std::regex oddTileSizeRegex{ "<TileSizeOdd>\\s*<(\\d*), (\\d*)>" };
 	std::regex evenTileSizeRegex{ "<TileSizeEven>\\s*<(\\d*), (\\d*)>" };
@@ -102,6 +143,10 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale, const std:
 	std::regex FloorOffsetRegex{ "<FloorOffset>\\s*<(\\d*)>" };
 	std::regex nodeRegex{ "<index (\\d*), index (\\d*)>\\s*<(\\d*), (\\d*)>" };
 	std::regex VoidTileHeightRegex{ "<TileHeightVoid>\\s*<(\\d*)>" };
+	std::regex IngredientComp{ "<(BunTop|Tomato|Patty|Cheese|Lettuce|BunBot)>\\s*<(\\d*),(\\d*)>" };
+	int idx{ 0 };
+	//std::vector<BurgerInit> initData;
+	//initData.push_back(BurgerInit{ {1,1},IngredientType::BunBot });
 	std::smatch matches{};
 	std::ifstream in{ filePath };
 	std::pair<int, int> ladderAccessSize;
@@ -113,6 +158,36 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale, const std:
 	{
 		std::string line;
 		std::getline(in, line);
+		if (std::regex_match(line, playerOneRegex))
+		{
+			std::regex_search(line, matches, playerOneRegex);
+			m_PlayerOneSpawn.first = std::stoi(matches[1]);
+			m_PlayerOneSpawn.second = std::stoi(matches[2]);
+		}
+		if (std::regex_match(line, playerTwoRegex))
+		{
+			std::regex_search(line, matches, playerTwoRegex);
+			m_PlayerTwoSpawn.first = std::stoi(matches[1]);
+			m_PlayerTwoSpawn.second = std::stoi(matches[2]);
+		}
+		if (std::regex_match(line, hotDogRegex))
+		{
+			std::regex_search(line, matches, hotDogRegex);
+			m_HotDogSpawn.first = std::stoi(matches[1]);
+			m_HotDogSpawn.second = std::stoi(matches[2]);
+		}
+		if (std::regex_match(line, pickleRegex))
+		{
+			std::regex_search(line, matches, pickleRegex);
+			m_PickleSpawn.first = std::stoi(matches[1]);
+			m_PickleSpawn.second = std::stoi(matches[2]);
+		}
+		if (std::regex_match(line, eggRegex))
+		{
+			std::regex_search(line, matches, eggRegex);
+			m_EggSpawn.first = std::stoi(matches[1]);
+			m_EggSpawn.second = std::stoi(matches[2]);
+		}
 		if (std::regex_match(line, VoidTileHeightRegex))
 		{
 			std::regex_search(line, matches, VoidTileHeightRegex);
@@ -183,6 +258,36 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale, const std:
 			auto comp = obj->GetComponent<NodeComponent>();
 			scene.lock()->Add(obj);
 			m_Grid[std::pair<int, int>(std::stoi(matches[1]), std::stoi(matches[2]))] = comp;
+		}
+		if (std::regex_match(line, IngredientComp))
+		{
+			std::regex_search(line, matches, IngredientComp);
+			BurgerInit init;
+			init.idx.first = std::stoi(matches[2]);
+			init.idx.second = std::stoi(matches[3]);
+			if(matches[1] == "BunTop")
+				init.type = IngredientType::BunTop;
+			if (matches[1] == "Tomato")
+				init.type = IngredientType::Tomato;
+			if (matches[1] == "Patty")
+				init.type = IngredientType::Patty;
+			if (matches[1] == "Cheese")
+				init.type = IngredientType::Cheese;
+			if (matches[1] == "Lettuce")
+				init.type = IngredientType::Lettuce;
+			if (matches[1] == "BunBot")
+				init.type = IngredientType::BunBot;
+			if (idx != std::stoi(matches[2]))
+			{
+				std::vector<BurgerInit> i;
+				i.push_back(init);
+				idx = std::stoi(matches[2]);
+				m_BurgerData.push_back(i);
+			}
+			else
+			{
+				m_BurgerData[m_BurgerData.size() - 1].push_back(init);
+			}
 		}
 	}
 	std::string bl("Textures/Level/BlueLadder.png");

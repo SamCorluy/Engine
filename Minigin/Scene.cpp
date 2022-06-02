@@ -1,6 +1,7 @@
 #include "MiniginPCH.h"
 #include "Scene.h"
 #include "GameObject.h"
+#include <algorithm>
 
 using namespace dae;
 
@@ -10,9 +11,10 @@ Scene::Scene(const std::string& name) : m_Name(name) {}
 
 Scene::~Scene() = default;
 
-void Scene::Add(const std::shared_ptr<GameObject>& object)
+void Scene::Add(const std::shared_ptr<GameObject>& object, size_t i)
 {
-	m_ObjectQueue.push_back(object);
+	m_ChangeOrder = true;
+	m_ObjectQueue.push_back({ object, i });
 }
 
 void Scene::Update()
@@ -22,19 +24,21 @@ void Scene::Update()
 	if(m_ObjectQueue.size() > 0)
 		m_ObjectQueue.clear();
 	for (auto& object : m_Objects)
-		object->Update();
-	m_Objects.erase(std::remove_if(m_Objects.begin(), m_Objects.end(), [](std::shared_ptr<GameObject>& object) { return object->NeedsRemoval(); }), m_Objects.end());
+		object.first->Update();
+	m_Objects.erase(std::remove_if(m_Objects.begin(), m_Objects.end(), [](std::pair<std::shared_ptr<GameObject>, size_t>& object) { return object.first->NeedsRemoval(); }), m_Objects.end());
+	if (m_ChangeOrder)
+		std::sort(m_Objects.begin(), m_Objects.end(), [](std::pair<std::shared_ptr<GameObject>, size_t>& object, std::pair<std::shared_ptr<GameObject>, size_t>& object2) { return object.second > object2.second; });
 }
 
 void dae::Scene::StaticUpdate()
 {
 	for (auto& object : m_Objects)
-		object->StaticUpdate();
+		object.first->StaticUpdate();
 }
 
 void Scene::Render() const
 {
 	for (auto& object : m_Objects)
-		object->Render();
+		object.first->Render();
 }
 

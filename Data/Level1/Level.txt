@@ -3,10 +3,40 @@
 <TileSizeOdd>	<16, 8>
 <TileSizeEven>	<32, 8>
 <LadderAccessSize>	<4, 3>
+<PlayerOneSpawn>	<2,1>
+<PlayerTwoSpawn>	<6,1>
+<HotDogSpawn>	<8,1>
+<EggSpawn>	<8,19>
+<PickleSpawn>	<0,19>
 
 <identifier>	<x>
 <FloorOffset>	<3>
 <TileHeightVoid>	<64>
+
+<IngredientType>	<loc x, loc y>
+<BunBot>	<1,1>
+<Lettuce>	<1,5>
+<Patty>	<1,11>
+<Tomato>	<1,15>
+<BunTop>	<1,19>
+
+<BunBot>	<3,1>
+<Tomato>	<3,5>
+<Patty>	<3,9>
+<Cheese>	<3,13>
+<BunTop>	<3,19>
+
+<BunBot>	<5,1>
+<Lettuce>	<5,5>
+<Cheese>	<5,9>
+<Patty>	<5,15>
+<BunTop>	<5,19>
+
+<BunBot>	<7,1>
+<Patty>	<7,7>
+<Cheese>	<7,11>
+<Patty>	<7,15>
+<BunTop>	<7,19>
 
 <loc x, loc y>	<floor, ladderAccess(Color)>
 <index 0, index 0>	<0, 0>

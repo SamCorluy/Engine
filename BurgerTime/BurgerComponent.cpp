@@ -6,7 +6,7 @@
 
 const float dropVelocity{ 100.f };
 
-BurgerComponent::BurgerComponent(const std::weak_ptr<NodeComponent> node, const std::weak_ptr<dae::Scene>& scene, std::vector<BurgerInit> burgerInit, const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level)
+BurgerComponent::BurgerComponent(const std::weak_ptr<NodeComponent> node, const std::weak_ptr<dae::Scene>& scene, std::vector<BurgerInit> burgerInit, const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level, size_t priority)
 	: BaseComponent(owner)
 	, m_RectSize{ 40 * scale, 6 * scale }
 {
@@ -16,7 +16,7 @@ BurgerComponent::BurgerComponent(const std::weak_ptr<NodeComponent> node, const 
 	{
 		auto gameObject = std::make_shared<dae::GameObject>();
 		gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(comp.idx, gameObject, scale, level, comp.type));
-		scene.lock()->Add(gameObject);
+		scene.lock()->Add(gameObject, priority);
 		m_pIngredients.push_back(gameObject->GetComponent<IngredientComponent>());
 	}
 	glm::vec2 pos;
@@ -110,4 +110,9 @@ void BurgerComponent::Render(const dae::Transform&) const
 const std::vector<std::weak_ptr<IngredientComponent>> BurgerComponent::getIngredients() const
 {
 	return m_pIngredients;
+}
+
+const bool BurgerComponent::IsComplete() const
+{
+	return m_pIngredients[m_pIngredients.size() - 1].lock()->HasReachedPlate();
 }

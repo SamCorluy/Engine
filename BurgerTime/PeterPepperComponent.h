@@ -26,7 +26,8 @@ public:
 	void Move(Action action);
 	void ThrowSalt();
 	void Die();
-	void Reset();
+	void Reset(const std::weak_ptr<NodeComponent>& node);
+	void Respawn();
 	bool IsDead();
 	bool DeathAnimationFinished();
 	const std::pair<int, int> GetRectSize() const;
@@ -35,7 +36,7 @@ private:
 	std::weak_ptr<dae::Subject> m_pSubject;
 	bool m_MovementProcessed;
 	std::weak_ptr<NodeComponent> m_pCurrentNode;
-	const std::weak_ptr<NodeComponent> m_pStartNode;
+	std::weak_ptr<NodeComponent> m_pStartNode;
 	const int m_FloorOffset;
 	const float m_SaltCooldown;
 	const float m_ThrowDuration;

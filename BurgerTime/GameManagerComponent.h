@@ -16,18 +16,34 @@ public:
 private:
 	void DeterminePathEnemies(std::vector<std::weak_ptr<EnemyComponent>>& enemies);
 	void InitSinglePlayer();
+	void InitCoop();
 	void CheckBurgerOverlap();
 	void CheckPlayerOverlap();
 	const bool CheckRectOverlap(Rect rectOne, Rect rectTwo);
+
+	//Enemy spawn functions
 	void SpawnHotDog();
 	void SpawnEgg();
 	void SpawnPickle();
+
+	//Initialize level
+	void InitLevel(size_t index);
+
+	//Handle enemies hit by falling burgers
 	void HandleFallingBurgers();
+	//Handle enemies hit by salt
 	void HandleSalt();
+	//ResetLevel
 	void Reset();
+	
+	void InitPlayer(size_t idx, size_t totalPlayers);
+
+	void NextLevel();
+
+	void InitBurgers();
 	std::weak_ptr<dae::Scene> m_pScene;
 	std::weak_ptr<LevelComponent> m_pLevel;
-	std::weak_ptr<PeterPepperComponent> m_pPlayer;
+	std::vector<std::weak_ptr<PeterPepperComponent>> m_pPlayers;
 	std::vector<std::weak_ptr<BurgerComponent>> m_pBurgers;
 	std::vector<std::weak_ptr<NodeComponent>> FindPath(std::weak_ptr<NodeComponent> start, std::weak_ptr<NodeComponent> end, std::weak_ptr<NodeComponent> prevNode);
 	std::vector<std::weak_ptr<NodeComponent>> m_TempPath;
@@ -41,5 +57,7 @@ private:
 	float m_CurrentPickleSpawnCoolDown;
 	const float m_EggSpawnCoolDown;
 	float m_currentEggSpawnCoolDown;
+	std::vector<std::string> m_LevelFolders;
+	size_t m_CurrentLevel = 0;
 };
 
