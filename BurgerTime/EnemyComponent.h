@@ -37,6 +37,11 @@ public:
 	void Stun();
 	void Kill(std::weak_ptr<PeterPepperComponent>& player);
 	const bool IsStunned() const;
+
+	const int GetFloorOffset() const;
+	void SetCurrentNode(const std::weak_ptr<NodeComponent>& node);
+	void SetDirection(Direction dir);
+	const bool IsDead() const;
 private:
 	//std::weak_ptr<dae::Subject> m_pSubject;
 	std::weak_ptr<NodeComponent> m_pCurrentNode;

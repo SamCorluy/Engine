@@ -6,13 +6,13 @@
 #include "NodeComponent.h"
 #include "SaltComponent.h"
 #include "Scene.h"
-enum class Action
-{
-	WalkingLeft,
-	WalkingRight,
-	ClimbingUp,
-	ClimbingDown
-};
+//enum class Action
+//{
+//	WalkingLeft,
+//	WalkingRight,
+//	ClimbingUp,
+//	ClimbingDown
+//};
 class PeterPepperComponent final : public dae::BaseComponent
 {
 public:
@@ -23,7 +23,8 @@ public:
 
 	const std::weak_ptr<NodeComponent> getNode() const;
 	const std::weak_ptr<SaltComponent> GetSalt() const;
-	void Move(Action action);
+	//void Move(Action action);
+	const bool IsThrowingSalt() const;
 	void ThrowSalt();
 	void Die();
 	void Reset(const std::weak_ptr<NodeComponent>& node);
@@ -32,6 +33,10 @@ public:
 	bool DeathAnimationFinished();
 	const std::pair<int, int> GetRectSize() const;
 	void AddPoints(int points);
+	const int GetFloorOffset() const;
+	void SetDirection(Direction dir);
+	void SetMovementProcessed(bool processed);
+	void SetCurrentNode(const std::weak_ptr<NodeComponent>& node);
 private:
 	std::weak_ptr<dae::Subject> m_pSubject;
 	bool m_MovementProcessed;

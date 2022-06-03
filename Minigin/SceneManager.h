@@ -16,6 +16,7 @@ namespace dae
 		void StaticUpdate();
 		void Render();
 		void SetActiveScene(const std::string& name);
+		const std::weak_ptr<Scene> GetActiveScene() const;
 
 	private:
 		friend class Singleton<SceneManager>;

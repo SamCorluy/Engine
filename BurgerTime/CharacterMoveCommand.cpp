@@ -1,14 +1,14 @@
 #include "CharacterMoveCommand.h"
 
-CharacterMoveCommand::CharacterMoveCommand(const std::weak_ptr<PeterPepperComponent>& target, const Action action)
+CharacterMoveCommand::CharacterMoveCommand(const std::weak_ptr<MovementComponent>& target, const Direction dir)
 	:BaseCommand()
 	, m_pTarget{target}
-	, m_Action{ action }
+	, m_Direction{ dir }
 {
 }
 
 void CharacterMoveCommand::Execute()
 {
 	if(!m_pTarget.expired())
-		m_pTarget.lock()->Move(m_Action);
+		m_pTarget.lock()->Move(m_Direction);
 }

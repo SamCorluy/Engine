@@ -22,6 +22,11 @@ void dae::SceneManager::SetActiveScene(const std::string& name)
 	m_pActiveScene = m_Scenes[name];
 }
 
+const std::weak_ptr<dae::Scene> dae::SceneManager::GetActiveScene() const
+{
+	return m_pActiveScene;
+}
+
 std::weak_ptr<dae::Scene> dae::SceneManager::CreateScene(const std::string& name)
 {
 	const auto scene = std::shared_ptr<Scene>(new Scene(name));
@@ -30,3 +35,4 @@ std::weak_ptr<dae::Scene> dae::SceneManager::CreateScene(const std::string& name
 		m_pActiveScene = scene;
 	return scene;
 }
+

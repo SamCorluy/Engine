@@ -5,6 +5,14 @@
 #include "EnemyComponent.h"
 #include "Structs.h"
 #include "PointsObserver.h"
+#include "HealthComponent.h"
+#include "SaltDisplayComponent.h"
+enum class GameModes
+{
+	SINGLEPLAYER,
+	COOP,
+	PVP
+};
 class GameManagerComponent final : public dae::BaseComponent
 {
 public:
@@ -41,6 +49,18 @@ private:
 	void NextLevel();
 
 	void InitBurgers();
+
+	void SpawnPlayerControlledHotDog();
+
+	void EndGame();
+
+	void ClearEnemies();
+
+	void ClearLevel();
+
+	void ClearBurgers();
+
+	void ClearPlayers();
 	std::weak_ptr<dae::Scene> m_pScene;
 	std::weak_ptr<LevelComponent> m_pLevel;
 	std::vector<std::weak_ptr<PeterPepperComponent>> m_pPlayers;
@@ -50,6 +70,9 @@ private:
 	std::vector<std::weak_ptr<EnemyComponent>> m_pHotDogs;
 	std::vector<std::weak_ptr<EnemyComponent>> m_pEggs;
 	std::vector<std::weak_ptr<EnemyComponent>> m_pPickles;
+	std::weak_ptr<EnemyComponent> m_pPlayerControlledEnemy;
+	std::vector<std::weak_ptr<CounterComponent>> m_pScoreComponents;
+	std::vector<std::pair<std::weak_ptr<HealthComponent>, std::weak_ptr<SaltDisplayComponent>>> m_pHudElements;
 	//std::shared_ptr<PointsObserver> m_pPointsObserver;
 	const float m_HotDogSpawnCoolDown;
 	float m_CurrentHotDogSpawnCoolDown;

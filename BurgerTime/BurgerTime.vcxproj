@@ -169,6 +169,9 @@
     <ClCompile Include="IngredientComponent.cpp" />
     <ClCompile Include="LevelComponent.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MenuCommand.cpp" />
+    <ClCompile Include="MenuComponent.cpp" />
+    <ClCompile Include="MovementComponent.cpp" />
     <ClCompile Include="NodeComponent.cpp" />
     <ClCompile Include="PeterPepperComponent.cpp" />
     <ClCompile Include="PointsObserver.cpp" />
@@ -187,6 +190,9 @@
     <ClInclude Include="HealthObserver.h" />
     <ClInclude Include="IngredientComponent.h" />
     <ClInclude Include="LevelComponent.h" />
+    <ClInclude Include="MenuCommand.h" />
+    <ClInclude Include="MenuComponent.h" />
+    <ClInclude Include="MovementComponent.h" />
     <ClInclude Include="NodeComponent.h" />
     <ClInclude Include="PeterPepperComponent.h" />
     <ClInclude Include="PointsObserver.h" />

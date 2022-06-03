@@ -4,6 +4,7 @@
 #include<vector>
 #include <iostream>
 #include "ElapsedTime.h"
+#include "MovementComponent.h"
 
 EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, std::string textFolder, AnimDurationInit animDurationInit, int points)
 	:BaseComponent(owner)
@@ -88,7 +89,7 @@ void EnemyComponent::Update()
 			}
 		}
 	}
-	if (m_Stunned || m_pTargetNode.expired())
+	if (m_Stunned || m_pTargetNode.expired() || !GetOwner().lock()->GetComponent<MovementComponent>().expired())
 		return;
 
 	auto levelPos = m_pCurrentNode.lock()->GetOwner().lock()->GetTransform().GetPosition();
@@ -274,4 +275,24 @@ void EnemyComponent::Kill(std::weak_ptr<PeterPepperComponent>& player)
 const bool EnemyComponent::IsStunned() const
 {
 	return m_Stunned;
+}
+
+const int EnemyComponent::GetFloorOffset() const
+{
+	return m_FloorOffset;
+}
+
+void EnemyComponent::SetCurrentNode(const std::weak_ptr<NodeComponent>& node)
+{
+	m_pCurrentNode = node;
+}
+
+void EnemyComponent::SetDirection(Direction dir)
+{
+	m_Direction = dir;
+}
+
+const bool EnemyComponent::IsDead() const
+{
+	return m_Dead;
 }

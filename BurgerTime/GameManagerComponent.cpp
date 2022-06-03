@@ -6,11 +6,10 @@
 #include <queue>
 #include <iostream>
 #include "ElapsedTime.h"
-#include "HealthComponent.h"
 #include "HealthObserver.h"
-#include "SaltDisplayComponent.h"
 #include "SaltObserver.h"
 #include "ResourceManager.h"
+#include "MovementComponent.h"
 
 GameManagerComponent::GameManagerComponent(const std::shared_ptr<dae::GameObject> owner, const std::weak_ptr<dae::Scene>& scene)
 	: BaseComponent(owner)
@@ -22,17 +21,26 @@ GameManagerComponent::GameManagerComponent(const std::shared_ptr<dae::GameObject
 	, m_EggSpawnCoolDown{ 15.f }
 	, m_currentEggSpawnCoolDown{ m_EggSpawnCoolDown }
 	, m_pPlayers{ std::shared_ptr<PeterPepperComponent>(nullptr), std::shared_ptr<PeterPepperComponent>(nullptr) }
+	, m_pPlayerControlledEnemy{ std::shared_ptr<EnemyComponent>(nullptr) }
+	, m_pScoreComponents{std::shared_ptr<CounterComponent>(nullptr), std::shared_ptr<CounterComponent>(nullptr)}
+	, m_pHudElements{ std::make_pair(std::shared_ptr<HealthComponent>(nullptr), std::shared_ptr<SaltDisplayComponent>(nullptr)),std::make_pair(std::shared_ptr<HealthComponent>(nullptr), std::shared_ptr<SaltDisplayComponent>(nullptr)) }
 {
 	m_LevelFolders.push_back("Level1");
 	m_LevelFolders.push_back("Level2");
 	m_LevelFolders.push_back("Level3");
 	InitLevel(0);
 	//InitCoop();
+	SpawnPlayerControlledHotDog();
 	InitSinglePlayer();
 }
 
 void GameManagerComponent::Update()
 {
+	if (m_pPlayers[0].expired() && m_pPlayers[1].expired())
+	{
+		EndGame();
+		return;
+	}
 	if (!m_pPlayers[0].expired() && m_pPlayers[0].lock()->IsDead())
 	{
 		if (m_pPlayers[0].lock()->DeathAnimationFinished())
@@ -325,12 +333,7 @@ void GameManagerComponent::SpawnPickle()
 
 void GameManagerComponent::InitLevel(size_t index)
 {
-	if (!m_pLevel.expired())
-	{
-		for (auto node : m_pLevel.lock()->GetGrid())
-			node.second.lock()->GetOwner().lock()->Remove();
-		m_pLevel.lock()->GetOwner().lock()->Remove();
-	}
+	ClearLevel();
 	auto levelObject = std::make_shared<dae::GameObject>();
 	levelObject->AddComponent<LevelComponent>(std::make_shared<LevelComponent>(levelObject, "../Data/" + m_LevelFolders[index] + "/Level.txt", 3, m_pScene));
 	//Adding level to scene
@@ -447,18 +450,7 @@ void GameManagerComponent::HandleSalt()
 
 void GameManagerComponent::Reset()
 {
-	for (auto egg : m_pEggs)
-		if(!egg.expired())
-			egg.lock()->GetOwner().lock()->Remove();
-	m_pEggs.clear();
-	for (auto hotDog : m_pHotDogs)
-		if (!hotDog.expired())
-			hotDog.lock()->GetOwner().lock()->Remove();
-	m_pHotDogs.clear();
-	for (auto pickle : m_pPickles)
-		if (!pickle.expired())
-			pickle.lock()->GetOwner().lock()->Remove();
-	m_pPickles.clear();
+	ClearEnemies();
 
 	m_pPlayers[0].lock()->Respawn();
 }
@@ -477,38 +469,42 @@ void GameManagerComponent::InitPlayer(size_t idx, size_t totalPlayers)
 	scoreObject->AddComponent<CounterComponent>(std::make_shared<CounterComponent>(scoreObject, font, 0));
 	scoreObject->SetPosition(idx * offset + 0.f, 10.f);
 	m_pScene.lock()->Add(scoreObject);
+	m_pScoreComponents[idx] = scoreObject->GetComponent<CounterComponent>();
 	//m_pPointsObserver = std::make_shared<PointsObserver>(scoreObject->GetComponent<CounterComponent>());
 
 	auto healthObject = std::make_shared<dae::GameObject>();
-	healthObject->AddComponent<HealthComponent>(std::make_shared<HealthComponent>(healthObject, 3, 5));
+	healthObject->AddComponent<HealthComponent>(std::make_shared<HealthComponent>(healthObject, 3, 1));
 	healthObject->SetPosition(idx * offset + 10.f, 10.f);
 	m_pScene.lock()->Add(healthObject);
+	m_pHudElements[idx].first = healthObject->GetComponent<HealthComponent>();
 
 	auto saltObject = std::make_shared<dae::GameObject>();
 	saltObject->AddComponent<SaltDisplayComponent>(std::make_shared<SaltDisplayComponent>(saltObject, 3, 5));
 	saltObject->SetPosition(idx * offset + 150.f, 10.f);
 	m_pScene.lock()->Add(saltObject);
+	m_pHudElements[idx].second = saltObject->GetComponent<SaltDisplayComponent>();
 
 	auto playerObject = std::make_shared<dae::GameObject>();
-	playerObject->AddComponent<PeterPepperComponent>(std::make_shared<PeterPepperComponent>(playerObject, 3, startNode, m_pLevel.lock()->GetFloorOffset(), m_pScene, 5));
+	playerObject->AddComponent<PeterPepperComponent>(std::make_shared<PeterPepperComponent>(playerObject, 3, startNode, m_pLevel.lock()->GetFloorOffset(), m_pScene, 1));
+	playerObject->AddComponent<MovementComponent>(std::make_shared<MovementComponent>(playerObject));
 	playerObject->GetComponent<dae::Subject>().lock()->AddObserver(std::make_shared<HealthObserver>(healthObject->GetComponent<HealthComponent>()));
 	playerObject->GetComponent<dae::Subject>().lock()->AddObserver(std::make_shared<SaltObserver>(saltObject->GetComponent<SaltDisplayComponent>()));
 	playerObject->GetComponent<dae::Subject>().lock()->AddObserver(std::make_shared<PointsObserver>(scoreObject->GetComponent<CounterComponent>()));
 	m_pPlayers[idx] = playerObject->GetComponent<PeterPepperComponent>();
 	if (idx == 0)
 	{
-		dae::InputManager::GetInstance().AddKeyboardInput('w', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx], Action::ClimbingUp));
-		dae::InputManager::GetInstance().AddKeyboardInput('s', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx], Action::ClimbingDown));
-		dae::InputManager::GetInstance().AddKeyboardInput('a', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx], Action::WalkingLeft));
-		dae::InputManager::GetInstance().AddKeyboardInput('d', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx], Action::WalkingRight));
+		dae::InputManager::GetInstance().AddKeyboardInput('w', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::UP));
+		dae::InputManager::GetInstance().AddKeyboardInput('s', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::DOWN));
+		dae::InputManager::GetInstance().AddKeyboardInput('a', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::LEFT));
+		dae::InputManager::GetInstance().AddKeyboardInput('d', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::RIGHT));
 		dae::InputManager::GetInstance().AddKeyboardInput('e', dae::InputType::Hold, std::make_shared<ThrowSaltCommand>(m_pPlayers[idx]));
 	}
 	if ((idx == 0 && totalPlayers == 1) || idx == 1)
 	{
-		dae::InputManager::GetInstance().AddControllerInput(0x5820, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx], Action::ClimbingUp));
-		dae::InputManager::GetInstance().AddControllerInput(0x5821, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx], Action::ClimbingDown));
-		dae::InputManager::GetInstance().AddControllerInput(0x5823, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx], Action::WalkingLeft));
-		dae::InputManager::GetInstance().AddControllerInput(0x5822, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx], Action::WalkingRight));
+		dae::InputManager::GetInstance().AddControllerInput(0x5820, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::UP));
+		dae::InputManager::GetInstance().AddControllerInput(0x5821, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::DOWN));
+		dae::InputManager::GetInstance().AddControllerInput(0x5823, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::LEFT));
+		dae::InputManager::GetInstance().AddControllerInput(0x5822, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::RIGHT));
 	}
 	m_pScene.lock()->Add(playerObject);
 }
@@ -520,7 +516,58 @@ void GameManagerComponent::NextLevel()
 	InitLevel(m_CurrentLevel);
 	InitBurgers();
 
+	ClearEnemies();
+
 	auto grid = m_pLevel.lock()->GetGrid();
+	m_pPlayers[0].lock()->Reset(grid[m_pLevel.lock()->GetPlayerOneSpawn()]);
+}
+
+void GameManagerComponent::InitBurgers()
+{
+	ClearBurgers();
+	auto grid = m_pLevel.lock()->GetGrid();
+	for (auto initData : m_pLevel.lock()->GetBurgerInit())
+	{
+		auto startNode = grid[{initData[0].idx.first, 0}];
+		auto burgerObj = std::make_shared<dae::GameObject>();
+		burgerObj->AddComponent<BurgerComponent>(std::make_shared<BurgerComponent>(startNode, m_pScene, initData, burgerObj, 3, m_pLevel, 2));
+		m_pBurgers.push_back(burgerObj->GetComponent<BurgerComponent>());
+		m_pScene.lock()->Add(burgerObj, 2);
+	}
+}
+
+void GameManagerComponent::SpawnPlayerControlledHotDog()
+{
+	m_CurrentHotDogSpawnCoolDown = m_HotDogSpawnCoolDown;
+	auto grid = m_pLevel.lock()->GetGrid();
+	auto startNode = grid[m_pLevel.lock()->GetHotDogSpawn()];
+	AnimDurationInit animInit(0.25f, 0.25f, 0.25f, 0.5f, 0.3f);
+	auto obj = std::make_shared<dae::GameObject>();
+	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/HotDog", animInit, 100));
+	obj->AddComponent<MovementComponent>(std::make_shared<MovementComponent>(obj));
+	//obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
+	m_pScene.lock()->Add(obj);
+	m_pPlayerControlledEnemy = obj->GetComponent<EnemyComponent>();
+	dae::InputManager::GetInstance().AddKeyboardInput('w', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::UP));
+	dae::InputManager::GetInstance().AddKeyboardInput('s', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::DOWN));
+	dae::InputManager::GetInstance().AddKeyboardInput('a', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::LEFT));
+	dae::InputManager::GetInstance().AddKeyboardInput('d', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::RIGHT));
+}
+
+void GameManagerComponent::EndGame()
+{
+	ClearEnemies();
+	ClearLevel();
+	ClearBurgers();
+	ClearPlayers();
+
+	GetOwner().lock()->Remove();
+
+	dae::SceneManager::GetInstance().SetActiveScene("Menu");
+}
+
+void GameManagerComponent::ClearEnemies()
+{
 	for (auto egg : m_pEggs)
 		if (!egg.expired())
 			egg.lock()->GetOwner().lock()->Remove();
@@ -533,27 +580,48 @@ void GameManagerComponent::NextLevel()
 		if (!pickle.expired())
 			pickle.lock()->GetOwner().lock()->Remove();
 	m_pPickles.clear();
-
-	m_pPlayers[0].lock()->Reset(grid[m_pLevel.lock()->GetPlayerOneSpawn()]);
+	if (!m_pPlayerControlledEnemy.expired())
+		m_pPlayerControlledEnemy.lock()->GetOwner().lock()->Remove();
 }
 
-void GameManagerComponent::InitBurgers()
+void GameManagerComponent::ClearLevel()
+{
+	if (!m_pLevel.expired())
+	{
+		for (auto node : m_pLevel.lock()->GetGrid())
+			node.second.lock()->GetOwner().lock()->Remove();
+		m_pLevel.lock()->GetOwner().lock()->Remove();
+	}
+}
+
+void GameManagerComponent::ClearBurgers()
 {
 	for (auto burger : m_pBurgers)
 	{
-		for (auto ingredient : burger.lock()->getIngredients())
-			ingredient.lock()->GetOwner().lock()->Remove();
-		burger.lock()->GetOwner().lock()->Remove();
+		if (!burger.expired()) {
+			for (auto ingredient : burger.lock()->getIngredients())
+				if (!ingredient.expired())
+					ingredient.lock()->GetOwner().lock()->Remove();
+			burger.lock()->GetOwner().lock()->Remove();
+		}
 	}
 	m_pBurgers.clear();
-	auto grid = m_pLevel.lock()->GetGrid();
-	for (auto initData : m_pLevel.lock()->GetBurgerInit())
+}
+
+void GameManagerComponent::ClearPlayers()
+{
+	for (auto player : m_pPlayers)
+		if (!player.expired())
+			player.lock()->GetOwner().lock()->Remove();
+	for (auto comp : m_pScoreComponents)
+		if (!comp.expired())
+			comp.lock()->GetOwner().lock()->Remove();
+	for (auto comp : m_pHudElements)
 	{
-		auto startNode = grid[{initData[0].idx.first, 0}];
-		auto burgerObj = std::make_shared<dae::GameObject>();
-		burgerObj->AddComponent<BurgerComponent>(std::make_shared<BurgerComponent>(startNode, m_pScene, initData, burgerObj, 3, m_pLevel, 2));
-		m_pBurgers.push_back(burgerObj->GetComponent<BurgerComponent>());
-		m_pScene.lock()->Add(burgerObj, 2);
+		if (!comp.first.expired())
+			comp.first.lock()->GetOwner().lock()->Remove();
+		if (!comp.second.expired())
+			comp.second.lock()->GetOwner().lock()->Remove();
 	}
 }
 
