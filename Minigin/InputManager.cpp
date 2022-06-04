@@ -13,6 +13,7 @@ class dae::InputManager::Impl
 	std::map < SDL_Keycode,std::pair<bool, bool>> m_KeyQueue;
 	std::map <WORD,std::pair<bool, bool>> m_ButtonQueue;
 	XINPUT_KEYSTROKE m_CurrentState{};
+	bool m_Reset{ false };
 public:
 	Impl()
 	{
@@ -21,13 +22,16 @@ public:
 
 	bool ProcessInput()
 	{
+		for (auto key : m_KeyQueue)
+			m_KeyQueue[key.first].second = true;
 		SDL_Event e;
 		std::vector<SDL_Keycode> toRemove;
 		while (SDL_PollEvent(&e)) {
 			switch (e.type)
 			{
 			case SDL_KEYDOWN:
-				m_KeyQueue[e.key.keysym.sym] = std::pair<bool, bool>(true, (bool)e.key.repeat);
+				if (m_KeyQueue.find(e.key.keysym.sym) == m_KeyQueue.end())
+					m_KeyQueue[e.key.keysym.sym] = std::pair<bool, bool>(true, false);
 				break;
 			case SDL_KEYUP:
 				m_KeyQueue[e.key.keysym.sym] = std::pair<bool, bool>(false, (bool)e.key.repeat);
@@ -69,7 +73,7 @@ public:
 					switch (input.type)
 					{
 					case InputType::Hold:
-						if (key.second.first)
+						if (key.second.first && key.second.second)
 							for (auto com : commands)
 								com->Execute();
 						break;
@@ -133,7 +137,7 @@ public:
 		i.input = input;
 		i.type = type;
 		i.isController = true;
-		m_Commands[i].push_back(command);
+		m_Commands[{input, true, type}].push_back(command);
 	}
 
 	void AddKeyboardInput(int input, InputType type, const std::shared_ptr<BaseCommand>& command)
@@ -142,7 +146,12 @@ public:
 		i.input = input;
 		i.type = type;
 		i.isController = false;
-		m_Commands[i].push_back(command);
+		m_Commands[{input, false, type}].push_back(command);
+	}
+
+	void RemoveKeys()
+	{
+		m_Commands.clear();
 	}
 };
 
@@ -164,6 +173,11 @@ dae::InputManager::InputManager()
 dae::InputManager::~InputManager()
 {
 	delete m_pImpl;
+}
+
+void dae::InputManager::RemoveKeys()
+{
+	m_pImpl->RemoveKeys();
 }
 
 bool dae::InputManager::ProcessInput()

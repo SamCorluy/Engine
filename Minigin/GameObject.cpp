@@ -24,7 +24,7 @@ void dae::GameObject::StaticUpdate()
 glm::vec2 dae::GameObject::GetPosition() const
 {
 	glm::vec2 pos{ m_Transform.GetPosition().x, m_Transform.GetPosition().y };
-	return glm::vec2();
+	return pos;
 }
 
 void dae::GameObject::SetPosition(float x, float y)

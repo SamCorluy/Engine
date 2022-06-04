@@ -11,7 +11,9 @@ dae::TextComponent::TextComponent(const std::shared_ptr<GameObject>& owner, cons
 	m_Text(text),
 	m_Font(font),
 	m_TextTexture(nullptr)
-{ }
+{
+	Update();
+}
 
 dae::TextComponent::TextComponent(const std::shared_ptr<GameObject>& owner)
 	:BaseComponent(owner),
@@ -20,6 +22,7 @@ dae::TextComponent::TextComponent(const std::shared_ptr<GameObject>& owner)
 	m_Font(),
 	m_TextTexture(nullptr)
 {
+	Update();
 }
 
 void dae::TextComponent::StaticUpdate()
@@ -52,7 +55,12 @@ void dae::TextComponent::Render(const Transform& pos) const
 	auto position = pos.GetPosition();
 	if (m_TextTexture != nullptr)
 	{
-		Renderer::GetInstance().RenderTexture(*m_TextTexture, position.x, position.y, false);
+		auto window = Renderer::GetInstance().GetWindow();
+		int windowHeight;
+		SDL_GetWindowSize(window, nullptr, &windowHeight);
+		int height;
+		SDL_QueryTexture(m_TextTexture->GetSDLTexture(), NULL, NULL, nullptr, &height);
+		Renderer::GetInstance().RenderTexture(*m_TextTexture, position.x, windowHeight - (position.y + height), false);
 	}
 }
 
@@ -67,6 +75,13 @@ void dae::TextComponent::SetFont(const std::shared_ptr<Font>& font)
 {
 	m_Font = font;
 	m_NeedsUpdate = true;
+}
+
+std::pair<int, int> dae::TextComponent::GetTextSize()
+{
+	int width, height;
+	SDL_QueryTexture(m_TextTexture->GetSDLTexture(), NULL, NULL, &width, &height);
+	return {width, height};
 }
 
 

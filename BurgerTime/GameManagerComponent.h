@@ -16,7 +16,7 @@ enum class GameModes
 class GameManagerComponent final : public dae::BaseComponent
 {
 public:
-	GameManagerComponent(const std::shared_ptr<dae::GameObject> owner, const std::weak_ptr<dae::Scene>& scene);
+	GameManagerComponent(const std::shared_ptr<dae::GameObject> owner, const std::weak_ptr<dae::Scene>& scene, GameModes gameMode);
 
 	void Update() override;
 	void StaticUpdate() override;
@@ -25,6 +25,7 @@ private:
 	void DeterminePathEnemies(std::vector<std::weak_ptr<EnemyComponent>>& enemies);
 	void InitSinglePlayer();
 	void InitCoop();
+	void InitPvp();
 	void CheckBurgerOverlap();
 	void CheckPlayerOverlap();
 	const bool CheckRectOverlap(Rect rectOne, Rect rectTwo);

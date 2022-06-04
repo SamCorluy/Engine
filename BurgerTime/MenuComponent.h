@@ -2,6 +2,7 @@
 #include "BaseComponent.h"
 #include "Scene.h"
 #include "GameManagerComponent.h"
+#include "TextureManagerComponent.h"
 class MenuComponent final : public dae::BaseComponent
 {
 public:
@@ -11,10 +12,21 @@ public:
 	void StaticUpdate() override;
 	void Render(const dae::Transform& pos) const override;
 
-	void SelectGameMode(GameModes gameMode);
+	void SelectGameMode();
+	void MoveUp();
+	void MoveDown();
+	void InitMenu();
 private:
 	std::weak_ptr<dae::Scene> m_pScene;
 	std::weak_ptr<dae::Scene> m_pGameScene;
+	std::weak_ptr<dae::Scene> m_pActiveScene;
 	std::weak_ptr<GameManagerComponent> m_pGame;
+
+	std::weak_ptr<dae::TextComponent> m_pSinglePlayer;
+	std::weak_ptr<dae::TextComponent> m_pCoop;
+	std::weak_ptr<dae::TextComponent> m_pPVP;
+
+	std::weak_ptr<dae::TextureManagerComponent> m_pSelector;
+	GameModes m_CurrentGameMode;
 };
 

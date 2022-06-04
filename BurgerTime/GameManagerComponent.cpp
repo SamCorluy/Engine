@@ -11,7 +11,7 @@
 #include "ResourceManager.h"
 #include "MovementComponent.h"
 
-GameManagerComponent::GameManagerComponent(const std::shared_ptr<dae::GameObject> owner, const std::weak_ptr<dae::Scene>& scene)
+GameManagerComponent::GameManagerComponent(const std::shared_ptr<dae::GameObject> owner, const std::weak_ptr<dae::Scene>& scene, GameModes gameMode)
 	: BaseComponent(owner)
 	, m_pScene{scene}
 	, m_HotDogSpawnCoolDown{8.f}
@@ -30,8 +30,12 @@ GameManagerComponent::GameManagerComponent(const std::shared_ptr<dae::GameObject
 	m_LevelFolders.push_back("Level3");
 	InitLevel(0);
 	//InitCoop();
-	SpawnPlayerControlledHotDog();
-	InitSinglePlayer();
+	if(gameMode == GameModes::SINGLEPLAYER)
+		InitSinglePlayer();
+	if (gameMode == GameModes::COOP)
+		InitCoop();
+	if (gameMode == GameModes::PVP)
+		InitPvp();
 }
 
 void GameManagerComponent::Update()
@@ -162,6 +166,17 @@ void GameManagerComponent::InitCoop()
 	SpawnPickle();
 
 	InitBurgers();
+}
+
+void GameManagerComponent::InitPvp()
+{
+	InitPlayer(0, 2);
+	SpawnHotDog();
+	SpawnEgg();
+	SpawnPickle();
+
+	InitBurgers();
+	SpawnPlayerControlledHotDog();
 }
 
 void GameManagerComponent::CheckBurgerOverlap()
@@ -563,6 +578,7 @@ void GameManagerComponent::EndGame()
 
 	GetOwner().lock()->Remove();
 
+	dae::InputManager::GetInstance().RemoveKeys();
 	dae::SceneManager::GetInstance().SetActiveScene("Menu");
 }
 

@@ -6,9 +6,9 @@ namespace dae
 {
 	enum class InputType
 	{
-		Press,
-		Release,
-		Hold
+		Press = 0,
+		Release = 1,
+		Hold = 2
 	};
 	struct Input
 	{
@@ -17,12 +17,12 @@ namespace dae
 		InputType type;
 		bool operator< (const Input& comp) const
 		{
-			return input < comp.input;
+			return input < comp.input || input == comp.input && type < comp.type;
 		}
 
 		bool operator> (const Input& comp) const
 		{
-			return input > comp.input;
+			return input > comp.input || input == comp.input && type > comp.type;
 		}
 
 		bool operator== (const Input& comp) const
@@ -41,6 +41,7 @@ namespace dae
 		bool ProcessInput();
 		void AddControllerInput(int input, InputType type, const  std::shared_ptr<BaseCommand>& command);
 		void AddKeyboardInput(int input, InputType type, const  std::shared_ptr<BaseCommand>& command);
+		void RemoveKeys();
 		//bool checkButtons(ControllerButton button, XINPUT_STATE toCheck, XINPUT_STATE toCompare) const;
 	};
 }
