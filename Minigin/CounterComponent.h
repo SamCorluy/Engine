@@ -12,7 +12,9 @@ public:
 	void StaticUpdate() override;
 	void Render(const dae::Transform& pos) const override;
 	void SetCounter(int value);
+	const int GetValue() const;
 private:
 	std::weak_ptr<dae::TextComponent> m_pTextComp;
+	int m_Value;
 };
 

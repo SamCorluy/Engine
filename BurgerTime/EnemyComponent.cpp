@@ -6,7 +6,7 @@
 #include "ElapsedTime.h"
 #include "MovementComponent.h"
 
-EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, std::string textFolder, AnimDurationInit animDurationInit, int points)
+EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, std::string textFolder, AnimDurationInit animDurationInit, int points, float ladderChance)
 	:BaseComponent(owner)
 	, m_pCurrentNode{ node }
 	, m_pPrevNode{ node }
@@ -19,6 +19,7 @@ EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, in
 	, m_Dead{false}
 	, m_Points{points}
 	, m_ElapsedTime{0}
+	, m_ChanceToTakeLadder{ladderChance}
 {
 	// Initialize subject
 	//owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
@@ -52,6 +53,12 @@ EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, in
 
 void EnemyComponent::Update()
 {
+	if (!m_HasSpawned)
+	{
+		m_ElapsedTime += ElapsedTime::GetInstance().GetElapsedTime();
+		if (m_ElapsedTime >= m_SpawnTime)
+			m_HasSpawned = true;
+	}
 	if (m_Dead)
 	{
 		m_ElapsedTime += ElapsedTime::GetInstance().GetElapsedTime();
@@ -98,7 +105,7 @@ void EnemyComponent::Update()
 	{
 		if (pos.x == levelPos.x + m_pTargetNode.lock()->GetNodePos().first + m_pTargetNode.lock()->GetNodeSize().first / 2)
 			return;
-		pos.x -= 100.f * ElapsedTime::GetInstance().GetElapsedTime();
+		pos.x -= 85.f * ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.x < levelPos.x + m_pCurrentNode.lock()->GetNodePos().first)
 		{
 			m_pCurrentNode = m_pTargetNode;
@@ -114,7 +121,7 @@ void EnemyComponent::Update()
 	{
 		if (pos.x == levelPos.x + m_pTargetNode.lock()->GetNodePos().first + m_pTargetNode.lock()->GetNodeSize().first / 2)
 			return;
-		pos.x += 100.f * ElapsedTime::GetInstance().GetElapsedTime();
+		pos.x += 85.f * ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.x > levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + m_pCurrentNode.lock()->GetNodeSize().first)
 		{
 			m_pCurrentNode = m_pTargetNode;
@@ -130,7 +137,7 @@ void EnemyComponent::Update()
 	{
 		if (pos.y == levelPos.y + m_pTargetNode.lock()->GetNodePos().second + m_FloorOffset)
 			return;
-		pos.y += 100.f * ElapsedTime::GetInstance().GetElapsedTime();
+		pos.y += 85.f * ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.y > levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_pCurrentNode.lock()->GetNodeSize().second)
 		{
 			m_pCurrentNode = m_pTargetNode;
@@ -146,7 +153,7 @@ void EnemyComponent::Update()
 	{
 		if (pos.y == levelPos.y + m_pTargetNode.lock()->GetNodePos().second + m_FloorOffset)
 			return;
-		pos.y -= 100.f * ElapsedTime::GetInstance().GetElapsedTime();
+		pos.y -= 85.f * ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.y < levelPos.y + m_pCurrentNode.lock()->GetNodePos().second)
 		{
 			m_pPrevNode = m_pTargetNode.lock()->GetConnection(Direction::UP);
@@ -187,10 +194,9 @@ void EnemyComponent::Move(std::weak_ptr<NodeComponent> targetNode)
 		((!m_pCurrentNode.lock()->GetConnection(Direction::UP).expired() && m_pCurrentNode.lock()->GetConnection(Direction::UP).lock() != m_pPrevNode.lock())
 			||(!m_pCurrentNode.lock()->GetConnection(Direction::DOWN).expired() && m_pCurrentNode.lock()->GetConnection(Direction::DOWN).lock() != m_pPrevNode.lock())))
 	{
-		int chance = 90;
 		int percentage = rand()%101;
 		//std::cout << percentage << "\n";
-		if (chance >= percentage)
+		if (m_ChanceToTakeLadder >= percentage)
 		{
 			if (m_pCurrentNode.lock()->GetConnection(Direction::UP).expired() || m_pCurrentNode.lock()->GetConnection(Direction::UP).lock() == m_pPrevNode.lock())
 				m_pTargetNode = m_pCurrentNode.lock()->GetConnection(Direction::DOWN).lock();
@@ -254,6 +260,7 @@ void EnemyComponent::Stun()
 {
 	if (m_Dead)
 		return;
+	m_HasSpawned = true;
 	m_Stunned = true;
 	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
 	comp.lock()->SetActiveAnimation(3);
@@ -267,6 +274,7 @@ void EnemyComponent::Kill(std::weak_ptr<PeterPepperComponent>& player)
 	if(!player.expired())
 		player.lock()->AddPoints(m_Points);
 	m_Dead = true;
+	m_HasSpawned = true;
 	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
 	comp.lock()->SetActiveAnimation(4);
 	m_ElapsedTime = 0.f;
@@ -295,4 +303,9 @@ void EnemyComponent::SetDirection(Direction dir)
 const bool EnemyComponent::IsDead() const
 {
 	return m_Dead;
+}
+
+const bool EnemyComponent::HasSpawned() const
+{
+	return m_HasSpawned;
 }

@@ -16,7 +16,7 @@ enum class GameModes
 class GameManagerComponent final : public dae::BaseComponent
 {
 public:
-	GameManagerComponent(const std::shared_ptr<dae::GameObject> owner, const std::weak_ptr<dae::Scene>& scene, GameModes gameMode);
+	GameManagerComponent(const std::shared_ptr<dae::GameObject> owner, const std::weak_ptr<dae::Scene>& scene, const std::weak_ptr<dae::Scene>& hsScene, GameModes gameMode);
 
 	void Update() override;
 	void StaticUpdate() override;
@@ -62,12 +62,14 @@ private:
 	void ClearBurgers();
 
 	void ClearPlayers();
+	void HandleEnemyRespawns();
 	std::weak_ptr<dae::Scene> m_pScene;
+	std::weak_ptr<dae::Scene> m_pHighscoreScene;
 	std::weak_ptr<LevelComponent> m_pLevel;
 	std::vector<std::weak_ptr<PeterPepperComponent>> m_pPlayers;
 	std::vector<std::weak_ptr<BurgerComponent>> m_pBurgers;
 	std::vector<std::weak_ptr<NodeComponent>> FindPath(std::weak_ptr<NodeComponent> start, std::weak_ptr<NodeComponent> end, std::weak_ptr<NodeComponent> prevNode);
-	std::vector<std::weak_ptr<NodeComponent>> m_TempPath;
+	//std::vector<std::weak_ptr<NodeComponent>> m_TempPath;
 	std::vector<std::weak_ptr<EnemyComponent>> m_pHotDogs;
 	std::vector<std::weak_ptr<EnemyComponent>> m_pEggs;
 	std::vector<std::weak_ptr<EnemyComponent>> m_pPickles;
@@ -83,5 +85,11 @@ private:
 	float m_currentEggSpawnCoolDown;
 	std::vector<std::string> m_LevelFolders;
 	size_t m_CurrentLevel = 0;
+	size_t m_CurrentDifficulty = 0;
+	int m_HotdogSpawns;
+	int m_EggSpawns;
+	int m_PickleSpawns;
+	const GameModes m_GameMode;
+	float m_LadderDeviationChance = 90.f;
 };
 

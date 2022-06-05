@@ -9,11 +9,10 @@
 
 class dae::InputManager::Impl
 {
-	std::map <Input, std::vector<std::shared_ptr<BaseCommand>>> m_Commands;
+	std::map <Input, std::vector<std::pair<std::shared_ptr<BaseCommand>, bool>>> m_Commands;
 	std::map < SDL_Keycode,std::pair<bool, bool>> m_KeyQueue;
 	std::map <WORD,std::pair<bool, bool>> m_ButtonQueue;
 	XINPUT_KEYSTROKE m_CurrentState{};
-	bool m_Reset{ false };
 public:
 	Impl()
 	{
@@ -22,6 +21,8 @@ public:
 
 	bool ProcessInput()
 	{
+		for (auto& command : m_Commands)
+			command.second.erase(std::remove_if(command.second.begin(), command.second.end(), [](std::pair<std::shared_ptr<BaseCommand>, bool>& object) { return object.second; }), command.second.end());
 		for (auto key : m_KeyQueue)
 			m_KeyQueue[key.first].second = true;
 		SDL_Event e;
@@ -75,17 +76,17 @@ public:
 					case InputType::Hold:
 						if (key.second.first && key.second.second)
 							for (auto com : commands)
-								com->Execute();
+								com.first->Execute();
 						break;
 					case InputType::Press:
 						if (key.second.first && !key.second.second)
 							for (auto com : commands)
-								com->Execute();
+								com.first->Execute();
 						break;
 					case InputType::Release:
 						if (!key.second.first)
 							for (auto com : commands)
-								com->Execute();
+								com.first->Execute();
 						break;
 					}
 				}
@@ -110,17 +111,17 @@ public:
 					case InputType::Hold:
 						if (button.second.first)
 							for (auto com : commands)
-								com->Execute();
+								com.first->Execute();
 						break;
 					case InputType::Press:
 						if (button.second.first && !button.second.second)
 							for (auto com : commands)
-								com->Execute();
+								com.first->Execute();
 						break;
 					case InputType::Release:
 						if (!button.second.first)
 							for (auto com : commands)
-								com->Execute();
+								com.first->Execute();
 						break;
 					}
 				}
@@ -137,7 +138,7 @@ public:
 		i.input = input;
 		i.type = type;
 		i.isController = true;
-		m_Commands[{input, true, type}].push_back(command);
+		m_Commands[{input, true, type}].push_back({ command, false });
 	}
 
 	void AddKeyboardInput(int input, InputType type, const std::shared_ptr<BaseCommand>& command)
@@ -146,12 +147,16 @@ public:
 		i.input = input;
 		i.type = type;
 		i.isController = false;
-		m_Commands[{input, false, type}].push_back(command);
+		m_Commands[{input, false, type}].push_back({ command, false });
 	}
 
 	void RemoveKeys()
 	{
-		m_Commands.clear();
+		for (auto& command : m_Commands)
+		{
+			for(auto& com : command.second)
+				com.second = true;
+		}
 	}
 };
 

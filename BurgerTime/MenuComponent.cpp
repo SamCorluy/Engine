@@ -15,6 +15,7 @@ MenuComponent::MenuComponent(const std::shared_ptr<dae::GameObject> owner, const
 	, m_CurrentGameMode{GameModes::SINGLEPLAYER}
 {
 	m_pGameScene = dae::SceneManager::GetInstance().CreateScene("BurgerTime").lock();
+	m_pHighScoreScene = dae::SceneManager::GetInstance().CreateScene("HighScore").lock();
 	InitMenu();
 }
 
@@ -42,11 +43,10 @@ void MenuComponent::SelectGameMode()
 {
 	if (dae::SceneManager::GetInstance().GetActiveScene().lock()->GetName() != m_pScene.lock()->GetName())
 		return;
-	std::cout << "chosen";
 	dae::SceneManager::GetInstance().SetActiveScene("BurgerTime");
 	m_pActiveScene = m_pGameScene;
 	auto gameObject = std::make_shared<dae::GameObject>();
-	gameObject->AddComponent<GameManagerComponent>(std::make_shared<GameManagerComponent>(gameObject, m_pGameScene, m_CurrentGameMode));
+	gameObject->AddComponent<GameManagerComponent>(std::make_shared<GameManagerComponent>(gameObject, m_pGameScene, m_pHighScoreScene, m_CurrentGameMode));
 	m_pGame = gameObject->GetComponent<GameManagerComponent>();
 	m_pGameScene.lock()->Add(gameObject);
 }

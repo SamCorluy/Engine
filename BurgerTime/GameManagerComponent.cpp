@@ -10,19 +10,29 @@
 #include "SaltObserver.h"
 #include "ResourceManager.h"
 #include "MovementComponent.h"
+#include "HighScoreMenuComponent.h"
 
-GameManagerComponent::GameManagerComponent(const std::shared_ptr<dae::GameObject> owner, const std::weak_ptr<dae::Scene>& scene, GameModes gameMode)
+const int hotdogMax = 6;
+const int eggMax = 1;
+const int pickleMax = 4;
+
+GameManagerComponent::GameManagerComponent(const std::shared_ptr<dae::GameObject> owner, const std::weak_ptr<dae::Scene>& scene, const std::weak_ptr<dae::Scene>& hsScene, GameModes gameMode)
 	: BaseComponent(owner)
 	, m_pScene{scene}
+	, m_pHighscoreScene{hsScene}
 	, m_HotDogSpawnCoolDown{8.f}
 	, m_CurrentHotDogSpawnCoolDown{ m_HotDogSpawnCoolDown }
-	, m_PickleSpawnCoolDown{ 15.f }
+	, m_PickleSpawnCoolDown{ 10.f }
 	, m_CurrentPickleSpawnCoolDown{ m_PickleSpawnCoolDown }
-	, m_EggSpawnCoolDown{ 15.f }
+	, m_EggSpawnCoolDown{ 6.f }
+	, m_HotdogSpawns{3}
+	, m_EggSpawns{1}
+	, m_PickleSpawns{0}
 	, m_currentEggSpawnCoolDown{ m_EggSpawnCoolDown }
 	, m_pPlayers{ std::shared_ptr<PeterPepperComponent>(nullptr), std::shared_ptr<PeterPepperComponent>(nullptr) }
 	, m_pPlayerControlledEnemy{ std::shared_ptr<EnemyComponent>(nullptr) }
 	, m_pScoreComponents{std::shared_ptr<CounterComponent>(nullptr), std::shared_ptr<CounterComponent>(nullptr)}
+	, m_GameMode{gameMode}
 	, m_pHudElements{ std::make_pair(std::shared_ptr<HealthComponent>(nullptr), std::shared_ptr<SaltDisplayComponent>(nullptr)),std::make_pair(std::shared_ptr<HealthComponent>(nullptr), std::shared_ptr<SaltDisplayComponent>(nullptr)) }
 {
 	m_LevelFolders.push_back("Level1");
@@ -40,47 +50,54 @@ GameManagerComponent::GameManagerComponent(const std::shared_ptr<dae::GameObject
 
 void GameManagerComponent::Update()
 {
+	// If both players are dead, end game and return
 	if (m_pPlayers[0].expired() && m_pPlayers[1].expired())
 	{
 		EndGame();
 		return;
 	}
-	if (!m_pPlayers[0].expired() && m_pPlayers[0].lock()->IsDead())
-	{
-		if (m_pPlayers[0].lock()->DeathAnimationFinished())
-			Reset();
-		return;
-	}
+	// Check if level is completed
 	bool completed = true;
 	for (auto burger : m_pBurgers)
 		if (!burger.lock()->IsComplete())
 			completed = false;
 	if (completed)
+	{
 		NextLevel();
+		return;
+	}
+	//Remove enemies from vector that were killed
 	m_pHotDogs.erase(std::remove_if(m_pHotDogs.begin(), m_pHotDogs.end(), [](std::weak_ptr<EnemyComponent>& enemy) { return enemy.expired(); }), m_pHotDogs.end());
 	m_pEggs.erase(std::remove_if(m_pEggs.begin(), m_pEggs.end(), [](std::weak_ptr<EnemyComponent>& enemy) { return enemy.expired(); }), m_pEggs.end());
 	m_pPickles.erase(std::remove_if(m_pPickles.begin(), m_pPickles.end(), [](std::weak_ptr<EnemyComponent>& enemy) { return enemy.expired(); }), m_pPickles.end());
-	if (m_pHotDogs.size() < 5)
+	switch (m_GameMode)
 	{
-		if (m_CurrentHotDogSpawnCoolDown > 0.f)
-			m_CurrentHotDogSpawnCoolDown -= ElapsedTime::GetInstance().GetElapsedTime();
-		if (m_CurrentHotDogSpawnCoolDown <= 0.f)
-			SpawnHotDog();
+	case GameModes::PVP:
+	case GameModes::SINGLEPLAYER:
+		// If player lost live but isn't dead 
+		if (!m_pPlayers[0].expired() && m_pPlayers[0].lock()->IsDead())
+		{
+			if (m_pPlayers[0].lock()->DeathAnimationFinished())
+				Reset();
+			return;
+		}
+		break;
+	case GameModes::COOP:
+		if (!m_pPlayers[0].expired() && m_pPlayers[0].lock()->IsDead())
+		{
+			if (m_pPlayers[0].lock()->DeathAnimationFinished())
+				m_pPlayers[0].lock()->Respawn();
+		}
+		if (!m_pPlayers[1].expired() && m_pPlayers[1].lock()->IsDead())
+		{
+			if (m_pPlayers[1].lock()->DeathAnimationFinished())
+				m_pPlayers[1].lock()->Respawn();
+		}
+		break;
+	default:
+		break;
 	}
-	if (m_pEggs.size() < 1)
-	{
-		if (m_currentEggSpawnCoolDown > 0.f)
-			m_currentEggSpawnCoolDown -= ElapsedTime::GetInstance().GetElapsedTime();
-		if (m_currentEggSpawnCoolDown <= 0.f)
-			SpawnEgg();
-	}
-	if (m_pPickles.size() < 3)
-	{
-		if (m_CurrentPickleSpawnCoolDown > 0.f)
-			m_CurrentPickleSpawnCoolDown -= ElapsedTime::GetInstance().GetElapsedTime();
-		if (m_CurrentPickleSpawnCoolDown <= 0.f)
-			SpawnPickle();
-	}
+	HandleEnemyRespawns();
 	CheckBurgerOverlap();
 	HandleFallingBurgers();
 	HandleSalt();
@@ -125,17 +142,36 @@ void GameManagerComponent::DeterminePathEnemies(std::vector<std::weak_ptr<EnemyC
 {
 	for (auto enemy : enemies)
 	{
-		if (m_pPlayers[0].expired())
-			continue;
+		if (m_pPlayers[0].expired() && m_pPlayers[1].expired())
+			return;
 		if (!enemy.lock()->ReachedChoicePoint())
 			continue;
-		m_TempPath = FindPath(enemy.lock()->getNode(), m_pPlayers[0].lock()->getNode(), enemy.lock()->getPrevNode());
-		//std::cout << hotDog.lock()->getNode().lock()->GetNodePos().first << " " << hotDog.lock()->getPrevNode().lock()->GetNodePos().first << "\n";
-		if (m_TempPath.size() >= 2)
-			enemy.lock()->Move(m_TempPath[1]);
+
+		std::weak_ptr<PeterPepperComponent> PlayerTarget = std::shared_ptr<PeterPepperComponent>(nullptr);
+		if (m_pPlayers[1].expired())
+			PlayerTarget = m_pPlayers[0];
+		else if (m_pPlayers[0].expired())
+			PlayerTarget = m_pPlayers[1];
 		else
 		{
-			for (auto node : m_pPlayers[0].lock()->getNode().lock()->GetConnections())
+			auto posOne = m_pPlayers[0].lock()->GetOwner().lock()->GetPosition();
+			auto posTwo = m_pPlayers[1].lock()->GetOwner().lock()->GetPosition();
+			auto enemyPos = enemy.lock()->GetOwner().lock()->GetPosition();
+			float distancePlayerOne{sqrtf(powf(enemyPos.x - posOne.x, 2) + powf(enemyPos.y - posOne.y, 2))};
+			float distancePlayerTwo{ sqrtf(powf(enemyPos.x - posTwo.x, 2) + powf(enemyPos.y - posTwo.y, 2)) };
+			if (distancePlayerOne < distancePlayerTwo)
+				PlayerTarget = m_pPlayers[0];
+			else
+				PlayerTarget = m_pPlayers[1];
+		}
+		auto tempPath = FindPath(enemy.lock()->getNode(), PlayerTarget.lock()->getNode(), enemy.lock()->getPrevNode());
+		//std::cout << hotDog.lock()->getNode().lock()->GetNodePos().first << " " << hotDog.lock()->getPrevNode().lock()->GetNodePos().first << "\n";
+		if (tempPath.size() >= 2)
+			enemy.lock()->Move(tempPath[1]);
+		// This makes sure the enemy keeps moving when he is on the same node as the player
+		else
+		{
+			for (auto node : PlayerTarget.lock()->getNode().lock()->GetConnections())
 			{
 				if (node.lock() != enemy.lock()->getPrevNode().lock())
 				{
@@ -150,9 +186,9 @@ void GameManagerComponent::DeterminePathEnemies(std::vector<std::weak_ptr<EnemyC
 void GameManagerComponent::InitSinglePlayer()
 {
 	InitPlayer(0, 1);
-	SpawnHotDog();
-	SpawnEgg();
-	SpawnPickle();
+	//SpawnHotDog();
+	//SpawnEgg();
+	//SpawnPickle();
 
 	InitBurgers();
 }
@@ -161,9 +197,9 @@ void GameManagerComponent::InitCoop()
 {
 	InitPlayer(0, 2);
 	InitPlayer(1, 2);
-	SpawnHotDog();
-	SpawnEgg();
-	SpawnPickle();
+	//SpawnHotDog();
+	//SpawnEgg();
+	//SpawnPickle();
 
 	InitBurgers();
 }
@@ -171,9 +207,9 @@ void GameManagerComponent::InitCoop()
 void GameManagerComponent::InitPvp()
 {
 	InitPlayer(0, 2);
-	SpawnHotDog();
-	SpawnEgg();
-	SpawnPickle();
+	//SpawnHotDog();
+	//SpawnEgg();
+	//SpawnPickle();
 
 	InitBurgers();
 	SpawnPlayerControlledHotDog();
@@ -184,7 +220,7 @@ void GameManagerComponent::CheckBurgerOverlap()
 	for (size_t i = 0; i < m_pPlayers.size(); ++i)
 	{
 		if (m_pPlayers[i].expired())
-			return;
+			continue;
 		for (auto burger : m_pBurgers)
 		{
 			for (auto ingredient : burger.lock()->getIngredients())
@@ -250,15 +286,17 @@ void GameManagerComponent::CheckBurgerOverlap()
 
 void GameManagerComponent::CheckPlayerOverlap()
 {
-	if (!m_pPlayers[0].expired() && !m_pPlayers[0].lock()->IsDead())
+	for (size_t i = 0; i < m_pPlayers.size(); ++i)
 	{
-		auto pos = m_pPlayers[0].lock()->GetOwner().lock()->GetTransform().GetPosition();
-		auto size = m_pPlayers[0].lock()->GetRectSize();
+		if (m_pPlayers[i].expired() || m_pPlayers[i].lock()->IsDead())
+			continue;
+		auto pos = m_pPlayers[i].lock()->GetOwner().lock()->GetTransform().GetPosition();
+		auto size = m_pPlayers[i].lock()->GetRectSize();
 		pos.x -= size.first / 2;
 		Rect PlayerRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
 		for (auto hotdog : m_pHotDogs)
 		{
-			if (m_pPlayers[0].lock()->getNode().lock() != hotdog.lock()->getNode().lock() || hotdog.lock()->IsStunned())
+			if (m_pPlayers[i].lock()->getNode().lock() != hotdog.lock()->getNode().lock() || hotdog.lock()->IsStunned() || !hotdog.lock()->HasSpawned())
 				continue;
 			pos = hotdog.lock()->GetOwner().lock()->GetTransform().GetPosition();
 			size = hotdog.lock()->GetRectSize();
@@ -266,13 +304,13 @@ void GameManagerComponent::CheckPlayerOverlap()
 			Rect enemyRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
 			if (CheckRectOverlap(PlayerRect, enemyRect))
 			{
-				m_pPlayers[0].lock()->Die();
+				m_pPlayers[i].lock()->Die();
 				return;
 			}
 		}
 		for (auto egg : m_pEggs)
 		{
-			if (m_pPlayers[0].lock()->getNode().lock() != egg.lock()->getNode().lock() || egg.lock()->IsStunned())
+			if (m_pPlayers[i].lock()->getNode().lock() != egg.lock()->getNode().lock() || egg.lock()->IsStunned() || !egg.lock()->HasSpawned())
 				continue;
 			pos = egg.lock()->GetOwner().lock()->GetTransform().GetPosition();
 			size = egg.lock()->GetRectSize();
@@ -280,13 +318,13 @@ void GameManagerComponent::CheckPlayerOverlap()
 			Rect enemyRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
 			if (CheckRectOverlap(PlayerRect, enemyRect))
 			{
-				m_pPlayers[0].lock()->Die();
+				m_pPlayers[i].lock()->Die();
 				return;
 			}
 		}
 		for (auto pickle : m_pPickles)
 		{
-			if (m_pPlayers[0].lock()->getNode().lock() != pickle.lock()->getNode().lock() || pickle.lock()->IsStunned())
+			if (m_pPlayers[i].lock()->getNode().lock() != pickle.lock()->getNode().lock() || pickle.lock()->IsStunned() || !pickle.lock()->HasSpawned())
 				continue;
 			pos = pickle.lock()->GetOwner().lock()->GetTransform().GetPosition();
 			size = pickle.lock()->GetRectSize();
@@ -294,7 +332,21 @@ void GameManagerComponent::CheckPlayerOverlap()
 			Rect enemyRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
 			if (CheckRectOverlap(PlayerRect, enemyRect))
 			{
-				m_pPlayers[0].lock()->Die();
+				m_pPlayers[i].lock()->Die();
+				return;
+			}
+		}
+		if (!m_pPlayerControlledEnemy.expired())
+		{
+			if (m_pPlayers[i].lock()->getNode().lock() != m_pPlayerControlledEnemy.lock()->getNode().lock() || m_pPlayerControlledEnemy.lock()->IsStunned() || !m_pPlayerControlledEnemy.lock()->HasSpawned())
+				break;
+			pos = m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetTransform().GetPosition();
+			size = m_pPlayerControlledEnemy.lock()->GetRectSize();
+			pos.x -= size.first / 2;
+			Rect enemyRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
+			if (CheckRectOverlap(PlayerRect, enemyRect))
+			{
+				m_pPlayers[i].lock()->Die();
 				return;
 			}
 		}
@@ -314,7 +366,7 @@ void GameManagerComponent::SpawnHotDog()
 	auto startNode = grid[m_pLevel.lock()->GetHotDogSpawn()];
 	AnimDurationInit animInit(0.25f, 0.25f, 0.25f, 0.5f, 0.3f);
 	auto obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/HotDog", animInit, 100));
+	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/HotDog", animInit, 100, m_LadderDeviationChance));
 	//obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
 	m_pScene.lock()->Add(obj, 1);
 	m_pHotDogs.push_back(obj->GetComponent<EnemyComponent>());
@@ -327,7 +379,7 @@ void GameManagerComponent::SpawnEgg()
 	auto startNode = grid[m_pLevel.lock()->GetEggSpawn()];
 	AnimDurationInit animInit(0.25f, 0.25f, 0.25f, 0.5f, 0.3f);
 	auto obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Egg", animInit, 300));
+	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Egg", animInit, 300, m_LadderDeviationChance));
 	//obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
 	m_pScene.lock()->Add(obj, 1);
 	m_pEggs.push_back(obj->GetComponent<EnemyComponent>());
@@ -340,7 +392,7 @@ void GameManagerComponent::SpawnPickle()
 	auto startNode = grid[m_pLevel.lock()->GetPickleSpawn()];
 	AnimDurationInit animInit(0.1f, 0.12f, 0.12f, 0.5f, 0.3f);
 	auto obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Pickle", animInit, 200));
+	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Pickle", animInit, 200, m_LadderDeviationChance));
 	//obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
 	m_pScene.lock()->Add(obj, 1);
 	m_pPickles.push_back(obj->GetComponent<EnemyComponent>());
@@ -414,6 +466,17 @@ void GameManagerComponent::HandleFallingBurgers()
 					if (CheckRectOverlap(ingredientRect, enemyRect))
 						pickle.lock()->Kill(player);
 				}
+				if (!m_pPlayerControlledEnemy.expired())
+				{
+					if (ingredient.lock()->GetNode().lock() != m_pPlayerControlledEnemy.lock()->getNode().lock())
+						break;
+					pos = m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetTransform().GetPosition();
+					size = m_pPlayerControlledEnemy.lock()->GetRectSize();
+					pos.x -= size.first / 2;
+					Rect enemyRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
+					if (CheckRectOverlap(ingredientRect, enemyRect))
+						m_pPlayerControlledEnemy.lock()->Kill(player);
+				}
 			}
 		}
 	}
@@ -424,7 +487,7 @@ void GameManagerComponent::HandleSalt()
 	for (auto player : m_pPlayers)
 	{
 		if (player.expired())
-			return;
+			continue;
 		auto salt = player.lock()->GetSalt();
 		if (!salt.expired())
 		{
@@ -459,6 +522,15 @@ void GameManagerComponent::HandleSalt()
 				if (CheckRectOverlap(saltRect, enemyRect))
 					pickle.lock()->Stun();
 			}
+			if (!m_pPlayerControlledEnemy.expired())
+			{
+				pos = m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetTransform().GetPosition();
+				size = m_pPlayerControlledEnemy.lock()->GetRectSize();
+				pos.x -= size.first / 2;
+				Rect enemyRect{ static_cast<int>(pos.x), static_cast<int>(pos.y), size.first, size.second };
+				if (CheckRectOverlap(saltRect, enemyRect))
+					m_pPlayerControlledEnemy.lock()->Stun();
+			}
 		}
 	}
 }
@@ -482,7 +554,7 @@ void GameManagerComponent::InitPlayer(size_t idx, size_t totalPlayers)
 	auto scoreObject = std::make_shared<dae::GameObject>();
 	auto font = dae::ResourceManager::GetInstance().LoadFont("emulogic.ttf", 20);
 	scoreObject->AddComponent<CounterComponent>(std::make_shared<CounterComponent>(scoreObject, font, 0));
-	scoreObject->SetPosition(idx * offset + 0.f, 10.f);
+	scoreObject->SetPosition(idx * offset + 0.f, 820.f);
 	m_pScene.lock()->Add(scoreObject);
 	m_pScoreComponents[idx] = scoreObject->GetComponent<CounterComponent>();
 	//m_pPointsObserver = std::make_shared<PointsObserver>(scoreObject->GetComponent<CounterComponent>());
@@ -526,7 +598,15 @@ void GameManagerComponent::InitPlayer(size_t idx, size_t totalPlayers)
 
 void GameManagerComponent::NextLevel()
 {
+	m_LadderDeviationChance *= 0.88f;
 	++m_CurrentLevel;
+	++m_CurrentDifficulty;
+	if (m_HotdogSpawns < hotdogMax)
+		++m_HotdogSpawns;
+	if (m_EggSpawns < eggMax)
+		++m_EggSpawns;
+	if (m_PickleSpawns < pickleMax)
+		++m_PickleSpawns;
 	m_CurrentLevel %= m_LevelFolders.size();
 	InitLevel(m_CurrentLevel);
 	InitBurgers();
@@ -534,7 +614,10 @@ void GameManagerComponent::NextLevel()
 	ClearEnemies();
 
 	auto grid = m_pLevel.lock()->GetGrid();
-	m_pPlayers[0].lock()->Reset(grid[m_pLevel.lock()->GetPlayerOneSpawn()]);
+	if(!m_pPlayers[0].expired())
+		m_pPlayers[0].lock()->Reset(grid[m_pLevel.lock()->GetPlayerOneSpawn()]);
+	if (!m_pPlayers[1].expired())
+		m_pPlayers[1].lock()->Reset(grid[m_pLevel.lock()->GetPlayerTwoSpawn()]);
 }
 
 void GameManagerComponent::InitBurgers()
@@ -558,7 +641,7 @@ void GameManagerComponent::SpawnPlayerControlledHotDog()
 	auto startNode = grid[m_pLevel.lock()->GetHotDogSpawn()];
 	AnimDurationInit animInit(0.25f, 0.25f, 0.25f, 0.5f, 0.3f);
 	auto obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/HotDog", animInit, 100));
+	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/HotDog", animInit, 100, m_LadderDeviationChance));
 	obj->AddComponent<MovementComponent>(std::make_shared<MovementComponent>(obj));
 	//obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
 	m_pScene.lock()->Add(obj);
@@ -579,7 +662,14 @@ void GameManagerComponent::EndGame()
 	GetOwner().lock()->Remove();
 
 	dae::InputManager::GetInstance().RemoveKeys();
-	dae::SceneManager::GetInstance().SetActiveScene("Menu");
+	dae::SceneManager::GetInstance().SetActiveScene("HighScore");
+	auto gameObject = std::make_shared<dae::GameObject>();
+	std::vector<int> scores;
+	scores.push_back(m_pScoreComponents[0].lock()->GetValue());
+	if(!m_pScoreComponents[1].expired())
+		scores.push_back(m_pScoreComponents[1].lock()->GetValue());
+	gameObject->AddComponent<HighScoreMenuComponent>(std::make_shared<HighScoreMenuComponent>(gameObject, m_pHighscoreScene, scores));
+	m_pHighscoreScene.lock()->Add(gameObject);
 }
 
 void GameManagerComponent::ClearEnemies()
@@ -588,14 +678,20 @@ void GameManagerComponent::ClearEnemies()
 		if (!egg.expired())
 			egg.lock()->GetOwner().lock()->Remove();
 	m_pEggs.clear();
+	m_currentEggSpawnCoolDown = m_EggSpawnCoolDown;
+
 	for (auto hotDog : m_pHotDogs)
 		if (!hotDog.expired())
 			hotDog.lock()->GetOwner().lock()->Remove();
 	m_pHotDogs.clear();
+	m_CurrentHotDogSpawnCoolDown = m_HotDogSpawnCoolDown;
+
 	for (auto pickle : m_pPickles)
 		if (!pickle.expired())
 			pickle.lock()->GetOwner().lock()->Remove();
 	m_pPickles.clear();
+	m_CurrentPickleSpawnCoolDown = m_PickleSpawnCoolDown;
+
 	if (!m_pPlayerControlledEnemy.expired())
 		m_pPlayerControlledEnemy.lock()->GetOwner().lock()->Remove();
 }
@@ -638,6 +734,37 @@ void GameManagerComponent::ClearPlayers()
 			comp.first.lock()->GetOwner().lock()->Remove();
 		if (!comp.second.expired())
 			comp.second.lock()->GetOwner().lock()->Remove();
+	}
+}
+
+void GameManagerComponent::HandleEnemyRespawns()
+{
+	int currentMax = m_HotdogSpawns;
+	if (m_GameMode == GameModes::PVP)
+		--currentMax;
+	if (m_pHotDogs.size() < currentMax || (m_GameMode == GameModes::PVP && m_pPlayerControlledEnemy.expired()))
+	{
+		if (m_CurrentHotDogSpawnCoolDown > 0.f)
+			m_CurrentHotDogSpawnCoolDown -= ElapsedTime::GetInstance().GetElapsedTime();
+		if (m_CurrentHotDogSpawnCoolDown <= 0.f)
+			if (m_GameMode == GameModes::PVP && m_pPlayerControlledEnemy.expired())
+				SpawnPlayerControlledHotDog();
+			else
+				SpawnHotDog();
+	}
+	if (m_pEggs.size() < m_EggSpawns)
+	{
+		if (m_currentEggSpawnCoolDown > 0.f)
+			m_currentEggSpawnCoolDown -= ElapsedTime::GetInstance().GetElapsedTime();
+		if (m_currentEggSpawnCoolDown <= 0.f)
+			SpawnEgg();
+	}
+	if (m_pPickles.size() < m_PickleSpawns)
+	{
+		if (m_CurrentPickleSpawnCoolDown > 0.f)
+			m_CurrentPickleSpawnCoolDown -= ElapsedTime::GetInstance().GetElapsedTime();
+		if (m_CurrentPickleSpawnCoolDown <= 0.f)
+			SpawnPickle();
 	}
 }
 

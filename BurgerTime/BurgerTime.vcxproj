@@ -166,6 +166,8 @@
     <ClCompile Include="EnemyComponent.cpp" />
     <ClCompile Include="HealthComponent.cpp" />
     <ClCompile Include="HealthObserver.cpp" />
+    <ClCompile Include="HighscoreCommand.cpp" />
+    <ClCompile Include="HighScoreMenuComponent.cpp" />
     <ClCompile Include="IngredientComponent.cpp" />
     <ClCompile Include="LevelComponent.cpp" />
     <ClCompile Include="main.cpp" />
@@ -188,6 +190,8 @@
     <ClInclude Include="EnemyComponent.h" />
     <ClInclude Include="HealthComponent.h" />
     <ClInclude Include="HealthObserver.h" />
+    <ClInclude Include="HighscoreCommand.h" />
+    <ClInclude Include="HighScoreMenuComponent.h" />
     <ClInclude Include="IngredientComponent.h" />
     <ClInclude Include="LevelComponent.h" />
     <ClInclude Include="MenuCommand.h" />

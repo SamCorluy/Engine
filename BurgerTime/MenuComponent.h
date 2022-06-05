@@ -19,6 +19,7 @@ public:
 private:
 	std::weak_ptr<dae::Scene> m_pScene;
 	std::weak_ptr<dae::Scene> m_pGameScene;
+	std::weak_ptr<dae::Scene> m_pHighScoreScene;
 	std::weak_ptr<dae::Scene> m_pActiveScene;
 	std::weak_ptr<GameManagerComponent> m_pGame;
 
