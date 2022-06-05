@@ -108,108 +108,6 @@ const std::weak_ptr<SaltComponent> PeterPepperComponent::GetSalt() const
 	return m_pSaltComponent;
 }
 
-//void PeterPepperComponent::Move(Action action)
-//{
-//	if (m_ThrowingSalt || m_Dead)
-//		return;
-//	auto rectSize = GetOwner().lock()->GetComponent<dae::AnimationComponent>().lock()->getActiveAnimRec();
-//	//auto grid = m_pLevel.lock()->GetGrid();
-//	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
-//	auto pos = GetOwner().lock()->GetTransform().GetPosition();
-//	auto levelPos = m_pCurrentNode.lock()->GetOwner().lock()->GetTransform().GetPosition();
-//	//auto idx = m_pLevel.lock()->CoordinateToIndex(pos);
-//	auto ladderRect = m_pCurrentNode.lock()->GetLadderAccessSize();
-//	//auto offset = m_pCurrentNode.lock()->GetFloorOffset();
-//	switch (action)
-//	{
-//	case Action::WalkingLeft:
-//		if ((m_pCurrentNode.lock()->GetConnection(Direction::LEFT).expired() || !m_pCurrentNode.lock()->GetConnection(Direction::LEFT).lock()->IsFloor())
-//			&& (levelPos.x + m_pCurrentNode.lock()->GetNodePos().first) >= (pos.x - rectSize.x / 2.f))
-//		{
-//			pos.x = levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + rectSize.x / 2;
-//			GetOwner().lock()->SetPosition(pos);
-//			return;
-//		}
-//		if (!m_pCurrentNode.lock()->IsFloor() || pos.y > (levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset + ladderRect.second))
-//			return;
-//		if (pos.y > levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset || pos.y < levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset)
-//			pos.y = levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset;
-//		comp.lock()->SetActiveAnimation(0);
-//		m_Direction = Direction::LEFT;
-//		comp.lock()->SetFlip(false);
-//		pos.x -= 100.f * ElapsedTime::GetInstance().GetElapsedTime();
-//		if (pos.x < m_pCurrentNode.lock()->GetNodePos().first + levelPos.x)
-//			m_pCurrentNode = m_pCurrentNode.lock()->GetConnection(Direction::LEFT);
-//		GetOwner().lock()->SetPosition(pos);
-//		break;
-//	case Action::WalkingRight:
-//		if ((m_pCurrentNode.lock()->GetConnection(Direction::RIGHT).expired() || !m_pCurrentNode.lock()->GetConnection(Direction::RIGHT).lock()->IsFloor())
-//			&& (levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + m_pCurrentNode.lock()->GetNodeSize().first) <= (pos.x + rectSize.x / 2.f))
-//		{
-//			pos.x = levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + m_pCurrentNode.lock()->GetNodeSize().first - rectSize.x / 2;
-//			GetOwner().lock()->SetPosition(pos);
-//			return;
-//		}
-//		if (!m_pCurrentNode.lock()->IsFloor() || pos.y > (levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset + ladderRect.second))
-//			return;
-//		if (pos.y > levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset || pos.y < levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset)
-//			pos.y = levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset;
-//		comp.lock()->SetActiveAnimation(0);
-//		m_Direction = Direction::RIGHT;
-//		comp.lock()->SetFlip(true);
-//		pos.x += 100.f * ElapsedTime::GetInstance().GetElapsedTime();
-//		if (pos.x > m_pCurrentNode.lock()->GetNodePos().first + levelPos.x + m_pCurrentNode.lock()->GetNodeSize().first)
-//			m_pCurrentNode = m_pCurrentNode.lock()->GetConnection(Direction::RIGHT);
-//		GetOwner().lock()->SetPosition(pos);
-//		break;
-//	case Action::ClimbingUp:
-//		if ((m_pCurrentNode.lock()->GetConnection(Direction::UP).expired() || !m_pCurrentNode.lock()->GetConnection(Direction::UP).lock()->HasLadderAccess())
-//			&& (levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset) >= pos.y)
-//		{
-//			pos.y = levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset;
-//			GetOwner().lock()->SetPosition(pos);
-//			return;
-//		}
-//		else if ((levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + (m_pCurrentNode.lock()->GetNodeSize().first - ladderRect.first) / 2) <= (pos.x)
-//			&& (levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + (m_pCurrentNode.lock()->GetNodeSize().first + ladderRect.first) / 2) >= (pos.x))
-//		{
-//			comp.lock()->SetActiveAnimation(2);
-//			m_Direction = Direction::UP;
-//			comp.lock()->SetFlip(false);
-//			pos.x = levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + m_pCurrentNode.lock()->GetNodeSize().first / 2;
-//			pos.y += 100.f * ElapsedTime::GetInstance().GetElapsedTime();
-//			if (pos.y > m_pCurrentNode.lock()->GetNodePos().second + levelPos.y + m_pCurrentNode.lock()->GetNodeSize().second)
-//				m_pCurrentNode = m_pCurrentNode.lock()->GetConnection(Direction::UP);
-//			GetOwner().lock()->SetPosition(pos);
-//		}
-//		break;
-//	case Action::ClimbingDown:
-//		if ((m_pCurrentNode.lock()->GetConnection(Direction::DOWN).expired() || !m_pCurrentNode.lock()->GetConnection(Direction::DOWN).lock()->HasLadderAccess())
-//			&& (levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset) >= pos.y)
-//		{
-//			pos.y = levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_FloorOffset;
-//			GetOwner().lock()->SetPosition(pos);
-//			return;
-//		}
-//		else if ((levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + (m_pCurrentNode.lock()->GetNodeSize().first - ladderRect.first) / 2) <= (pos.x)
-//			&& (levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + (m_pCurrentNode.lock()->GetNodeSize().first + ladderRect.first) / 2) >= (pos.x))
-//		{
-//			comp.lock()->SetActiveAnimation(1);
-//			m_Direction = Direction::DOWN;
-//			comp.lock()->SetFlip(false);
-//			pos.x = levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + m_pCurrentNode.lock()->GetNodeSize().first / 2;
-//			pos.y -= 100.f * ElapsedTime::GetInstance().GetElapsedTime();
-//			if (pos.y < m_pCurrentNode.lock()->GetNodePos().second + levelPos.y)
-//				m_pCurrentNode = m_pCurrentNode.lock()->GetConnection(Direction::DOWN);
-//			GetOwner().lock()->SetPosition(pos);
-//		}
-//		break;
-//	default:
-//		break;
-//	}
-//	m_MovementProcessed = true;
-//}
-
 const bool PeterPepperComponent::IsThrowingSalt() const
 {
 	return m_ThrowingSalt;
@@ -274,7 +172,6 @@ void PeterPepperComponent::Die()
 	m_CanThrow = false;
 	m_ThrowingSalt = false;
 	m_Dead = true;
-	std::cout << m_Lives << "\n";
 	if (m_Lives <= 0)
 	{
 		if(!m_pSaltComponent.expired())

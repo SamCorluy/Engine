@@ -33,6 +33,9 @@ void MenuComponent::Update()
 		dae::InputManager::GetInstance().AddKeyboardInput('\r', dae::InputType::Press, std::make_shared<MenuCommand>(GetOwner().lock()->GetComponent<MenuComponent>(), MenuInteraction::SELECT));
 		dae::InputManager::GetInstance().AddKeyboardInput('w', dae::InputType::Press, std::make_shared<MenuCommand>(GetOwner().lock()->GetComponent<MenuComponent>(), MenuInteraction::MOVEUP));
 		dae::InputManager::GetInstance().AddKeyboardInput('s', dae::InputType::Press, std::make_shared<MenuCommand>(GetOwner().lock()->GetComponent<MenuComponent>(), MenuInteraction::MOVEDOWN));
+		dae::InputManager::GetInstance().AddControllerInput(0x5820, dae::InputType::Press, std::make_shared<MenuCommand>(GetOwner().lock()->GetComponent<MenuComponent>(), MenuInteraction::MOVEUP));
+		dae::InputManager::GetInstance().AddControllerInput(0x5821, dae::InputType::Press, std::make_shared<MenuCommand>(GetOwner().lock()->GetComponent<MenuComponent>(), MenuInteraction::MOVEDOWN));
+		dae::InputManager::GetInstance().AddControllerInput(0x5800, dae::InputType::Press, std::make_shared<MenuCommand>(GetOwner().lock()->GetComponent<MenuComponent>(), MenuInteraction::SELECT));
 		m_pActiveScene = m_pScene;
 	}
 }
@@ -56,7 +59,7 @@ void MenuComponent::SelectGameMode()
 	gameObject->AddComponent<GameManagerComponent>(std::make_shared<GameManagerComponent>(gameObject, m_pGameScene, m_pHighScoreScene, m_CurrentGameMode));
 	m_pGame = gameObject->GetComponent<GameManagerComponent>();
 	m_pGameScene.lock()->Add(gameObject);
-	SoundLocator::get_sound_system().play(0, 1.f, SoundType::MUSIC);
+	SoundLocator::get_sound_system().play(0, 0.3f, SoundType::MUSIC);
 }
 
 void MenuComponent::MoveDown()
@@ -224,7 +227,7 @@ void MenuComponent::InitMenu()
 	m_pScene.lock()->Add(obj);
 
 	obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "THROW SALT: A", font3));
+	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "THROW SALT: A(CONTROLLER)", font3));
 	textSize = obj->GetComponent<dae::TextComponent>().lock()->GetTextSize();
 	pos.x = static_cast<float>(windowWidth - textSize.first) / 2.f;
 	pos.y -= textSize.second + 5.f;
@@ -280,7 +283,7 @@ void MenuComponent::InitMenu()
 	m_pScene.lock()->Add(obj);
 
 	obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "PREV: W", font3));
+	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "PREV: W, LEFT JOYSTICK DOWN", font3));
 	textSize = obj->GetComponent<dae::TextComponent>().lock()->GetTextSize();
 	pos.x = static_cast<float>(windowWidth - textSize.first) / 2.f;
 	pos.y -= textSize.second + 5.f;
@@ -288,7 +291,7 @@ void MenuComponent::InitMenu()
 	m_pScene.lock()->Add(obj);
 
 	obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "NEXT: S", font3));
+	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "NEXT: S, LEFT JOYSTICK UP", font3));
 	textSize = obj->GetComponent<dae::TextComponent>().lock()->GetTextSize();
 	pos.x = static_cast<float>(windowWidth - textSize.first) / 2.f;
 	pos.y -= textSize.second + 5.f;
@@ -296,7 +299,7 @@ void MenuComponent::InitMenu()
 	m_pScene.lock()->Add(obj);
 
 	obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "SELECT: ENTER", font3));
+	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "SELECT: ENTER, A(CONTROLLER)", font3));
 	textSize = obj->GetComponent<dae::TextComponent>().lock()->GetTextSize();
 	pos.x = static_cast<float>(windowWidth - textSize.first) / 2.f;
 	pos.y -= textSize.second + 5.f;

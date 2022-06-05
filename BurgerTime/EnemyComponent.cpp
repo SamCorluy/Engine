@@ -266,7 +266,7 @@ void EnemyComponent::Stun()
 	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
 	comp.lock()->SetActiveAnimation(3);
 	m_ElapsedTime = 0.f;
-	SoundLocator::get_sound_system().play(1, 1.f, SoundType::EFFECT);
+	SoundLocator::get_sound_system().play(1, 0.3f, SoundType::EFFECT);
 }
 
 void EnemyComponent::Kill(std::weak_ptr<PeterPepperComponent>& player)
@@ -280,7 +280,7 @@ void EnemyComponent::Kill(std::weak_ptr<PeterPepperComponent>& player)
 	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
 	comp.lock()->SetActiveAnimation(4);
 	m_ElapsedTime = 0.f;
-	SoundLocator::get_sound_system().play(0, 1.f, SoundType::EFFECT);
+	SoundLocator::get_sound_system().play(0, 0.3f, SoundType::EFFECT);
 }
 
 const bool EnemyComponent::IsStunned() const

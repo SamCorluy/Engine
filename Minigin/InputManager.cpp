@@ -56,12 +56,15 @@ public:
 				return false;
 		}
 		ZeroMemory(&m_CurrentState, sizeof(XINPUT_KEYSTROKE));
+		for (auto button : m_ButtonQueue)
+			m_ButtonQueue[button.first].second = true;
 		std::vector<WORD> xToRemove;
 		while (XInputGetKeystroke(0, 0, &m_CurrentState) == ERROR_SUCCESS) {
 			switch (m_CurrentState.Flags)
 			{
 			case XINPUT_KEYSTROKE_KEYDOWN:
-				m_ButtonQueue[m_CurrentState.VirtualKey] = std::pair<bool, bool>(true, m_CurrentState.Flags == XINPUT_KEYSTROKE_REPEAT);
+				if (m_ButtonQueue.find(m_CurrentState.VirtualKey) == m_ButtonQueue.end())
+					m_ButtonQueue[m_CurrentState.VirtualKey] = std::pair<bool, bool>(true, false);
 				break;
 			case XINPUT_KEYSTROKE_KEYUP:
 				m_ButtonQueue[m_CurrentState.VirtualKey] = std::pair<bool, bool>(false, m_CurrentState.Flags == XINPUT_KEYSTROKE_REPEAT);

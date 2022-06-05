@@ -21,6 +21,8 @@ void HighScoreMenuComponent::Update()
 	if (!m_controlsAdded)
 	{
 		dae::InputManager::GetInstance().AddKeyboardInput('\r', dae::InputType::Press, std::make_shared<HighscoreCommand>(GetOwner().lock()->GetComponent<HighScoreMenuComponent>()));
+		dae::InputManager::GetInstance().AddKeyboardInput(0x40000058, dae::InputType::Press, std::make_shared<HighscoreCommand>(GetOwner().lock()->GetComponent<HighScoreMenuComponent>()));
+		dae::InputManager::GetInstance().AddControllerInput(0x5800, dae::InputType::Press, std::make_shared<HighscoreCommand>(GetOwner().lock()->GetComponent<HighScoreMenuComponent>()));
 		m_controlsAdded = true;
 	}
 }
@@ -165,10 +167,19 @@ void HighScoreMenuComponent::InitMenu(std::vector<int> scores)
 	}
 
 	obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "PRESS ENTER TO CONTINUE", font));
+	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "PRESS ENTER/A(CONTROLLER)", font));
 	textSize = obj->GetComponent<dae::TextComponent>().lock()->GetTextSize();
 	pos.x = static_cast<float>(windowWidth - textSize.first) / 2.f;
-	pos.y = 20.f;
+	pos.y = 50.f;
+	obj->SetPosition(pos);
+	m_pHighScores.push_back(obj->GetComponent<dae::TextComponent>());
+	m_pScene.lock()->Add(obj);
+
+	obj = std::make_shared<dae::GameObject>();
+	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "TO CONTINUE", font));
+	textSize = obj->GetComponent<dae::TextComponent>().lock()->GetTextSize();
+	pos.x = static_cast<float>(windowWidth - textSize.first) / 2.f;
+	pos.y -= textSize.second - 2.f;
 	obj->SetPosition(pos);
 	m_pHighScores.push_back(obj->GetComponent<dae::TextComponent>());
 	m_pScene.lock()->Add(obj);

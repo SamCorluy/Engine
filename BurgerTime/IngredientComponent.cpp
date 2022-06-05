@@ -175,7 +175,7 @@ bool IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& play
 				offset.y -= m_DropHeight;
 				text.lock()->setOffset(i, offset);
 				m_pPartitions[i].hasDropped = true;
-				SoundLocator::get_sound_system().play(2, 1.f, SoundType::EFFECT);
+				SoundLocator::get_sound_system().play(2, 0.3f, SoundType::EFFECT);
 				//if (hasDropped())
 				//{
 				//	InitiateDrop(playerIdx);
