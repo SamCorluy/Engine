@@ -6,7 +6,7 @@
 #include "Texture2D.h"
 #include "ElapsedTime.h"
 
-dae::AnimationComponent::AnimationComponent(const std::shared_ptr<GameObject>& owner, const std::vector<AnimationInit>& animInfo, int scale)
+Engine::AnimationComponent::AnimationComponent(const std::shared_ptr<GameObject>& owner, const std::vector<AnimationInit>& animInfo, int scale)
 	: BaseComponent(owner)
 	, m_ActiveTexture{0}
 	, m_Scale{scale}
@@ -18,12 +18,12 @@ dae::AnimationComponent::AnimationComponent(const std::shared_ptr<GameObject>& o
 	}
 }
 
-const glm::vec2 dae::AnimationComponent::getActiveAnimRec()
+const glm::vec2 Engine::AnimationComponent::getActiveAnimRec()
 {
 	return m_Textures[m_ActiveTexture].animRect;
 }
 
-void dae::AnimationComponent::Render(const Transform& pos) const
+void Engine::AnimationComponent::Render(const Transform& pos) const
 {
 	auto position = pos.GetPosition();
 	if (!(m_ActiveTexture == 0 && m_Textures.size() == 0) && m_Textures[m_ActiveTexture].texture != nullptr)
@@ -58,7 +58,7 @@ void dae::AnimationComponent::Render(const Transform& pos) const
 	}
 }
 
-void dae::AnimationComponent::AddTexture(const AnimationInit animInfo)
+void Engine::AnimationComponent::AddTexture(const AnimationInit animInfo)
 {
 	Animation animation{};
 	animation.accumTime = 0.f;
@@ -73,7 +73,7 @@ void dae::AnimationComponent::AddTexture(const AnimationInit animInfo)
 	m_Textures.push_back(animation);
 }
 
-bool dae::AnimationComponent::SetActiveAnimation(size_t index)
+bool Engine::AnimationComponent::SetActiveAnimation(size_t index)
 {
 	if (index < m_Textures.size())
 	{
@@ -83,16 +83,16 @@ bool dae::AnimationComponent::SetActiveAnimation(size_t index)
 	return false;
 }
 
-void dae::AnimationComponent::SetFlip(bool flip)
+void Engine::AnimationComponent::SetFlip(bool flip)
 {
 	m_Flip = flip;
 }
 
-void dae::AnimationComponent::StaticUpdate()
+void Engine::AnimationComponent::StaticUpdate()
 {
 }
 
-void dae::AnimationComponent::Update()
+void Engine::AnimationComponent::Update()
 {
 	if (m_Textures[m_ActiveTexture].frames > 1 && !(m_ActiveTexture == 0 && m_Textures.size() == 0) && m_Textures[m_ActiveTexture].texture != nullptr)
 	{

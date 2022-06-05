@@ -29,7 +29,7 @@ void PrintSDLVersion()
 		linked.major, linked.minor, linked.patch);
 }
 
-void dae::Minigin::Initialize()
+void Engine::Minigin::Initialize()
 {
 	PrintSDLVersion();
 	
@@ -57,7 +57,7 @@ void dae::Minigin::Initialize()
 	SoundLocator::register_sound_system(new SoundService{});
 }
 
-void dae::Minigin::Cleanup()
+void Engine::Minigin::Cleanup()
 {
 	Renderer::GetInstance().Destroy();
 	SDL_DestroyWindow(m_Window);
@@ -66,7 +66,7 @@ void dae::Minigin::Cleanup()
 	delete &SoundLocator::get_sound_system();
 }
 
-void dae::Minigin::Run()
+void Engine::Minigin::Run()
 {
 	Initialize();
 

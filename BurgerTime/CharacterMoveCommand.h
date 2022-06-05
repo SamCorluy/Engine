@@ -2,7 +2,7 @@
 #include "BaseCommand.h"
 #include "MovementComponent.h"
 #include <memory>
-class CharacterMoveCommand final : public BaseCommand
+class CharacterMoveCommand final : public Engine::BaseCommand
 {
 public:
 	CharacterMoveCommand(const std::weak_ptr<MovementComponent>& target, const Direction dir);

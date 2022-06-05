@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseCommand.h"
 #include "HighScoreMenuComponent.h"
-class HighscoreCommand : public BaseCommand
+class HighscoreCommand : public Engine::BaseCommand
 {
 public:
 	HighscoreCommand(const std::weak_ptr<HighScoreMenuComponent>& target);

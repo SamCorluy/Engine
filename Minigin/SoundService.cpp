@@ -1,7 +1,7 @@
 #include "MiniginPCH.h"
 #include "SoundService.h"
 #include "SDL_mixer.h"
-class SoundService::SDLMixerPimpl
+class Engine::SoundService::SDLMixerPimpl
 {
 	std::vector<Mix_Chunk*> effects;
 	std::vector<Mix_Music*> music;
@@ -86,48 +86,48 @@ public:
 	}
 };
 
-const int SoundService::MAX_PENDING = 16;
-int SoundService::numPending_{};
-playSound SoundService::pending_[MAX_PENDING]{};
+const int Engine::SoundService::MAX_PENDING = 16;
+int Engine::SoundService::numPending_{};
+Engine::playSound Engine::SoundService::pending_[MAX_PENDING]{};
 
-SoundService::SDLMixerPimpl* SoundService::m_pImpl{};
+Engine::SoundService::SDLMixerPimpl* Engine::SoundService::m_pImpl{};
 
-void SoundService::init()
+void Engine::SoundService::init()
 {
 	numPending_ = 0;
 }
 
-SoundService::SoundService()
+Engine::SoundService::SoundService()
 {
 	m_pImpl = new SDLMixerPimpl();
 }
 
-SoundService::~SoundService()
+Engine::SoundService::~SoundService()
 {
 	delete m_pImpl;
 }
 
-int SoundService::loadSound(const char* filename, SoundType soundType)
+int Engine::SoundService::loadSound(const char* filename, SoundType soundType)
 {
 	return m_pImpl->loadSound(filename, soundType);
 }
 
-void SoundService::play(const sound_id id, const float volume, SoundType soundType)
+void Engine::SoundService::play(const sound_id id, const float volume, SoundType soundType)
 {
 	m_pImpl->play(id, volume, soundType);
 }
 
-void SoundService::stopAllSounds()
+void Engine::SoundService::stopAllSounds()
 {
 	m_pImpl->stopAllSounds();
 }
 
-void SoundService::update()
+void Engine::SoundService::update()
 {
 	m_pImpl->update();
 }
 
-void SoundService::Remove()
+void Engine::SoundService::Remove()
 {
 	delete m_pImpl;
 }

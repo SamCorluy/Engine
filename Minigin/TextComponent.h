@@ -2,7 +2,7 @@
 #include "BaseComponent.h"
 #include <string>
 
-namespace dae
+namespace Engine
 {
 	class Font;
 	class Texture2D;

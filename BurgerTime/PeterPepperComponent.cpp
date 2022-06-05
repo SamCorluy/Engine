@@ -5,7 +5,7 @@
 #include <iostream>
 #include "ElapsedTime.h"
 #include "Observer.h"
-PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, const std::weak_ptr<dae::Scene>& scene, int lives, std::string folder)
+PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<Engine::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, const std::weak_ptr<Engine::Scene>& scene, int lives, std::string folder)
 	:BaseComponent(owner)
 	, m_MovementProcessed{false}
 	, m_pCurrentNode{ node }
@@ -25,28 +25,28 @@ PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject
 	, m_Velocity{100.f}
 {
 	// Initialize subject
-	owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
-	m_pSubject = owner->GetComponent<dae::Subject>();
+	owner->AddComponent<Engine::Subject>(std::make_shared<Engine::Subject>(owner));
+	m_pSubject = owner->GetComponent<Engine::Subject>();
 
 	// Handling animation info
-	std::vector<dae::AnimationInit> animInitList;
+	std::vector<Engine::AnimationInit> animInitList;
 	std::string fileName{ folder + "PeterPepperWalkSideWays.png" };
-	animInitList.push_back(dae::AnimationInit(3, 0.32f, fileName, { -m_RectSize.first / 2, 0 }));
+	animInitList.push_back(Engine::AnimationInit(3, 0.32f, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = folder + "peterPepperLadderDown.png";
-	animInitList.push_back(dae::AnimationInit(2, 0.2f, fileName, { -m_RectSize.first / 2, 0 }));
+	animInitList.push_back(Engine::AnimationInit(2, 0.2f, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = folder + "peterPepperLadderUp.png";
-	animInitList.push_back(dae::AnimationInit(2, 0.2f, fileName, { -m_RectSize.first / 2, 0 }));
+	animInitList.push_back(Engine::AnimationInit(2, 0.2f, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = folder + "PeterPepperIdle.png";
-	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName, { -m_RectSize.first / 2, 0 }));
+	animInitList.push_back(Engine::AnimationInit(1, 0.f, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = folder + "PeterPepperThrowSaltWalk.png";
-	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName, { -m_RectSize.first / 2, 0 }));
+	animInitList.push_back(Engine::AnimationInit(1, 0.f, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = folder + "PeterPepperThrowSaltDown.png";
-	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName, { -m_RectSize.first / 2, 0 }));
+	animInitList.push_back(Engine::AnimationInit(1, 0.f, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = folder + "PeterPepperThrowSaltUp.png";
-	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName, { -m_RectSize.first / 2, 0 }));
+	animInitList.push_back(Engine::AnimationInit(1, 0.f, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = folder + "PeterPepperDeath.png";
-	animInitList.push_back(dae::AnimationInit(12, m_DieDuration, fileName, { -m_RectSize.first / 2, 0 }));
-	owner->AddComponent<dae::AnimationComponent>(std::make_shared<dae::AnimationComponent>(owner, animInitList, scale));
+	animInitList.push_back(Engine::AnimationInit(12, m_DieDuration, fileName, { -m_RectSize.first / 2, 0 }));
+	owner->AddComponent<Engine::AnimationComponent>(std::make_shared<Engine::AnimationComponent>(owner, animInitList, scale));
 
 	// Handle spawnpoint
 	//std::pair<int, int> idx = { 0,0 };
@@ -64,12 +64,12 @@ void PeterPepperComponent::Update()
 {
 	if (m_Dead)
 	{
-		m_ElapsedTime += ElapsedTime::GetInstance().GetElapsedTime();
+		m_ElapsedTime += Engine::ElapsedTime::GetInstance().GetElapsedTime();
 		return;
 	}
 	if (!m_MovementProcessed)
 	{
-		auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
+		auto comp = GetOwner().lock()->GetComponent<Engine::AnimationComponent>();
 		comp.lock()->SetActiveAnimation(3);
 		comp.lock()->SetFlip(false);
 	}
@@ -77,7 +77,7 @@ void PeterPepperComponent::Update()
 		m_MovementProcessed = false;
 	if(!m_CanThrow)
 	{
-		m_ElapsedTime += ElapsedTime::GetInstance().GetElapsedTime();
+		m_ElapsedTime += Engine::ElapsedTime::GetInstance().GetElapsedTime();
 		if (m_ElapsedTime >= m_SaltCooldown)
 		{
 			m_ElapsedTime = 0.f;
@@ -94,7 +94,7 @@ void PeterPepperComponent::StaticUpdate()
 {
 }
 
-void PeterPepperComponent::Render(const dae::Transform&) const
+void PeterPepperComponent::Render(const Engine::Transform&) const
 {
 }
 
@@ -120,7 +120,7 @@ void PeterPepperComponent::ThrowSalt()
 	{
 		--m_SaltCharges;
 		if (!m_pSubject.expired())
-			m_pSubject.lock()->Notify(dae::Event::SALT_THROW, m_SaltCharges);
+			m_pSubject.lock()->Notify(Engine::Event::SALT_THROW, m_SaltCharges);
 		m_CanThrow = false;
 		m_ThrowingSalt = true;
 		size_t texture{};
@@ -149,10 +149,10 @@ void PeterPepperComponent::ThrowSalt()
 		default:
 			break;
 		}
-		auto obj = std::make_shared<dae::GameObject>();
+		auto obj = std::make_shared<Engine::GameObject>();
 		obj->AddComponent<SaltComponent>(std::make_shared<SaltComponent>(obj, 3, m_pCurrentNode, pos, m_FloorOffset, m_Direction));
 		m_pScene.lock()->Add(obj);
-		auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
+		auto comp = GetOwner().lock()->GetComponent<Engine::AnimationComponent>();
 		comp.lock()->SetActiveAnimation(texture);
 		comp.lock()->SetFlip(flip);
 		m_pSaltComponent = obj->GetComponent<SaltComponent>();
@@ -163,11 +163,11 @@ void PeterPepperComponent::Die()
 {
 	if (m_Dead)
 		return;
-	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
+	auto comp = GetOwner().lock()->GetComponent<Engine::AnimationComponent>();
 	comp.lock()->SetActiveAnimation(7);
 	--m_Lives;
 	if (!m_pSubject.expired())
-		m_pSubject.lock()->Notify(dae::Event::CHARACTER_DEAD, m_Lives);
+		m_pSubject.lock()->Notify(Engine::Event::CHARACTER_DEAD, m_Lives);
 	m_ElapsedTime = 0.f;
 	m_CanThrow = false;
 	m_ThrowingSalt = false;
@@ -219,7 +219,7 @@ const std::pair<int, int> PeterPepperComponent::GetRectSize() const
 void PeterPepperComponent::AddPoints(int points)
 {
 	m_Points += points;
-	m_pSubject.lock()->Notify(dae::Event::SCORE_CHANGE, m_Points);
+	m_pSubject.lock()->Notify(Engine::Event::SCORE_CHANGE, m_Points);
 }
 
 const int PeterPepperComponent::GetFloorOffset() const

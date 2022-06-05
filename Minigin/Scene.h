@@ -2,7 +2,7 @@
 #include "SceneManager.h"
 #include <vector>
 
-namespace dae
+namespace Engine
 {
 	class GameObject;
 	class Scene

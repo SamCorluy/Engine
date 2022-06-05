@@ -6,7 +6,7 @@
 #include "Texture2D.h"
 #include "ElapsedTime.h"
 
-dae::TextureManagerComponent::TextureManagerComponent(const std::shared_ptr<GameObject>& owner, const std::vector<std::pair<const std::string, glm::vec2>>& textureInfo, int scale)
+Engine::TextureManagerComponent::TextureManagerComponent(const std::shared_ptr<GameObject>& owner, const std::vector<std::pair<const std::string, glm::vec2>>& textureInfo, int scale)
 	: BaseComponent(owner)
 	, m_Scale{scale}
 {
@@ -16,7 +16,7 @@ dae::TextureManagerComponent::TextureManagerComponent(const std::shared_ptr<Game
 	}
 }
 
-void dae::TextureManagerComponent::Render(const Transform& pos) const
+void Engine::TextureManagerComponent::Render(const Transform& pos) const
 {
 	auto window = Renderer::GetInstance().GetWindow();
 	int windowHeight;
@@ -35,7 +35,7 @@ void dae::TextureManagerComponent::Render(const Transform& pos) const
 	}
 }
 
-void dae::TextureManagerComponent::AddTexture(const std::string& fileName, glm::vec2 offset)
+void Engine::TextureManagerComponent::AddTexture(const std::string& fileName, glm::vec2 offset)
 {
 	TextureStruct text{};
 	text.texture = ResourceManager::GetInstance().LoadTexture(fileName);
@@ -43,7 +43,7 @@ void dae::TextureManagerComponent::AddTexture(const std::string& fileName, glm::
 	m_Textures.push_back(std::make_shared<TextureStruct>(text));
 }
 
-void dae::TextureManagerComponent::RemoveLastTexture()
+void Engine::TextureManagerComponent::RemoveLastTexture()
 {
 	if (m_Textures.size() > 0)
 	{
@@ -51,7 +51,7 @@ void dae::TextureManagerComponent::RemoveLastTexture()
 	}
 }
 
-const glm::vec2 dae::TextureManagerComponent::getOffset(size_t idx) const
+const glm::vec2 Engine::TextureManagerComponent::getOffset(size_t idx) const
 {
 	glm::vec2 offset {};
 	if(idx < m_Textures.size())
@@ -59,17 +59,17 @@ const glm::vec2 dae::TextureManagerComponent::getOffset(size_t idx) const
 	return offset;
 }
 
-void dae::TextureManagerComponent::setOffset(size_t idx, glm::vec2 offset)
+void Engine::TextureManagerComponent::setOffset(size_t idx, glm::vec2 offset)
 {
 	if (idx < m_Textures.size())
 		m_Textures[idx]->offset = offset;
 }
 
-void dae::TextureManagerComponent::StaticUpdate()
+void Engine::TextureManagerComponent::StaticUpdate()
 {
 
 }
 
-void dae::TextureManagerComponent::Update()
+void Engine::TextureManagerComponent::Update()
 {
 }

@@ -2,7 +2,7 @@
 #include "GameObject.h"
 #include "TextureManagerComponent.h"
 
-HealthComponent::HealthComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, int health)
+HealthComponent::HealthComponent(const std::shared_ptr<Engine::GameObject>& owner, int scale, int health)
 	: BaseComponent(owner)
 	, m_RectSize{ 7 * scale, 8 * scale }
 {
@@ -15,7 +15,7 @@ HealthComponent::HealthComponent(const std::shared_ptr<dae::GameObject>& owner, 
 		info.second.x = static_cast<float>((m_RectSize.first + 1) * i);
 		textureInfo.push_back(info);
 	}
-	GetOwner().lock()->AddComponent<dae::TextureManagerComponent>(std::make_shared<dae::TextureManagerComponent>(GetOwner().lock(), textureInfo, scale));
+	GetOwner().lock()->AddComponent<Engine::TextureManagerComponent>(std::make_shared<Engine::TextureManagerComponent>(GetOwner().lock(), textureInfo, scale));
 }
 
 void HealthComponent::Update()
@@ -26,11 +26,11 @@ void HealthComponent::StaticUpdate()
 {
 }
 
-void HealthComponent::Render(const dae::Transform&) const
+void HealthComponent::Render(const Engine::Transform&) const
 {
 }
 
 void HealthComponent::RemoveLife() const
 {
-	GetOwner().lock()->GetComponent<dae::TextureManagerComponent>().lock()->RemoveLastTexture();
+	GetOwner().lock()->GetComponent<Engine::TextureManagerComponent>().lock()->RemoveLastTexture();
 }

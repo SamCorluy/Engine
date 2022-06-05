@@ -17,7 +17,7 @@ const int hotdogMax = 6;
 const int eggMax = 1;
 const int pickleMax = 4;
 
-GameManagerComponent::GameManagerComponent(const std::shared_ptr<dae::GameObject> owner, const std::weak_ptr<dae::Scene>& scene, const std::weak_ptr<dae::Scene>& hsScene, GameModes gameMode)
+GameManagerComponent::GameManagerComponent(const std::shared_ptr<Engine::GameObject> owner, const std::weak_ptr<Engine::Scene>& scene, const std::weak_ptr<Engine::Scene>& hsScene, GameModes gameMode)
 	: BaseComponent(owner)
 	, m_pScene{scene}
 	, m_pHighscoreScene{hsScene}
@@ -32,7 +32,7 @@ GameManagerComponent::GameManagerComponent(const std::shared_ptr<dae::GameObject
 	, m_currentEggSpawnCoolDown{ m_EggSpawnCoolDown }
 	, m_pPlayers{ std::shared_ptr<PeterPepperComponent>(nullptr), std::shared_ptr<PeterPepperComponent>(nullptr) }
 	, m_pPlayerControlledEnemy{ std::shared_ptr<EnemyComponent>(nullptr) }
-	, m_pScoreComponents{std::shared_ptr<CounterComponent>(nullptr), std::shared_ptr<CounterComponent>(nullptr)}
+	, m_pScoreComponents{std::shared_ptr<Engine::CounterComponent>(nullptr), std::shared_ptr<Engine::CounterComponent>(nullptr)}
 	, m_GameMode{gameMode}
 	, m_pHudElements{ std::make_pair(std::shared_ptr<HealthComponent>(nullptr), std::shared_ptr<SaltDisplayComponent>(nullptr)),std::make_pair(std::shared_ptr<HealthComponent>(nullptr), std::shared_ptr<SaltDisplayComponent>(nullptr)) }
 {
@@ -117,7 +117,7 @@ void GameManagerComponent::StaticUpdate()
 {
 }
 
-void GameManagerComponent::Render(const dae::Transform&) const
+void GameManagerComponent::Render(const Engine::Transform&) const
 {
 	//auto window = dae::Renderer::GetInstance().GetWindow();
 	//int windowWidth;
@@ -366,7 +366,7 @@ void GameManagerComponent::SpawnHotDog()
 	auto grid = m_pLevel.lock()->GetGrid();
 	auto startNode = grid[m_pLevel.lock()->GetHotDogSpawn()];
 	AnimDurationInit animInit(0.25f, 0.25f, 0.25f, 0.5f, 0.3f);
-	auto obj = std::make_shared<dae::GameObject>();
+	auto obj = std::make_shared<Engine::GameObject>();
 	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/HotDog", animInit, 100, m_LadderDeviationChance));
 	//obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
 	m_pScene.lock()->Add(obj, 1);
@@ -379,7 +379,7 @@ void GameManagerComponent::SpawnEgg()
 	auto grid = m_pLevel.lock()->GetGrid();
 	auto startNode = grid[m_pLevel.lock()->GetEggSpawn()];
 	AnimDurationInit animInit(0.25f, 0.25f, 0.25f, 0.5f, 0.3f);
-	auto obj = std::make_shared<dae::GameObject>();
+	auto obj = std::make_shared<Engine::GameObject>();
 	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Egg", animInit, 300, m_LadderDeviationChance));
 	//obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
 	m_pScene.lock()->Add(obj, 1);
@@ -392,7 +392,7 @@ void GameManagerComponent::SpawnPickle()
 	auto grid = m_pLevel.lock()->GetGrid();
 	auto startNode = grid[m_pLevel.lock()->GetPickleSpawn()];
 	AnimDurationInit animInit(0.1f, 0.12f, 0.12f, 0.5f, 0.3f);
-	auto obj = std::make_shared<dae::GameObject>();
+	auto obj = std::make_shared<Engine::GameObject>();
 	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/Pickle", animInit, 200, m_LadderDeviationChance));
 	//obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
 	m_pScene.lock()->Add(obj, 1);
@@ -402,13 +402,13 @@ void GameManagerComponent::SpawnPickle()
 void GameManagerComponent::InitLevel(size_t index)
 {
 	ClearLevel();
-	auto levelObject = std::make_shared<dae::GameObject>();
+	auto levelObject = std::make_shared<Engine::GameObject>();
 	levelObject->AddComponent<LevelComponent>(std::make_shared<LevelComponent>(levelObject, "../Data/" + m_LevelFolders[index] + "/Level.txt", 3, m_pScene));
 	//Adding level to scene
 	m_pLevel = levelObject->GetComponent<LevelComponent>();
 	//Preparations to center level on screen
 	auto size = m_pLevel.lock()->getLevelSize();
-	auto window = dae::Renderer::GetInstance().GetWindow();
+	auto window = Engine::Renderer::GetInstance().GetWindow();
 	int windowWidth, windowHeight;
 	SDL_GetWindowSize(window, &windowWidth, &windowHeight);
 	glm::vec2 pos;
@@ -556,48 +556,48 @@ void GameManagerComponent::InitPlayer(size_t idx, size_t totalPlayers)
 		startNode = grid[m_pLevel.lock()->GetPlayerTwoSpawn()];
 	float offset = 450.f;
 
-	auto scoreObject = std::make_shared<dae::GameObject>();
-	auto font = dae::ResourceManager::GetInstance().LoadFont("emulogic.ttf", 20);
-	scoreObject->AddComponent<CounterComponent>(std::make_shared<CounterComponent>(scoreObject, font, 0));
+	auto scoreObject = std::make_shared<Engine::GameObject>();
+	auto font = Engine::ResourceManager::GetInstance().LoadFont("emulogic.ttf", 20);
+	scoreObject->AddComponent<Engine::CounterComponent>(std::make_shared<Engine::CounterComponent>(scoreObject, font, 0));
 	scoreObject->SetPosition(idx * offset + 0.f, 820.f);
 	m_pScene.lock()->Add(scoreObject);
-	m_pScoreComponents[idx] = scoreObject->GetComponent<CounterComponent>();
+	m_pScoreComponents[idx] = scoreObject->GetComponent<Engine::CounterComponent>();
 	//m_pPointsObserver = std::make_shared<PointsObserver>(scoreObject->GetComponent<CounterComponent>());
 
-	auto healthObject = std::make_shared<dae::GameObject>();
+	auto healthObject = std::make_shared<Engine::GameObject>();
 	healthObject->AddComponent<HealthComponent>(std::make_shared<HealthComponent>(healthObject, 3, health));
 	healthObject->SetPosition(idx * offset + 10.f, 10.f);
 	m_pScene.lock()->Add(healthObject);
 	m_pHudElements[idx].first = healthObject->GetComponent<HealthComponent>();
 
-	auto saltObject = std::make_shared<dae::GameObject>();
+	auto saltObject = std::make_shared<Engine::GameObject>();
 	saltObject->AddComponent<SaltDisplayComponent>(std::make_shared<SaltDisplayComponent>(saltObject, 3, 5));
 	saltObject->SetPosition(idx * offset + 150.f, 10.f);
 	m_pScene.lock()->Add(saltObject);
 	m_pHudElements[idx].second = saltObject->GetComponent<SaltDisplayComponent>();
 
-	auto playerObject = std::make_shared<dae::GameObject>();
+	auto playerObject = std::make_shared<Engine::GameObject>();
 	playerObject->AddComponent<PeterPepperComponent>(std::make_shared<PeterPepperComponent>(playerObject, 3, startNode, m_pLevel.lock()->GetFloorOffset(), m_pScene, health, path));
 	playerObject->AddComponent<MovementComponent>(std::make_shared<MovementComponent>(playerObject));
-	playerObject->GetComponent<dae::Subject>().lock()->AddObserver(std::make_shared<HealthObserver>(healthObject->GetComponent<HealthComponent>()));
-	playerObject->GetComponent<dae::Subject>().lock()->AddObserver(std::make_shared<SaltObserver>(saltObject->GetComponent<SaltDisplayComponent>()));
-	playerObject->GetComponent<dae::Subject>().lock()->AddObserver(std::make_shared<PointsObserver>(scoreObject->GetComponent<CounterComponent>()));
+	playerObject->GetComponent<Engine::Subject>().lock()->AddObserver(std::make_shared<HealthObserver>(healthObject->GetComponent<HealthComponent>()));
+	playerObject->GetComponent<Engine::Subject>().lock()->AddObserver(std::make_shared<SaltObserver>(saltObject->GetComponent<SaltDisplayComponent>()));
+	playerObject->GetComponent<Engine::Subject>().lock()->AddObserver(std::make_shared<PointsObserver>(scoreObject->GetComponent<Engine::CounterComponent>()));
 	m_pPlayers[idx] = playerObject->GetComponent<PeterPepperComponent>();
 	if (idx == 0)
 	{
-		dae::InputManager::GetInstance().AddKeyboardInput('w', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::UP));
-		dae::InputManager::GetInstance().AddKeyboardInput('s', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::DOWN));
-		dae::InputManager::GetInstance().AddKeyboardInput('a', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::LEFT));
-		dae::InputManager::GetInstance().AddKeyboardInput('d', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::RIGHT));
-		dae::InputManager::GetInstance().AddKeyboardInput('e', dae::InputType::Press, std::make_shared<ThrowSaltCommand>(m_pPlayers[idx]));
+		Engine::InputManager::GetInstance().AddKeyboardInput('w', Engine::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::UP));
+		Engine::InputManager::GetInstance().AddKeyboardInput('s', Engine::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::DOWN));
+		Engine::InputManager::GetInstance().AddKeyboardInput('a', Engine::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::LEFT));
+		Engine::InputManager::GetInstance().AddKeyboardInput('d', Engine::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::RIGHT));
+		Engine::InputManager::GetInstance().AddKeyboardInput('e', Engine::InputType::Press, std::make_shared<ThrowSaltCommand>(m_pPlayers[idx]));
 	}
 	if ((idx == 0 && totalPlayers == 1) || idx == 1)
 	{
-		dae::InputManager::GetInstance().AddControllerInput(0x5820, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::UP));
-		dae::InputManager::GetInstance().AddControllerInput(0x5821, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::DOWN));
-		dae::InputManager::GetInstance().AddControllerInput(0x5823, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::LEFT));
-		dae::InputManager::GetInstance().AddControllerInput(0x5822, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::RIGHT));
-		dae::InputManager::GetInstance().AddControllerInput(0x5800, dae::InputType::Press, std::make_shared<ThrowSaltCommand>(m_pPlayers[idx]));
+		Engine::InputManager::GetInstance().AddControllerInput(0x5820, Engine::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::UP));
+		Engine::InputManager::GetInstance().AddControllerInput(0x5821, Engine::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::DOWN));
+		Engine::InputManager::GetInstance().AddControllerInput(0x5823, Engine::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::LEFT));
+		Engine::InputManager::GetInstance().AddControllerInput(0x5822, Engine::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::RIGHT));
+		Engine::InputManager::GetInstance().AddControllerInput(0x5800, Engine::InputType::Press, std::make_shared<ThrowSaltCommand>(m_pPlayers[idx]));
 	}
 	m_pScene.lock()->Add(playerObject);
 }
@@ -633,7 +633,7 @@ void GameManagerComponent::InitBurgers()
 	for (auto initData : m_pLevel.lock()->GetBurgerInit())
 	{
 		auto startNode = grid[{initData[0].idx.first, 0}];
-		auto burgerObj = std::make_shared<dae::GameObject>();
+		auto burgerObj = std::make_shared<Engine::GameObject>();
 		burgerObj->AddComponent<BurgerComponent>(std::make_shared<BurgerComponent>(startNode, m_pScene, initData, burgerObj, 3, m_pLevel, 2));
 		m_pBurgers.push_back(burgerObj->GetComponent<BurgerComponent>());
 		m_pScene.lock()->Add(burgerObj, 2);
@@ -646,21 +646,21 @@ void GameManagerComponent::SpawnPlayerControlledHotDog()
 	auto grid = m_pLevel.lock()->GetGrid();
 	auto startNode = grid[m_pLevel.lock()->GetHotDogSpawn()];
 	AnimDurationInit animInit(0.25f, 0.25f, 0.25f, 0.5f, 0.3f);
-	auto obj = std::make_shared<dae::GameObject>();
+	auto obj = std::make_shared<Engine::GameObject>();
 	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/PlayerControlledHotDog", animInit, 100, m_LadderDeviationChance));
 	obj->AddComponent<MovementComponent>(std::make_shared<MovementComponent>(obj));
 	//obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
 	m_pScene.lock()->Add(obj);
 	m_pPlayerControlledEnemy = obj->GetComponent<EnemyComponent>();
-	dae::InputManager::GetInstance().AddControllerInput(0x5820, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::UP));
-	dae::InputManager::GetInstance().AddControllerInput(0x5821, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::DOWN));
-	dae::InputManager::GetInstance().AddControllerInput(0x5823, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::LEFT));
-	dae::InputManager::GetInstance().AddControllerInput(0x5822, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::RIGHT));
+	Engine::InputManager::GetInstance().AddControllerInput(0x5820, Engine::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::UP));
+	Engine::InputManager::GetInstance().AddControllerInput(0x5821, Engine::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::DOWN));
+	Engine::InputManager::GetInstance().AddControllerInput(0x5823, Engine::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::LEFT));
+	Engine::InputManager::GetInstance().AddControllerInput(0x5822, Engine::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::RIGHT));
 }
 
 void GameManagerComponent::EndGame()
 {
-	SoundLocator::get_sound_system().stopAllSounds();
+	Engine::SoundLocator::get_sound_system().stopAllSounds();
 	ClearEnemies();
 	ClearLevel();
 	ClearBurgers();
@@ -668,9 +668,9 @@ void GameManagerComponent::EndGame()
 
 	GetOwner().lock()->Remove();
 
-	dae::InputManager::GetInstance().RemoveKeys();
-	dae::SceneManager::GetInstance().SetActiveScene("HighScore");
-	auto gameObject = std::make_shared<dae::GameObject>();
+	Engine::InputManager::GetInstance().RemoveKeys();
+	Engine::SceneManager::GetInstance().SetActiveScene("HighScore");
+	auto gameObject = std::make_shared<Engine::GameObject>();
 	std::vector<int> scores;
 	scores.push_back(m_pScoreComponents[0].lock()->GetValue());
 	if(!m_pScoreComponents[1].expired())
@@ -752,7 +752,7 @@ void GameManagerComponent::HandleEnemyRespawns()
 	if (static_cast<int>(m_pHotDogs.size()) < currentMax || (m_GameMode == GameModes::PVP && m_pPlayerControlledEnemy.expired()))
 	{
 		if (m_CurrentHotDogSpawnCoolDown > 0.f)
-			m_CurrentHotDogSpawnCoolDown -= ElapsedTime::GetInstance().GetElapsedTime();
+			m_CurrentHotDogSpawnCoolDown -= Engine::ElapsedTime::GetInstance().GetElapsedTime();
 		if (m_CurrentHotDogSpawnCoolDown <= 0.f)
 			if (m_GameMode == GameModes::PVP && m_pPlayerControlledEnemy.expired())
 				SpawnPlayerControlledHotDog();
@@ -762,14 +762,14 @@ void GameManagerComponent::HandleEnemyRespawns()
 	if (static_cast<int>(m_pEggs.size()) < m_EggSpawns)
 	{
 		if (m_currentEggSpawnCoolDown > 0.f)
-			m_currentEggSpawnCoolDown -= ElapsedTime::GetInstance().GetElapsedTime();
+			m_currentEggSpawnCoolDown -= Engine::ElapsedTime::GetInstance().GetElapsedTime();
 		if (m_currentEggSpawnCoolDown <= 0.f)
 			SpawnEgg();
 	}
 	if (static_cast<int>(m_pPickles.size()) < m_PickleSpawns)
 	{
 		if (m_CurrentPickleSpawnCoolDown > 0.f)
-			m_CurrentPickleSpawnCoolDown -= ElapsedTime::GetInstance().GetElapsedTime();
+			m_CurrentPickleSpawnCoolDown -= Engine::ElapsedTime::GetInstance().GetElapsedTime();
 		if (m_CurrentPickleSpawnCoolDown <= 0.f)
 			SpawnPickle();
 	}

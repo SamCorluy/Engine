@@ -6,7 +6,7 @@
 #include <vector>
 #include <map>
 
-namespace dae
+namespace Engine
 {
 	class Texture2D;
 	struct TextureStruct

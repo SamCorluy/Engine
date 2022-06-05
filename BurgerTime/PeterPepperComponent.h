@@ -13,13 +13,13 @@
 //	ClimbingUp,
 //	ClimbingDown
 //};
-class PeterPepperComponent final : public dae::BaseComponent
+class PeterPepperComponent final : public Engine::BaseComponent
 {
 public:
-	PeterPepperComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, const std::weak_ptr<dae::Scene>& scene, int lives, std::string folder);
+	PeterPepperComponent(const std::shared_ptr<Engine::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, const std::weak_ptr<Engine::Scene>& scene, int lives, std::string folder);
 	virtual void Update() override;
 	virtual void StaticUpdate() override;
-	virtual void Render(const dae::Transform& pos) const override;
+	virtual void Render(const Engine::Transform& pos) const override;
 
 	const std::weak_ptr<NodeComponent> getNode() const;
 	const std::weak_ptr<SaltComponent> GetSalt() const;
@@ -40,7 +40,7 @@ public:
 
 	const float GetVelocity() const;
 private:
-	std::weak_ptr<dae::Subject> m_pSubject;
+	std::weak_ptr<Engine::Subject> m_pSubject;
 	bool m_MovementProcessed;
 	std::weak_ptr<NodeComponent> m_pCurrentNode;
 	std::weak_ptr<NodeComponent> m_pStartNode;
@@ -54,7 +54,7 @@ private:
 	bool m_Dead;
 	Direction m_Direction;
 	std::weak_ptr<SaltComponent> m_pSaltComponent;
-	std::weak_ptr<dae::Scene> m_pScene;
+	std::weak_ptr<Engine::Scene> m_pScene;
 	std::pair<int, int> m_RectSize;
 	int m_Lives;
 	int m_Points = 0;

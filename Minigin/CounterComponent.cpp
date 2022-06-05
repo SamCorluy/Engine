@@ -1,33 +1,33 @@
 #include "MiniginPCH.h"
 #include "CounterComponent.h"
 
-CounterComponent::CounterComponent(std::shared_ptr<dae::GameObject> owner, const  std::shared_ptr<dae::Font> font, int value)
+Engine::CounterComponent::CounterComponent(std::shared_ptr<GameObject> owner, const  std::shared_ptr<Font> font, int value)
 	: BaseComponent(owner)
 	, m_Value{value}
 {
-	owner->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(owner, std::to_string(value), font));
-	m_pTextComp = owner->GetComponent<dae::TextComponent>();
+	owner->AddComponent<Engine::TextComponent>(std::make_shared<Engine::TextComponent>(owner, std::to_string(value), font));
+	m_pTextComp = owner->GetComponent<Engine::TextComponent>();
 }
 
-void CounterComponent::Update()
+void Engine::CounterComponent::Update()
 {
 }
 
-void CounterComponent::StaticUpdate()
+void Engine::CounterComponent::StaticUpdate()
 {
 }
 
-void CounterComponent::Render(const dae::Transform&) const
+void Engine::CounterComponent::Render(const Transform&) const
 {
 }
 
-void CounterComponent::SetCounter(int value)
+void Engine::CounterComponent::SetCounter(int value)
 {
 	m_Value = value;
 	m_pTextComp.lock()->SetText(std::to_string(value));
 }
 
-const int CounterComponent::GetValue() const
+const int Engine::CounterComponent::GetValue() const
 {
 	return m_Value;
 }

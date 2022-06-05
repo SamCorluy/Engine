@@ -5,7 +5,7 @@
 #include <regex>
 #include "Scene.h"
 
-LevelComponent::LevelComponent(const std::shared_ptr<dae::GameObject>& owner, const std::string& filePath, int scale, const std::weak_ptr<dae::Scene>& scene)
+LevelComponent::LevelComponent(const std::shared_ptr<Engine::GameObject>& owner, const std::string& filePath, int scale, const std::weak_ptr<Engine::Scene>& scene)
 	:BaseComponent(owner)
 {
 	ReadFile(filePath, scale, scene);
@@ -19,7 +19,7 @@ void LevelComponent::StaticUpdate()
 {
 }
 
-void LevelComponent::Render(const dae::Transform&) const
+void LevelComponent::Render(const Engine::Transform&) const
 {
 }
 
@@ -123,7 +123,7 @@ void LevelComponent::SetNodeOffset(const glm::vec2& pos)
 	}
 }
 
-void LevelComponent::ReadFile(const std::string& filePath, int scale, const std::weak_ptr<dae::Scene>& scene)
+void LevelComponent::ReadFile(const std::string& filePath, int scale, const std::weak_ptr<Engine::Scene>& scene)
 {
 	m_PlayerOneSpawn;
 	m_PlayerTwoSpawn;
@@ -253,7 +253,7 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale, const std:
 				node.nodeSize.second = m_EvenTileSize.second;
 
 			node.ladderAccessSize = ladderAccessSize;
-			auto obj = std::make_shared<dae::GameObject>();
+			auto obj = std::make_shared<Engine::GameObject>();
 			obj->AddComponent<NodeComponent>(std::make_shared<NodeComponent>(obj, node));
 			auto comp = obj->GetComponent<NodeComponent>();
 			scene.lock()->Add(obj);
@@ -370,5 +370,5 @@ void LevelComponent::ReadFile(const std::string& filePath, int scale, const std:
 		//	m_Grid[node.first].nodeSize.second = m_EvenTileSize.second;
 	}
 	//owner->AddComponent<dae::AnimationComponent>(std::make_shared<dae::AnimationComponent>(owner, animInitList));
-	GetOwner().lock()->AddComponent<dae::TextureManagerComponent>(std::make_shared<dae::TextureManagerComponent>(GetOwner().lock(), textureInfo, scale));
+	GetOwner().lock()->AddComponent<Engine::TextureManagerComponent>(std::make_shared<Engine::TextureManagerComponent>(GetOwner().lock(), textureInfo, scale));
 }

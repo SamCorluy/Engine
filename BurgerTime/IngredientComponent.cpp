@@ -5,7 +5,7 @@
 #include "SoundLocator.h"
 
 
-IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level, IngredientType type)
+IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::shared_ptr<Engine::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level, IngredientType type)
 	: BaseComponent(owner)
 	//, m_TextureSize{8 * scale}
 	, m_DropHeight{ 8 * scale / 5 }
@@ -72,7 +72,7 @@ IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::sha
 		part.botLeft.y = info.second.y + GetOwner().lock()->GetTransform().GetPosition().y;
 		m_pPartitions.push_back(part);
 	}
-	GetOwner().lock()->AddComponent<dae::TextureManagerComponent>(std::make_shared<dae::TextureManagerComponent>(GetOwner().lock(), textureInfo, scale));
+	GetOwner().lock()->AddComponent<Engine::TextureManagerComponent>(std::make_shared<Engine::TextureManagerComponent>(GetOwner().lock(), textureInfo, scale));
 }
 
 void IngredientComponent::Update()
@@ -86,7 +86,7 @@ void IngredientComponent::StaticUpdate()
 {
 }
 
-void IngredientComponent::Render(const dae::Transform&) const
+void IngredientComponent::Render(const Engine::Transform&) const
 {
 }
 
@@ -103,7 +103,7 @@ void IngredientComponent::InitiateDrop(std::weak_ptr<PeterPepperComponent>& play
 	bool walkedOn = false;
 	for (int i = 0; i < static_cast<int>(m_pPartitions.size()); ++i)
 	{
-		auto text = GetOwner().lock()->GetComponent<dae::TextureManagerComponent>();
+		auto text = GetOwner().lock()->GetComponent<Engine::TextureManagerComponent>();
 		auto offset = text.lock()->getOffset(i);
 		if (offset.y == m_pBurgerOffset - m_DropHeight)
 		{
@@ -170,12 +170,12 @@ bool IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& play
 			if (!m_pPartitions[i].hasDropped && ((playerPos.x >= m_pPartitions[i].botLeft.x + m_RectSize.second / 2 && m_PrevPlayerPos[idx].x < m_pPartitions[i].botLeft.x + m_RectSize.second / 2) ||
 				(playerPos.x < m_pPartitions[i].botLeft.x + m_RectSize.second / 2 && m_PrevPlayerPos[idx].x >= m_pPartitions[i].botLeft.x + m_RectSize.second / 2)))
 			{
-				auto text = GetOwner().lock()->GetComponent<dae::TextureManagerComponent>();
+				auto text = GetOwner().lock()->GetComponent<Engine::TextureManagerComponent>();
 				auto offset = text.lock()->getOffset(i);
 				offset.y -= m_DropHeight;
 				text.lock()->setOffset(i, offset);
 				m_pPartitions[i].hasDropped = true;
-				SoundLocator::get_sound_system().play(2, 0.3f, SoundType::EFFECT);
+				Engine::SoundLocator::get_sound_system().play(2, 0.3f, Engine::SoundType::EFFECT);
 				//if (hasDropped())
 				//{
 				//	InitiateDrop(playerIdx);

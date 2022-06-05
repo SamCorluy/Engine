@@ -3,7 +3,7 @@
 #include "Structs.h"
 #include "SDL.h"
 
-namespace dae
+namespace Engine
 {
 	class GameObject;
 	class Texture2D;

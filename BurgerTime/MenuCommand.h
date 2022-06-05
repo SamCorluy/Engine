@@ -7,7 +7,7 @@ enum class MenuInteraction
 	MOVEUP,
 	MOVEDOWN
 };
-class MenuCommand final : public BaseCommand
+class MenuCommand final : public Engine::BaseCommand
 {
 public:
 	MenuCommand(const std::weak_ptr<MenuComponent>& target, MenuInteraction interaction);

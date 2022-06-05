@@ -7,9 +7,9 @@ HealthObserver::HealthObserver(const std::weak_ptr<HealthComponent>& healthComp)
 {
 }
 
-void HealthObserver::Notify(dae::Event event, int lives)
+void HealthObserver::Notify(Engine::Event event, int lives)
 {
-	if (event == dae::Event::CHARACTER_DEAD && lives >= 0)
+	if (event == Engine::Event::CHARACTER_DEAD && lives >= 0)
 	{
 		m_pHealthComponent.lock()->RemoveLife();
 	}

@@ -3,18 +3,21 @@
 #include "BaseComponent.h"
 #include "TextComponent.h"
 
-class CounterComponent final : public dae::BaseComponent
+namespace Engine
 {
-public:
-	CounterComponent(std::shared_ptr<dae::GameObject> owner, const std::shared_ptr<dae::Font> font, int value);
+	class CounterComponent final : public BaseComponent
+	{
+	public:
+		CounterComponent(std::shared_ptr<GameObject> owner, const std::shared_ptr<Font> font, int value);
 
-	void Update() override;
-	void StaticUpdate() override;
-	void Render(const dae::Transform& pos) const override;
-	void SetCounter(int value);
-	const int GetValue() const;
-private:
-	std::weak_ptr<dae::TextComponent> m_pTextComp;
-	int m_Value;
-};
+		void Update() override;
+		void StaticUpdate() override;
+		void Render(const Transform& pos) const override;
+		void SetCounter(int value);
+		const int GetValue() const;
+	private:
+		std::weak_ptr<TextComponent> m_pTextComp;
+		int m_Value;
+	};
+}
 

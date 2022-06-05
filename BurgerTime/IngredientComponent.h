@@ -13,13 +13,13 @@ struct IngredientPartition
 	bool hasDropped;
 	glm::vec2 botLeft;
 };
-class IngredientComponent final : public dae::BaseComponent
+class IngredientComponent final : public Engine::BaseComponent
 {
 public:
-	IngredientComponent(std::pair<int, int> idx, const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level, IngredientType type);
+	IngredientComponent(std::pair<int, int> idx, const std::shared_ptr<Engine::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level, IngredientType type);
 	virtual void Update() override;
 	virtual void StaticUpdate() override;
-	virtual void Render(const dae::Transform& pos) const override;
+	virtual void Render(const Engine::Transform& pos) const override;
 	const int GetTextureHeight() const;
 	const bool hasDropped() const;
 	void setDropped(bool dropped, std::weak_ptr<PeterPepperComponent>& player);

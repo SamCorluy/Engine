@@ -8,8 +8,8 @@
 #include "TextComponent.h"
 #include "InputManager.h"
 #include "HighscoreCommand.h"
-HighScoreMenuComponent::HighScoreMenuComponent(const std::shared_ptr<dae::GameObject> owner, const std::weak_ptr<dae::Scene>& scene, std::vector<int> scores)
-	: dae::BaseComponent(owner)
+HighScoreMenuComponent::HighScoreMenuComponent(const std::shared_ptr<Engine::GameObject> owner, const std::weak_ptr<Engine::Scene>& scene, std::vector<int> scores)
+	: Engine::BaseComponent(owner)
 	, m_pScene{scene}
 {
 	InitMenu(scores);
@@ -20,9 +20,9 @@ void HighScoreMenuComponent::Update()
 {
 	if (!m_controlsAdded)
 	{
-		dae::InputManager::GetInstance().AddKeyboardInput('\r', dae::InputType::Press, std::make_shared<HighscoreCommand>(GetOwner().lock()->GetComponent<HighScoreMenuComponent>()));
-		dae::InputManager::GetInstance().AddKeyboardInput(0x40000058, dae::InputType::Press, std::make_shared<HighscoreCommand>(GetOwner().lock()->GetComponent<HighScoreMenuComponent>()));
-		dae::InputManager::GetInstance().AddControllerInput(0x5800, dae::InputType::Press, std::make_shared<HighscoreCommand>(GetOwner().lock()->GetComponent<HighScoreMenuComponent>()));
+		Engine::InputManager::GetInstance().AddKeyboardInput('\r', Engine::InputType::Press, std::make_shared<HighscoreCommand>(GetOwner().lock()->GetComponent<HighScoreMenuComponent>()));
+		Engine::InputManager::GetInstance().AddKeyboardInput(0x40000058, Engine::InputType::Press, std::make_shared<HighscoreCommand>(GetOwner().lock()->GetComponent<HighScoreMenuComponent>()));
+		Engine::InputManager::GetInstance().AddControllerInput(0x5800, Engine::InputType::Press, std::make_shared<HighscoreCommand>(GetOwner().lock()->GetComponent<HighScoreMenuComponent>()));
 		m_controlsAdded = true;
 	}
 }
@@ -31,7 +31,7 @@ void HighScoreMenuComponent::StaticUpdate()
 {
 }
 
-void HighScoreMenuComponent::Render(const dae::Transform&) const
+void HighScoreMenuComponent::Render(const Engine::Transform&) const
 {
 }
 
@@ -49,8 +49,8 @@ void HighScoreMenuComponent::BackToMenu()
 
 	GetOwner().lock()->Remove();
 
-	dae::InputManager::GetInstance().RemoveKeys();
-	dae::SceneManager::GetInstance().SetActiveScene("Menu");
+	Engine::InputManager::GetInstance().RemoveKeys();
+	Engine::SceneManager::GetInstance().SetActiveScene("Menu");
 }
 
 void HighScoreMenuComponent::InitMenu(std::vector<int> scores)
@@ -92,95 +92,95 @@ void HighScoreMenuComponent::InitMenu(std::vector<int> scores)
 
 
 	// Get fonts ready
-	auto font = dae::ResourceManager::GetInstance().LoadFont("emulogic.ttf", 20);
+	auto font = Engine::ResourceManager::GetInstance().LoadFont("emulogic.ttf", 20);
 
 	// Get window size
-	auto window = dae::Renderer::GetInstance().GetWindow();
+	auto window = Engine::Renderer::GetInstance().GetWindow();
 	int windowWidth, windowHeight;
 	SDL_GetWindowSize(window, &windowWidth, &windowHeight);
 
 	glm::vec2 pos{};
 
-	auto obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "PLAYER 1:", font));
-	auto textSize = obj->GetComponent<dae::TextComponent>().lock()->GetTextSize();
+	auto obj = std::make_shared<Engine::GameObject>();
+	obj->AddComponent<Engine::TextComponent>(std::make_shared<Engine::TextComponent>(obj, "PLAYER 1:", font));
+	auto textSize = obj->GetComponent<Engine::TextComponent>().lock()->GetTextSize();
 	if(scores.size() == 1)
 		pos.x = static_cast<float>(windowWidth - textSize.first) / 2.f;
 	else
 		pos.x = static_cast<float>((windowWidth / 2.f) - textSize.first) / 2.f;
 	pos.y = static_cast<float>(windowHeight - textSize.second) - 20.f;
 	obj->SetPosition(pos);
-	m_pPlayerTitles.push_back(obj->GetComponent<dae::TextComponent>());
+	m_pPlayerTitles.push_back(obj->GetComponent<Engine::TextComponent>());
 	m_pScene.lock()->Add(obj);
 	if (scores.size() > 1)
 	{
-		obj = std::make_shared<dae::GameObject>();
-		obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "PLAYER 2:", font));
-		textSize = obj->GetComponent<dae::TextComponent>().lock()->GetTextSize();
+		obj = std::make_shared<Engine::GameObject>();
+		obj->AddComponent<Engine::TextComponent>(std::make_shared<Engine::TextComponent>(obj, "PLAYER 2:", font));
+		textSize = obj->GetComponent<Engine::TextComponent>().lock()->GetTextSize();
 		pos.x = static_cast<float>((windowWidth / 2.f) - textSize.first) / 2.f + static_cast<float>(windowWidth) / 2.f;
 		obj->SetPosition(pos);
-		m_pPlayerTitles.push_back(obj->GetComponent<dae::TextComponent>());
+		m_pPlayerTitles.push_back(obj->GetComponent<Engine::TextComponent>());
 		m_pScene.lock()->Add(obj);
 	}
 
-	obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, std::to_string(scores[0]), font));
-	textSize = obj->GetComponent<dae::TextComponent>().lock()->GetTextSize();
+	obj = std::make_shared<Engine::GameObject>();
+	obj->AddComponent<Engine::TextComponent>(std::make_shared<Engine::TextComponent>(obj, std::to_string(scores[0]), font));
+	textSize = obj->GetComponent<Engine::TextComponent>().lock()->GetTextSize();
 	if (scores.size() == 1)
 		pos.x = static_cast<float>(windowWidth - textSize.first) / 2.f;
 	else
 		pos.x = static_cast<float>((windowWidth / 2.f) - textSize.first) / 2.f;
 	pos.y -= static_cast<float>(textSize.second) + 10.f;
 	obj->SetPosition(pos);
-	m_pPlayerScores.push_back(obj->GetComponent<dae::TextComponent>());
+	m_pPlayerScores.push_back(obj->GetComponent<Engine::TextComponent>());
 	m_pScene.lock()->Add(obj);
 	if (scores.size() > 1)
 	{
-		obj = std::make_shared<dae::GameObject>();
-		obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, std::to_string(scores[1]), font));
-		textSize = obj->GetComponent<dae::TextComponent>().lock()->GetTextSize();
+		obj = std::make_shared<Engine::GameObject>();
+		obj->AddComponent<Engine::TextComponent>(std::make_shared<Engine::TextComponent>(obj, std::to_string(scores[1]), font));
+		textSize = obj->GetComponent<Engine::TextComponent>().lock()->GetTextSize();
 		pos.x = static_cast<float>((windowWidth / 2.f) - textSize.first) / 2.f + static_cast<float>(windowWidth) / 2.f;
 		obj->SetPosition(pos);
-		m_pPlayerScores.push_back(obj->GetComponent<dae::TextComponent>());
+		m_pPlayerScores.push_back(obj->GetComponent<Engine::TextComponent>());
 		m_pScene.lock()->Add(obj);
 	}
 
-	obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "HIGHSCORES:", font));
-	textSize = obj->GetComponent<dae::TextComponent>().lock()->GetTextSize();
+	obj = std::make_shared<Engine::GameObject>();
+	obj->AddComponent<Engine::TextComponent>(std::make_shared<Engine::TextComponent>(obj, "HIGHSCORES:", font));
+	textSize = obj->GetComponent<Engine::TextComponent>().lock()->GetTextSize();
 	pos.x = static_cast<float>(windowWidth - textSize.first) / 2.f;
 	pos.y -= static_cast<float>(textSize.second) + 15.f;
 	obj->SetPosition(pos);
-	m_pHighScores.push_back(obj->GetComponent<dae::TextComponent>());
+	m_pHighScores.push_back(obj->GetComponent<Engine::TextComponent>());
 	m_pScene.lock()->Add(obj);
 
 	for (auto score : highScores)
 	{
-		obj = std::make_shared<dae::GameObject>();
-		obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, std::to_string(score), font));
-		textSize = obj->GetComponent<dae::TextComponent>().lock()->GetTextSize();
+		obj = std::make_shared<Engine::GameObject>();
+		obj->AddComponent<Engine::TextComponent>(std::make_shared<Engine::TextComponent>(obj, std::to_string(score), font));
+		textSize = obj->GetComponent<Engine::TextComponent>().lock()->GetTextSize();
 		pos.x = static_cast<float>(windowWidth - textSize.first) / 2.f;
 		pos.y -= static_cast<float>(textSize.second) + 10.f;
 		obj->SetPosition(pos);
-		m_pHighScores.push_back(obj->GetComponent<dae::TextComponent>());
+		m_pHighScores.push_back(obj->GetComponent<Engine::TextComponent>());
 		m_pScene.lock()->Add(obj);
 	}
 
-	obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "PRESS ENTER/A(CONTROLLER)", font));
-	textSize = obj->GetComponent<dae::TextComponent>().lock()->GetTextSize();
+	obj = std::make_shared<Engine::GameObject>();
+	obj->AddComponent<Engine::TextComponent>(std::make_shared<Engine::TextComponent>(obj, "PRESS ENTER/A(CONTROLLER)", font));
+	textSize = obj->GetComponent<Engine::TextComponent>().lock()->GetTextSize();
 	pos.x = static_cast<float>(windowWidth - textSize.first) / 2.f;
 	pos.y = 50.f;
 	obj->SetPosition(pos);
-	m_pHighScores.push_back(obj->GetComponent<dae::TextComponent>());
+	m_pHighScores.push_back(obj->GetComponent<Engine::TextComponent>());
 	m_pScene.lock()->Add(obj);
 
-	obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "TO CONTINUE", font));
-	textSize = obj->GetComponent<dae::TextComponent>().lock()->GetTextSize();
+	obj = std::make_shared<Engine::GameObject>();
+	obj->AddComponent<Engine::TextComponent>(std::make_shared<Engine::TextComponent>(obj, "TO CONTINUE", font));
+	textSize = obj->GetComponent<Engine::TextComponent>().lock()->GetTextSize();
 	pos.x = static_cast<float>(windowWidth - textSize.first) / 2.f;
 	pos.y -= textSize.second - 2.f;
 	obj->SetPosition(pos);
-	m_pHighScores.push_back(obj->GetComponent<dae::TextComponent>());
+	m_pHighScores.push_back(obj->GetComponent<Engine::TextComponent>());
 	m_pScene.lock()->Add(obj);
 }

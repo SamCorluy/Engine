@@ -8,13 +8,13 @@
 //	ClimbingUp,
 //	ClimbingDown
 //};
-class MovementComponent final : public dae::BaseComponent
+class MovementComponent final : public Engine::BaseComponent
 {
 public:
-	MovementComponent(const std::shared_ptr<dae::GameObject>& owner);
+	MovementComponent(const std::shared_ptr<Engine::GameObject>& owner);
 	virtual void Update() override;
 	virtual void StaticUpdate() override;
-	virtual void Render(const dae::Transform& pos) const override;
+	virtual void Render(const Engine::Transform& pos) const override;
 
 	void Move(Direction dir);
 private:

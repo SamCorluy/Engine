@@ -13,6 +13,36 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\npc/player">
+      <UniqueIdentifier>{db2749c8-21b0-45aa-883f-5b86b5427a79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\npc/player">
+      <UniqueIdentifier>{7d45d416-d548-43b6-9d22-977148b26eea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\UI">
+      <UniqueIdentifier>{7b455c48-2341-449e-aa67-1df595b85866}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\HUD">
+      <UniqueIdentifier>{53cad191-8406-4807-bbd7-fe46830d5318}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\burger">
+      <UniqueIdentifier>{f18b3f50-ddd7-45dc-84ad-710cad487c6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\level">
+      <UniqueIdentifier>{7fdaf080-d304-42f7-840d-e664c981003d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\HUD">
+      <UniqueIdentifier>{3ae60eac-4d7e-4634-bb9f-9142dc48be56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\burger">
+      <UniqueIdentifier>{29384936-c5ea-43ea-bb6f-bdc184d65da2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\level">
+      <UniqueIdentifier>{a76ec12e-0f44-43b9-8fb8-875f804073fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UI">
+      <UniqueIdentifier>{9af8185e-8fe5-4ce8-b3c6-fd811ad3118e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -21,130 +51,130 @@
     <ClCompile Include="Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PeterPepperComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CharacterMoveCommand.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LevelComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="IngredientComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BurgerComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NodeComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GameManagerComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BurgerComponent.cpp">
+      <Filter>Source Files\burger</Filter>
+    </ClCompile>
+    <ClCompile Include="CharacterMoveCommand.cpp">
+      <Filter>Source Files\npc/player</Filter>
+    </ClCompile>
     <ClCompile Include="EnemyComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SaltComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ThrowSaltCommand.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\npc/player</Filter>
     </ClCompile>
     <ClCompile Include="HealthComponent.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\HUD</Filter>
     </ClCompile>
     <ClCompile Include="HealthObserver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PointsObserver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SaltDisplayComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SaltObserver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MovementComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MenuComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MenuCommand.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="HighScoreMenuComponent.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\HUD</Filter>
     </ClCompile>
     <ClCompile Include="HighscoreCommand.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="HighScoreMenuComponent.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="IngredientComponent.cpp">
+      <Filter>Source Files\burger</Filter>
+    </ClCompile>
+    <ClCompile Include="LevelComponent.cpp">
+      <Filter>Source Files\level</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuCommand.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuComponent.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="MovementComponent.cpp">
+      <Filter>Source Files\npc/player</Filter>
+    </ClCompile>
+    <ClCompile Include="NodeComponent.cpp">
+      <Filter>Source Files\level</Filter>
+    </ClCompile>
+    <ClCompile Include="PeterPepperComponent.cpp">
+      <Filter>Source Files\npc/player</Filter>
+    </ClCompile>
+    <ClCompile Include="PointsObserver.cpp">
+      <Filter>Source Files\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="SaltComponent.cpp">
+      <Filter>Source Files\npc/player</Filter>
+    </ClCompile>
+    <ClCompile Include="SaltDisplayComponent.cpp">
+      <Filter>Source Files\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="SaltObserver.cpp">
+      <Filter>Source Files\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="ThrowSaltCommand.cpp">
+      <Filter>Source Files\npc/player</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PeterPepperComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CharacterMoveCommand.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LevelComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IngredientComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BurgerComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NodeComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GameManagerComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EnemyComponent.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="CharacterMoveCommand.h">
+      <Filter>Header Files\npc/player</Filter>
     </ClInclude>
-    <ClInclude Include="SaltComponent.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="EnemyComponent.h">
+      <Filter>Header Files\npc/player</Filter>
     </ClInclude>
     <ClInclude Include="ThrowSaltCommand.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\npc/player</Filter>
     </ClInclude>
-    <ClInclude Include="HealthComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HealthObserver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PointsObserver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SaltDisplayComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SaltObserver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MovementComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MenuComponent.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="SaltComponent.h">
+      <Filter>Header Files\npc/player</Filter>
     </ClInclude>
     <ClInclude Include="MenuCommand.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuComponent.h">
+      <Filter>Header Files\UI</Filter>
     </ClInclude>
     <ClInclude Include="HighScoreMenuComponent.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\UI</Filter>
     </ClInclude>
     <ClInclude Include="HighscoreCommand.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="SaltDisplayComponent.h">
+      <Filter>Header Files\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="HealthComponent.h">
+      <Filter>Header Files\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="PointsObserver.h">
+      <Filter>Header Files\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="SaltObserver.h">
+      <Filter>Header Files\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="HealthObserver.h">
+      <Filter>Header Files\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="BurgerComponent.h">
+      <Filter>Header Files\burger</Filter>
+    </ClInclude>
+    <ClInclude Include="IngredientComponent.h">
+      <Filter>Header Files\burger</Filter>
+    </ClInclude>
+    <ClInclude Include="MovementComponent.h">
+      <Filter>Header Files\npc/player</Filter>
+    </ClInclude>
+    <ClInclude Include="PeterPepperComponent.h">
+      <Filter>Header Files\npc/player</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeComponent.h">
+      <Filter>Header Files\level</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelComponent.h">
+      <Filter>Header Files\level</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

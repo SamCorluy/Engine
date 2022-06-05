@@ -1,16 +1,16 @@
 #include "MiniginPCH.h"
 #include "SoundLogger.h"
 
-SoundLogger::SoundLogger(Sound* wrapped)
+Engine::SoundLogger::SoundLogger(Sound* wrapped)
 	:wrapped_(wrapped)
 {}
 
-SoundLogger::~SoundLogger()
+Engine::SoundLogger::~SoundLogger()
 {
 	delete wrapped_;
 }
 
-int SoundLogger::loadSound(const char* filename, SoundType soundType)
+int Engine::SoundLogger::loadSound(const char* filename, SoundType soundType)
 {
 	std::string type = "load sound of type: ";
 	type += (soundType == SoundType::EFFECT) ? "effect" : "sound";
@@ -19,7 +19,7 @@ int SoundLogger::loadSound(const char* filename, SoundType soundType)
 	return wrapped_->loadSound(filename, soundType);
 }
 
-void SoundLogger::play(const sound_id id, const float volume, SoundType soundType)
+void Engine::SoundLogger::play(const sound_id id, const float volume, SoundType soundType)
 {
 	std::string type = "play sound of type: ";
 	type += (soundType == SoundType::EFFECT) ? "effect" : "sound";
@@ -27,23 +27,23 @@ void SoundLogger::play(const sound_id id, const float volume, SoundType soundTyp
 	wrapped_->play(id, volume, soundType);
 }
 
-void SoundLogger::stopAllSounds()
+void Engine::SoundLogger::stopAllSounds()
 {
 	log("stop all sounds");
 	wrapped_->stopAllSounds();
 }
 
-void SoundLogger::update()
+void Engine::SoundLogger::update()
 {
 	wrapped_->update();
 }
 
-void SoundLogger::Remove()
+void Engine::SoundLogger::Remove()
 {
 	wrapped_->Remove();
 }
 
-void SoundLogger::log(const char* message)
+void Engine::SoundLogger::log(const char* message)
 {
 	std::cout << message << "\n";
 }

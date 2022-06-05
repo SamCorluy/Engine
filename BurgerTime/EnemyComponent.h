@@ -21,13 +21,13 @@ struct AnimDurationInit
 		, stun{s}
 	{}
 };
-class EnemyComponent final : public dae::BaseComponent
+class EnemyComponent final : public Engine::BaseComponent
 {
 public:
-	EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, std::string textFolder, AnimDurationInit animDurationInit, int points, float ladderChance);
+	EnemyComponent(const std::shared_ptr<Engine::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, std::string textFolder, AnimDurationInit animDurationInit, int points, float ladderChance);
 	virtual void Update() override;
 	virtual void StaticUpdate() override;
-	virtual void Render(const dae::Transform& pos) const override;
+	virtual void Render(const Engine::Transform& pos) const override;
 
 	const std::weak_ptr<NodeComponent> getNode() const;
 	const std::weak_ptr<NodeComponent> getPrevNode() const;

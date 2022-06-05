@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-namespace dae
+namespace Engine
 {
 	struct AnimationInit
 	{

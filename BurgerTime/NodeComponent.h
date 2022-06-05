@@ -16,14 +16,14 @@ struct GridNodeInit
 	bool ladderAccess;
 	bool floor;
 };
-class NodeComponent final : public dae::BaseComponent
+class NodeComponent final : public Engine::BaseComponent
 {
 public:
-	NodeComponent(const std::shared_ptr<dae::GameObject> owner, GridNodeInit init);
+	NodeComponent(const std::shared_ptr<Engine::GameObject> owner, GridNodeInit init);
 
 	void Update() override;
 	void StaticUpdate() override;
-	void Render(const dae::Transform& pos) const override;
+	void Render(const Engine::Transform& pos) const override;
 
 	std::weak_ptr<NodeComponent> GetConnection(Direction dir) const;
 	std::weak_ptr<NodeComponent> GetConnectionIgnoringWalkable(Direction dir) const;

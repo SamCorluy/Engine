@@ -2,7 +2,7 @@
 #include "BaseCommand.h"
 #include "PeterPepperComponent.h"
 #include <memory>
-class ThrowSaltCommand final : public BaseCommand
+class ThrowSaltCommand final : public Engine::BaseCommand
 {
 public:
 	ThrowSaltCommand(const std::weak_ptr<PeterPepperComponent>& target);

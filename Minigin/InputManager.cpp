@@ -7,7 +7,7 @@
 #include <map>
 #pragma comment(lib, "XInput.lib")
 
-class dae::InputManager::Impl
+class Engine::InputManager::Impl
 {
 	std::map <Input, std::vector<std::pair<std::shared_ptr<BaseCommand>, bool>>> m_Commands;
 	std::map < SDL_Keycode,std::pair<bool, bool>> m_KeyQueue;
@@ -176,32 +176,32 @@ public:
 	}
 };
 
-void dae::InputManager::AddControllerInput(int input, InputType type, const std::shared_ptr<BaseCommand>& command)
+void Engine::InputManager::AddControllerInput(int input, InputType type, const std::shared_ptr<BaseCommand>& command)
 {
 	m_pImpl->AddControllerInput(input, type, command);
 }
 
-void dae::InputManager::AddKeyboardInput(int input, InputType type, const std::shared_ptr<BaseCommand>& command)
+void Engine::InputManager::AddKeyboardInput(int input, InputType type, const std::shared_ptr<BaseCommand>& command)
 {
 	m_pImpl->AddKeyboardInput(input, type, command);
 }
 
-dae::InputManager::InputManager()
+Engine::InputManager::InputManager()
 {
 	m_pImpl = new Impl();
 }
 
-dae::InputManager::~InputManager()
+Engine::InputManager::~InputManager()
 {
 	delete m_pImpl;
 }
 
-void dae::InputManager::RemoveKeys()
+void Engine::InputManager::RemoveKeys()
 {
 	m_pImpl->RemoveKeys();
 }
 
-bool dae::InputManager::ProcessInput()
+bool Engine::InputManager::ProcessInput()
 {
 	return m_pImpl->ProcessInput();
 }

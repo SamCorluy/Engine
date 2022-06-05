@@ -6,7 +6,7 @@
 
 const float dropVelocity{ 100.f };
 
-BurgerComponent::BurgerComponent(const std::weak_ptr<NodeComponent> node, const std::weak_ptr<dae::Scene>& scene, std::vector<BurgerInit> burgerInit, const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level, size_t priority)
+BurgerComponent::BurgerComponent(const std::weak_ptr<NodeComponent> node, const std::weak_ptr<Engine::Scene>& scene, std::vector<BurgerInit> burgerInit, const std::shared_ptr<Engine::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level, size_t priority)
 	: BaseComponent(owner)
 	, m_RectSize{ 40 * scale, 6 * scale }
 {
@@ -14,7 +14,7 @@ BurgerComponent::BurgerComponent(const std::weak_ptr<NodeComponent> node, const 
 
 	for (auto comp : burgerInit)
 	{
-		auto gameObject = std::make_shared<dae::GameObject>();
+		auto gameObject = std::make_shared<Engine::GameObject>();
 		gameObject->AddComponent<IngredientComponent>(std::make_shared<IngredientComponent>(comp.idx, gameObject, scale, level, comp.type));
 		scene.lock()->Add(gameObject, priority);
 		m_pIngredients.push_back(gameObject->GetComponent<IngredientComponent>());
@@ -29,7 +29,7 @@ BurgerComponent::BurgerComponent(const std::weak_ptr<NodeComponent> node, const 
 	info.first = "Textures/Burger/Plate.png";
 	info.second.x = static_cast<float>(-m_RectSize.first / 2);
 	textureInfo.push_back(info);
-	GetOwner().lock()->AddComponent<dae::TextureManagerComponent>(std::make_shared<dae::TextureManagerComponent>(GetOwner().lock(), textureInfo, scale));
+	GetOwner().lock()->AddComponent<Engine::TextureManagerComponent>(std::make_shared<Engine::TextureManagerComponent>(GetOwner().lock(), textureInfo, scale));
 }
 
 void BurgerComponent::Update()
@@ -47,7 +47,7 @@ void BurgerComponent::Update()
 		//If first ingredient, don't need to check for ingredients below
 		if (i == 0)
 		{
-			pos.y -= ElapsedTime::GetInstance().GetElapsedTime() * dropVelocity;
+			pos.y -= Engine::ElapsedTime::GetInstance().GetElapsedTime() * dropVelocity;
 			//If ingredient reached plate
 			if (pos.y <= GetOwner().lock()->GetTransform().GetPosition().y + 1.f)
 			{
@@ -78,7 +78,7 @@ void BurgerComponent::Update()
 			else
 			{
 				//Else continue dropping burger
-				pos.y -= ElapsedTime::GetInstance().GetElapsedTime() * dropVelocity;
+				pos.y -= Engine::ElapsedTime::GetInstance().GetElapsedTime() * dropVelocity;
 			}
 		}
 		//Check if burger is not on the start floor but current loccation is floor
@@ -103,7 +103,7 @@ void BurgerComponent::StaticUpdate()
 {
 }
 
-void BurgerComponent::Render(const dae::Transform&) const
+void BurgerComponent::Render(const Engine::Transform&) const
 {
 }
 

@@ -4,7 +4,7 @@
 #include "EnemyComponent.h"
 #include "ElapsedTime.h"
 
-MovementComponent::MovementComponent(const std::shared_ptr<dae::GameObject>& owner)
+MovementComponent::MovementComponent(const std::shared_ptr<Engine::GameObject>& owner)
 	: BaseComponent(owner)
 {
 }
@@ -17,7 +17,7 @@ void MovementComponent::StaticUpdate()
 {
 }
 
-void MovementComponent::Render(const dae::Transform&) const
+void MovementComponent::Render(const Engine::Transform&) const
 {
 }
 
@@ -38,9 +38,9 @@ void MovementComponent::MovePlayer(Direction dir)
 	auto player = GetOwner().lock()->GetComponent<PeterPepperComponent>();
 	if (player.lock()->IsThrowingSalt() || player.lock()->IsDead())
 		return;
-	auto rectSize = GetOwner().lock()->GetComponent<dae::AnimationComponent>().lock()->getActiveAnimRec();
+	auto rectSize = GetOwner().lock()->GetComponent<Engine::AnimationComponent>().lock()->getActiveAnimRec();
 	//auto grid = m_pLevel.lock()->GetGrid();
-	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
+	auto comp = GetOwner().lock()->GetComponent<Engine::AnimationComponent>();
 	auto pos = GetOwner().lock()->GetTransform().GetPosition();
 	auto levelPos = player.lock()->getNode().lock()->GetOwner().lock()->GetTransform().GetPosition();
 	//auto idx = m_pLevel.lock()->CoordinateToIndex(pos);
@@ -63,7 +63,7 @@ void MovementComponent::MovePlayer(Direction dir)
 		comp.lock()->SetActiveAnimation(0);
 		player.lock()->SetDirection(dir);
 		comp.lock()->SetFlip(false);
-		pos.x -= player.lock()->GetVelocity() * ElapsedTime::GetInstance().GetElapsedTime();
+		pos.x -= player.lock()->GetVelocity() * Engine::ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.x < player.lock()->getNode().lock()->GetNodePos().first + levelPos.x)
 			player.lock()->SetCurrentNode(player.lock()->getNode().lock()->GetConnection(Direction::LEFT));
 		GetOwner().lock()->SetPosition(pos);
@@ -83,7 +83,7 @@ void MovementComponent::MovePlayer(Direction dir)
 		comp.lock()->SetActiveAnimation(0);
 		player.lock()->SetDirection(dir);
 		comp.lock()->SetFlip(true);
-		pos.x += player.lock()->GetVelocity() * ElapsedTime::GetInstance().GetElapsedTime();
+		pos.x += player.lock()->GetVelocity() * Engine::ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.x > player.lock()->getNode().lock()->GetNodePos().first + levelPos.x + player.lock()->getNode().lock()->GetNodeSize().first)
 			player.lock()->SetCurrentNode(player.lock()->getNode().lock()->GetConnection(dir));
 		GetOwner().lock()->SetPosition(pos);
@@ -103,7 +103,7 @@ void MovementComponent::MovePlayer(Direction dir)
 			player.lock()->SetDirection(dir);
 			comp.lock()->SetFlip(false);
 			pos.x = levelPos.x + player.lock()->getNode().lock()->GetNodePos().first + player.lock()->getNode().lock()->GetNodeSize().first / 2;
-			pos.y += player.lock()->GetVelocity() * ElapsedTime::GetInstance().GetElapsedTime();
+			pos.y += player.lock()->GetVelocity() * Engine::ElapsedTime::GetInstance().GetElapsedTime();
 			if (pos.y > player.lock()->getNode().lock()->GetNodePos().second + levelPos.y + player.lock()->getNode().lock()->GetNodeSize().second)
 				player.lock()->SetCurrentNode(player.lock()->getNode().lock()->GetConnection(dir));
 			GetOwner().lock()->SetPosition(pos);
@@ -124,7 +124,7 @@ void MovementComponent::MovePlayer(Direction dir)
 			player.lock()->SetDirection(dir);
 			comp.lock()->SetFlip(false);
 			pos.x = levelPos.x + player.lock()->getNode().lock()->GetNodePos().first + player.lock()->getNode().lock()->GetNodeSize().first / 2;
-			pos.y -= player.lock()->GetVelocity() * ElapsedTime::GetInstance().GetElapsedTime();
+			pos.y -= player.lock()->GetVelocity() * Engine::ElapsedTime::GetInstance().GetElapsedTime();
 			if (pos.y < player.lock()->getNode().lock()->GetNodePos().second + levelPos.y)
 				player.lock()->SetCurrentNode(player.lock()->getNode().lock()->GetConnection(dir));
 			GetOwner().lock()->SetPosition(pos);
@@ -141,9 +141,9 @@ void MovementComponent::MoveEnemy(Direction dir)
 	auto enemy = GetOwner().lock()->GetComponent<EnemyComponent>();
 	if (enemy.lock()->IsDead() || enemy.lock()->IsStunned())
 		return;
-	auto rectSize = GetOwner().lock()->GetComponent<dae::AnimationComponent>().lock()->getActiveAnimRec();
+	auto rectSize = GetOwner().lock()->GetComponent<Engine::AnimationComponent>().lock()->getActiveAnimRec();
 	//auto grid = m_pLevel.lock()->GetGrid();
-	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
+	auto comp = GetOwner().lock()->GetComponent<Engine::AnimationComponent>();
 	auto pos = GetOwner().lock()->GetTransform().GetPosition();
 	auto levelPos = enemy.lock()->getNode().lock()->GetOwner().lock()->GetTransform().GetPosition();
 	//auto idx = m_pLevel.lock()->CoordinateToIndex(pos);
@@ -166,7 +166,7 @@ void MovementComponent::MoveEnemy(Direction dir)
 		comp.lock()->SetActiveAnimation(0);
 		enemy.lock()->SetDirection(dir);
 		comp.lock()->SetFlip(false);
-		pos.x -= enemy.lock()->GetVelocity() * ElapsedTime::GetInstance().GetElapsedTime();
+		pos.x -= enemy.lock()->GetVelocity() * Engine::ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.x < enemy.lock()->getNode().lock()->GetNodePos().first + levelPos.x)
 			enemy.lock()->SetCurrentNode(enemy.lock()->getNode().lock()->GetConnection(Direction::LEFT));
 		GetOwner().lock()->SetPosition(pos);
@@ -186,7 +186,7 @@ void MovementComponent::MoveEnemy(Direction dir)
 		comp.lock()->SetActiveAnimation(0);
 		enemy.lock()->SetDirection(dir);
 		comp.lock()->SetFlip(true);
-		pos.x += enemy.lock()->GetVelocity() * ElapsedTime::GetInstance().GetElapsedTime();
+		pos.x += enemy.lock()->GetVelocity() * Engine::ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.x > enemy.lock()->getNode().lock()->GetNodePos().first + levelPos.x + enemy.lock()->getNode().lock()->GetNodeSize().first)
 			enemy.lock()->SetCurrentNode(enemy.lock()->getNode().lock()->GetConnection(dir));
 		GetOwner().lock()->SetPosition(pos);
@@ -206,7 +206,7 @@ void MovementComponent::MoveEnemy(Direction dir)
 			enemy.lock()->SetDirection(dir);
 			comp.lock()->SetFlip(false);
 			pos.x = levelPos.x + enemy.lock()->getNode().lock()->GetNodePos().first + enemy.lock()->getNode().lock()->GetNodeSize().first / 2;
-			pos.y += enemy.lock()->GetVelocity() * ElapsedTime::GetInstance().GetElapsedTime();
+			pos.y += enemy.lock()->GetVelocity() * Engine::ElapsedTime::GetInstance().GetElapsedTime();
 			if (pos.y > enemy.lock()->getNode().lock()->GetNodePos().second + levelPos.y + enemy.lock()->getNode().lock()->GetNodeSize().second)
 				enemy.lock()->SetCurrentNode(enemy.lock()->getNode().lock()->GetConnection(dir));
 			GetOwner().lock()->SetPosition(pos);
@@ -227,7 +227,7 @@ void MovementComponent::MoveEnemy(Direction dir)
 			enemy.lock()->SetDirection(dir);
 			comp.lock()->SetFlip(false);
 			pos.x = levelPos.x + enemy.lock()->getNode().lock()->GetNodePos().first + enemy.lock()->getNode().lock()->GetNodeSize().first / 2;
-			pos.y -= enemy.lock()->GetVelocity() * ElapsedTime::GetInstance().GetElapsedTime();
+			pos.y -= enemy.lock()->GetVelocity() * Engine::ElapsedTime::GetInstance().GetElapsedTime();
 			if (pos.y < enemy.lock()->getNode().lock()->GetNodePos().second + levelPos.y)
 				enemy.lock()->SetCurrentNode(enemy.lock()->getNode().lock()->GetConnection(dir));
 			GetOwner().lock()->SetPosition(pos);

@@ -1,6 +1,6 @@
 #include "NodeComponent.h"
 
-NodeComponent::NodeComponent(const std::shared_ptr<dae::GameObject> owner, GridNodeInit init)
+NodeComponent::NodeComponent(const std::shared_ptr<Engine::GameObject> owner, GridNodeInit init)
 	:BaseComponent(owner)
 	, m_NodePos{init.nodePos}
 	, m_NodeSize{init.nodeSize}
@@ -22,7 +22,7 @@ void NodeComponent::StaticUpdate()
 {
 }
 
-void NodeComponent::Render(const dae::Transform&) const
+void NodeComponent::Render(const Engine::Transform&) const
 {
 }
 

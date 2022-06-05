@@ -6,7 +6,7 @@
 #include <vector>
 #include <memory>
 
-namespace dae
+namespace Engine
 {
 	class Scene;
 	class Texture2D;
@@ -42,7 +42,7 @@ namespace dae
 		bool m_Remove{false};
 	};
 
-	template<typename T> void dae::GameObject::AddComponent(const std::weak_ptr<BaseComponent>& comp)
+	template<typename T> void Engine::GameObject::AddComponent(const std::weak_ptr<BaseComponent>& comp)
 	{
 		if (!GetComponent<T>().lock() && comp.use_count() == 1)
 		{
@@ -50,7 +50,7 @@ namespace dae
 		}
 	}
 
-	template<typename T> std::weak_ptr<T> dae::GameObject::GetComponent() const
+	template<typename T> std::weak_ptr<T> Engine::GameObject::GetComponent() const
 	{
 		std::weak_ptr<T> gameComp;
 		for (std::shared_ptr<BaseComponent> comp: m_pComponentObjects)
@@ -63,7 +63,7 @@ namespace dae
 		return gameComp;
 	}
 
-	template<typename T> void dae::GameObject::RemoveComponent()
+	template<typename T> void Engine::GameObject::RemoveComponent()
 	{
 		auto comp = GetComponent<T>();
 		if (comp)

@@ -7,9 +7,9 @@ SaltObserver::SaltObserver(const std::weak_ptr<SaltDisplayComponent>& saltComp)
 {
 }
 
-void SaltObserver::Notify(dae::Event event, int data)
+void SaltObserver::Notify(Engine::Event event, int data)
 {
-	if (event == dae::Event::SALT_THROW && data >= 0)
+	if (event == Engine::Event::SALT_THROW && data >= 0)
 	{
 		m_pSaltComponent.lock()->RemoveCharge();
 	}

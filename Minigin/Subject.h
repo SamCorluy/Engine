@@ -2,7 +2,7 @@
 #include "Observer.h"
 #include <memory>
 #include <vector>
-namespace dae
+namespace Engine
 {
 	class Subject final: public BaseComponent
 	{

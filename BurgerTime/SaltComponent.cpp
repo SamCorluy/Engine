@@ -2,7 +2,7 @@
 #include "AnimationComponent.h"
 #include "ElapsedTime.h"
 
-SaltComponent::SaltComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, glm::vec2 pos, const int floorOffset, Direction direction)
+SaltComponent::SaltComponent(const std::shared_ptr<Engine::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, glm::vec2 pos, const int floorOffset, Direction direction)
 	:BaseComponent(owner)
 	, m_pNode{node}
 	, m_ElapsedTime{0}
@@ -11,7 +11,7 @@ SaltComponent::SaltComponent(const std::shared_ptr<dae::GameObject>& owner, int 
 	, m_RectSize{16 * scale, 16 * scale}
 {
 	// Handling animation info
-	std::vector<dae::AnimationInit> animInitList;
+	std::vector<Engine::AnimationInit> animInitList;
 	std::string fileName{};
 	bool flip = false;
 	switch (direction)
@@ -32,9 +32,9 @@ SaltComponent::SaltComponent(const std::shared_ptr<dae::GameObject>& owner, int 
 	default:
 		break;
 	}
-	animInitList.push_back(dae::AnimationInit(4, m_Duration, fileName, {-m_RectSize.first / 2, 0}));
-	owner->AddComponent<dae::AnimationComponent>(std::make_shared<dae::AnimationComponent>(owner, animInitList, scale));
-	owner->GetComponent<dae::AnimationComponent>().lock()->SetFlip(flip);
+	animInitList.push_back(Engine::AnimationInit(4, m_Duration, fileName, {-m_RectSize.first / 2, 0}));
+	owner->AddComponent<Engine::AnimationComponent>(std::make_shared<Engine::AnimationComponent>(owner, animInitList, scale));
+	owner->GetComponent<Engine::AnimationComponent>().lock()->SetFlip(flip);
 
 	// Handle spawnpoint
 	//std::pair<int, int> idx = { 0,0 };
@@ -94,7 +94,7 @@ SaltComponent::SaltComponent(const std::shared_ptr<dae::GameObject>& owner, int 
 
 void SaltComponent::Update()
 {
-	m_ElapsedTime += ElapsedTime::GetInstance().GetElapsedTime();
+	m_ElapsedTime += Engine::ElapsedTime::GetInstance().GetElapsedTime();
 	if (IsDone())
 		GetOwner().lock()->Remove();
 }
@@ -103,7 +103,7 @@ void SaltComponent::StaticUpdate()
 {
 }
 
-void SaltComponent::Render(const dae::Transform&) const
+void SaltComponent::Render(const Engine::Transform&) const
 {
 }
 

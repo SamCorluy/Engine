@@ -3,19 +3,17 @@
 #include "GameObject.h"
 #include <algorithm>
 
-using namespace dae;
+Engine::Scene::Scene(const std::string& name) : m_Name(name) {}
 
-Scene::Scene(const std::string& name) : m_Name(name) {}
+Engine::Scene::~Scene() = default;
 
-Scene::~Scene() = default;
-
-void Scene::Add(const std::shared_ptr<GameObject>& object, size_t i)
+void Engine::Scene::Add(const std::shared_ptr<GameObject>& object, size_t i)
 {
 	m_ChangeOrder = true;
 	m_ObjectQueue.push_back({ object, i });
 }
 
-void Scene::Update()
+void Engine::Scene::Update()
 {
 	for (auto& object : m_ObjectQueue)
 		m_Objects.push_back(object);
@@ -28,19 +26,19 @@ void Scene::Update()
 		std::sort(m_Objects.begin(), m_Objects.end(), [](std::pair<std::shared_ptr<GameObject>, size_t>& object, std::pair<std::shared_ptr<GameObject>, size_t>& object2) { return object.second > object2.second; });
 }
 
-void dae::Scene::StaticUpdate()
+void Engine::Scene::StaticUpdate()
 {
 	for (auto& object : m_Objects)
 		object.first->StaticUpdate();
 }
 
-void Scene::Render() const
+void Engine::Scene::Render() const
 {
 	for (auto& object : m_Objects)
 		object.first->Render();
 }
 
-const std::string dae::Scene::GetName() const
+const std::string Engine::Scene::GetName() const
 {
 	return m_Name;
 }

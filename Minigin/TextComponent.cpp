@@ -5,7 +5,7 @@
 #include "Font.h"
 #include "Texture2D.h"
 
-dae::TextComponent::TextComponent(const std::shared_ptr<GameObject>& owner, const std::string& text, const std::shared_ptr<Font>& font)
+Engine::TextComponent::TextComponent(const std::shared_ptr<GameObject>& owner, const std::string& text, const std::shared_ptr<Font>& font)
 	:BaseComponent(owner),
 	m_NeedsUpdate(true),
 	m_Text(text),
@@ -15,7 +15,7 @@ dae::TextComponent::TextComponent(const std::shared_ptr<GameObject>& owner, cons
 	Update();
 }
 
-dae::TextComponent::TextComponent(const std::shared_ptr<GameObject>& owner)
+Engine::TextComponent::TextComponent(const std::shared_ptr<GameObject>& owner)
 	:BaseComponent(owner),
 	m_NeedsUpdate(true),
 	m_Text(),
@@ -25,11 +25,11 @@ dae::TextComponent::TextComponent(const std::shared_ptr<GameObject>& owner)
 	Update();
 }
 
-void dae::TextComponent::StaticUpdate()
+void Engine::TextComponent::StaticUpdate()
 {
 }
 
-void dae::TextComponent::Update()
+void Engine::TextComponent::Update()
 {
 	if (m_NeedsUpdate)
 	{
@@ -50,7 +50,7 @@ void dae::TextComponent::Update()
 	}
 }
 
-void dae::TextComponent::Render(const Transform& pos) const
+void Engine::TextComponent::Render(const Transform& pos) const
 {
 	auto position = pos.GetPosition();
 	if (m_TextTexture != nullptr)
@@ -65,19 +65,19 @@ void dae::TextComponent::Render(const Transform& pos) const
 }
 
 // This implementation uses the "dirty flag" pattern
-void dae::TextComponent::SetText(const std::string& text)
+void Engine::TextComponent::SetText(const std::string& text)
 {
 	m_Text = text;
 	m_NeedsUpdate = true;
 }
 
-void dae::TextComponent::SetFont(const std::shared_ptr<Font>& font)
+void Engine::TextComponent::SetFont(const std::shared_ptr<Font>& font)
 {
 	m_Font = font;
 	m_NeedsUpdate = true;
 }
 
-std::pair<int, int> dae::TextComponent::GetTextSize()
+std::pair<int, int> Engine::TextComponent::GetTextSize()
 {
 	int width, height;
 	SDL_QueryTexture(m_TextTexture->GetSDLTexture(), NULL, NULL, &width, &height);

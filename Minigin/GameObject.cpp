@@ -5,7 +5,7 @@
 
 //dae::GameObject::~GameObject() = default;
 
-void dae::GameObject::Update()
+void Engine::GameObject::Update()
 {
 	for (auto& object : m_pComponentObjects)
 	{
@@ -13,7 +13,7 @@ void dae::GameObject::Update()
 	}
 }
 
-void dae::GameObject::StaticUpdate()
+void Engine::GameObject::StaticUpdate()
 {
 	for (auto& object : m_pComponentObjects)
 	{
@@ -21,28 +21,28 @@ void dae::GameObject::StaticUpdate()
 	}
 }
 
-glm::vec2 dae::GameObject::GetPosition() const
+glm::vec2 Engine::GameObject::GetPosition() const
 {
 	glm::vec2 pos{ m_Transform.GetPosition().x, m_Transform.GetPosition().y };
 	return pos;
 }
 
-void dae::GameObject::SetPosition(float x, float y)
+void Engine::GameObject::SetPosition(float x, float y)
 {
 	m_Transform.SetPosition(x, y, 0.0f);
 }
 
-void dae::GameObject::SetPosition(const glm::vec2& pos)
+void Engine::GameObject::SetPosition(const glm::vec2& pos)
 {
 	m_Transform.SetPosition(pos.x, pos.y, 0.0f);
 }
 
-const dae::Transform& dae::GameObject::GetTransform() const
+const Engine::Transform& Engine::GameObject::GetTransform() const
 {
 	return m_Transform;
 }
 
-void dae::GameObject::Render() const
+void Engine::GameObject::Render() const
 {
 	for (auto& object : m_pComponentObjects)
 	{
@@ -50,12 +50,12 @@ void dae::GameObject::Render() const
 	}
 }
 
-void dae::GameObject::Remove()
+void Engine::GameObject::Remove()
 {
 	m_Remove = true;
 }
 
-bool dae::GameObject::NeedsRemoval()
+bool Engine::GameObject::NeedsRemoval()
 {
 	return m_Remove;
 }

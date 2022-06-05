@@ -1,7 +1,7 @@
 #pragma once
 #include "Minigin.h"
 
-class Game final : public dae::Minigin
+class Game final : public Engine::Minigin
 {
 public:
 	Game() = default;

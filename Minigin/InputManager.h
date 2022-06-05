@@ -2,7 +2,7 @@
 #include "Singleton.h"
 #include "BaseCommand.h"
 
-namespace dae
+namespace Engine
 {
 	enum class InputType
 	{

@@ -4,13 +4,13 @@
 #include "Transform.h"
 #include "Subject.h"
 #include "NodeComponent.h"
-class SaltComponent final : public dae::BaseComponent
+class SaltComponent final : public Engine::BaseComponent
 {
 public:
-	SaltComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, glm::vec2 pos, const int floorOffset, Direction direction);
+	SaltComponent(const std::shared_ptr<Engine::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, glm::vec2 pos, const int floorOffset, Direction direction);
 	virtual void Update() override;
 	virtual void StaticUpdate() override;
-	virtual void Render(const dae::Transform& pos) const override;
+	virtual void Render(const Engine::Transform& pos) const override;
 
 	//const std::weak_ptr<NodeComponent> getNode() const;
 	const bool IsDone() const;

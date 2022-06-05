@@ -6,7 +6,7 @@
 #include "ElapsedTime.h"
 #include "MovementComponent.h"
 #include "SoundLocator.h"
-EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, std::string textFolder, AnimDurationInit animDurationInit, int points, float ladderChance)
+EnemyComponent::EnemyComponent(const std::shared_ptr<Engine::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, std::string textFolder, AnimDurationInit animDurationInit, int points, float ladderChance)
 	:BaseComponent(owner)
 	, m_pCurrentNode{ node }
 	, m_pPrevNode{ node }
@@ -27,18 +27,18 @@ EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, in
 	//m_pSubject = owner->GetComponent<dae::Subject>();
 
 	// Handling animation info
-	std::vector<dae::AnimationInit> animInitList;
+	std::vector<Engine::AnimationInit> animInitList;
 	std::string fileName = textFolder + "/Walk.png";
-	animInitList.push_back(dae::AnimationInit(2, animDurationInit.walk, fileName, { -m_RectSize.first / 2, 0 }));
+	animInitList.push_back(Engine::AnimationInit(2, animDurationInit.walk, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = textFolder + "/Down.png";
-	animInitList.push_back(dae::AnimationInit(2, animDurationInit.down, fileName, { -m_RectSize.first / 2, 0 }));
+	animInitList.push_back(Engine::AnimationInit(2, animDurationInit.down, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = textFolder + "/Up.png";
-	animInitList.push_back(dae::AnimationInit(2, animDurationInit.up, fileName, { -m_RectSize.first / 2, 0 }));
+	animInitList.push_back(Engine::AnimationInit(2, animDurationInit.up, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = textFolder + "/Stunned.png";
-	animInitList.push_back(dae::AnimationInit(2, animDurationInit.stun, fileName, { -m_RectSize.first / 2, 0 }));
+	animInitList.push_back(Engine::AnimationInit(2, animDurationInit.stun, fileName, { -m_RectSize.first / 2, 0 }));
 	fileName = textFolder + "/Death.png";
-	animInitList.push_back(dae::AnimationInit(4, animDurationInit.kill, fileName, { -m_RectSize.first / 2, 0 }));
-	owner->AddComponent<dae::AnimationComponent>(std::make_shared<dae::AnimationComponent>(owner, animInitList, scale));
+	animInitList.push_back(Engine::AnimationInit(4, animDurationInit.kill, fileName, { -m_RectSize.first / 2, 0 }));
+	owner->AddComponent<Engine::AnimationComponent>(std::make_shared<Engine::AnimationComponent>(owner, animInitList, scale));
 
 	// Handle spawnpoint
 	//std::pair<int, int> idx = { 0,0 };
@@ -56,24 +56,24 @@ void EnemyComponent::Update()
 {
 	if (!m_HasSpawned)
 	{
-		m_ElapsedTime += ElapsedTime::GetInstance().GetElapsedTime();
+		m_ElapsedTime += Engine::ElapsedTime::GetInstance().GetElapsedTime();
 		if (m_ElapsedTime >= m_SpawnTime)
 			m_HasSpawned = true;
 	}
 	if (m_Dead)
 	{
-		m_ElapsedTime += ElapsedTime::GetInstance().GetElapsedTime();
+		m_ElapsedTime += Engine::ElapsedTime::GetInstance().GetElapsedTime();
 		if (m_ElapsedTime >= m_DeathDuration)
 			GetOwner().lock()->Remove();
 		return;
 	}
 	if (m_Stunned)
 	{
-		m_ElapsedTime += ElapsedTime::GetInstance().GetElapsedTime();
+		m_ElapsedTime += Engine::ElapsedTime::GetInstance().GetElapsedTime();
 		if (m_ElapsedTime >= m_StunDuration)
 		{
 			m_Stunned = false;
-			auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
+			auto comp = GetOwner().lock()->GetComponent<Engine::AnimationComponent>();
 			switch (m_Direction)
 			{
 			case Direction::LEFT:
@@ -106,7 +106,7 @@ void EnemyComponent::Update()
 	{
 		if (pos.x == levelPos.x + m_pTargetNode.lock()->GetNodePos().first + m_pTargetNode.lock()->GetNodeSize().first / 2)
 			return;
-		pos.x -= m_Velocity * ElapsedTime::GetInstance().GetElapsedTime();
+		pos.x -= m_Velocity * Engine::ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.x < levelPos.x + m_pCurrentNode.lock()->GetNodePos().first)
 		{
 			m_pCurrentNode = m_pTargetNode;
@@ -122,7 +122,7 @@ void EnemyComponent::Update()
 	{
 		if (pos.x == levelPos.x + m_pTargetNode.lock()->GetNodePos().first + m_pTargetNode.lock()->GetNodeSize().first / 2)
 			return;
-		pos.x += m_Velocity * ElapsedTime::GetInstance().GetElapsedTime();
+		pos.x += m_Velocity * Engine::ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.x > levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + m_pCurrentNode.lock()->GetNodeSize().first)
 		{
 			m_pCurrentNode = m_pTargetNode;
@@ -138,7 +138,7 @@ void EnemyComponent::Update()
 	{
 		if (pos.y == levelPos.y + m_pTargetNode.lock()->GetNodePos().second + m_FloorOffset)
 			return;
-		pos.y += m_Velocity * ElapsedTime::GetInstance().GetElapsedTime();
+		pos.y += m_Velocity * Engine::ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.y > levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_pCurrentNode.lock()->GetNodeSize().second)
 		{
 			m_pCurrentNode = m_pTargetNode;
@@ -154,7 +154,7 @@ void EnemyComponent::Update()
 	{
 		if (pos.y == levelPos.y + m_pTargetNode.lock()->GetNodePos().second + m_FloorOffset)
 			return;
-		pos.y -= m_Velocity * ElapsedTime::GetInstance().GetElapsedTime();
+		pos.y -= m_Velocity * Engine::ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.y < levelPos.y + m_pCurrentNode.lock()->GetNodePos().second)
 		{
 			m_pPrevNode = m_pTargetNode.lock()->GetConnection(Direction::UP);
@@ -173,7 +173,7 @@ void EnemyComponent::StaticUpdate()
 {
 }
 
-void EnemyComponent::Render(const dae::Transform&) const
+void EnemyComponent::Render(const Engine::Transform&) const
 {
 }
 
@@ -218,7 +218,7 @@ void EnemyComponent::Move(std::weak_ptr<NodeComponent> targetNode)
 	else
 		m_pTargetNode = targetNode;
 
-	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
+	auto comp = GetOwner().lock()->GetComponent<Engine::AnimationComponent>();
 	if (m_pCurrentNode.lock()->GetConnection(Direction::LEFT).lock() == m_pTargetNode.lock())
 	{
 		m_Direction = Direction::LEFT;
@@ -263,10 +263,10 @@ void EnemyComponent::Stun()
 		return;
 	m_HasSpawned = true;
 	m_Stunned = true;
-	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
+	auto comp = GetOwner().lock()->GetComponent<Engine::AnimationComponent>();
 	comp.lock()->SetActiveAnimation(3);
 	m_ElapsedTime = 0.f;
-	SoundLocator::get_sound_system().play(1, 0.3f, SoundType::EFFECT);
+	Engine::SoundLocator::get_sound_system().play(1, 0.3f, Engine::SoundType::EFFECT);
 }
 
 void EnemyComponent::Kill(std::weak_ptr<PeterPepperComponent>& player)
@@ -277,10 +277,10 @@ void EnemyComponent::Kill(std::weak_ptr<PeterPepperComponent>& player)
 		player.lock()->AddPoints(m_Points);
 	m_Dead = true;
 	m_HasSpawned = true;
-	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
+	auto comp = GetOwner().lock()->GetComponent<Engine::AnimationComponent>();
 	comp.lock()->SetActiveAnimation(4);
 	m_ElapsedTime = 0.f;
-	SoundLocator::get_sound_system().play(0, 0.3f, SoundType::EFFECT);
+	Engine::SoundLocator::get_sound_system().play(0, 0.3f, Engine::SoundType::EFFECT);
 }
 
 const bool EnemyComponent::IsStunned() const
