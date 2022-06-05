@@ -75,36 +75,34 @@ void Engine::Minigin::Run()
 
 	LoadGame();
 
-	{
-		auto& renderer = Renderer::GetInstance();
-		auto& sceneManager = SceneManager::GetInstance();
-		auto& input = InputManager::GetInstance();
+	auto& renderer = Renderer::GetInstance();
+	auto& sceneManager = SceneManager::GetInstance();
+	auto& input = InputManager::GetInstance();
 
-		// todo: this update loop could use some work.
-		bool doContinue = true;
-		auto lastTime = std::chrono::high_resolution_clock::now();
-		float lag = 0.0f;
-		while (doContinue)
+	// todo: this update loop could use some work.
+	bool doContinue = true;
+	auto lastTime = std::chrono::high_resolution_clock::now();
+	float lag = 0.0f;
+	while (doContinue)
+	{
+		const auto currentTime = std::chrono::high_resolution_clock::now();
+		float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
+		lastTime = currentTime;
+		lag += deltaTime;
+		doContinue = input.ProcessInput();
+		while (lag * 1000.f >= MsPerFrame)
 		{
-			const auto currentTime = std::chrono::high_resolution_clock::now();
-			float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
-			lastTime = currentTime;
-			lag += deltaTime;
-			doContinue = input.ProcessInput();
-			while (lag * 1000.f >= MsPerFrame)
-			{
-				//m_pGameObject->StaticUpdate(MsPerFrame);
-				ElapsedTime::GetInstance().SetElapsedTime(MsPerFrame);
-				sceneManager.StaticUpdate();
-				lag -= MsPerFrame / 1000.f;
-			}
-			//m_pGameObject->Update(deltaTime);
-			ElapsedTime::GetInstance().SetElapsedTime(deltaTime);
-			sceneManager.Update();
-			renderer.Render();
-			auto& ss1 = SoundLocator::get_sound_system();
-			ss1.update();
+			//m_pGameObject->StaticUpdate(MsPerFrame);
+			ElapsedTime::GetInstance().SetElapsedTime(MsPerFrame);
+			sceneManager.StaticUpdate();
+			lag -= MsPerFrame / 1000.f;
 		}
+		//m_pGameObject->Update(deltaTime);
+		ElapsedTime::GetInstance().SetElapsedTime(deltaTime);
+		sceneManager.Update();
+		renderer.Render();
+		auto& ss1 = SoundLocator::get_sound_system();
+		ss1.update();
 	}
 
 	Cleanup();

@@ -71,9 +71,6 @@ public:
 				xToRemove.push_back(m_CurrentState.VirtualKey);
 				break;
 			}
-
-			if (e.type == SDL_QUIT)
-				return false;
 		}
 		for (auto key: m_KeyQueue)
 		{
