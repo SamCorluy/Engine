@@ -13,6 +13,7 @@ class dae::InputManager::Impl
 	std::map < SDL_Keycode,std::pair<bool, bool>> m_KeyQueue;
 	std::map <WORD,std::pair<bool, bool>> m_ButtonQueue;
 	XINPUT_KEYSTROKE m_CurrentState{};
+	bool m_Reset = false;
 public:
 	Impl()
 	{
@@ -21,8 +22,12 @@ public:
 
 	bool ProcessInput()
 	{
-		for (auto& command : m_Commands)
-			command.second.erase(std::remove_if(command.second.begin(), command.second.end(), [](std::pair<std::shared_ptr<BaseCommand>, bool>& object) { return object.second; }), command.second.end());
+		if (m_Reset)
+		{
+			m_Reset = false;
+			for (auto& command : m_Commands)
+				command.second.erase(std::remove_if(command.second.begin(), command.second.end(), [](std::pair<std::shared_ptr<BaseCommand>, bool>& object) { return object.second; }), command.second.end());
+		}
 		for (auto key : m_KeyQueue)
 			m_KeyQueue[key.first].second = true;
 		SDL_Event e;
@@ -152,6 +157,7 @@ public:
 
 	void RemoveKeys()
 	{
+		m_Reset = true;
 		for (auto& command : m_Commands)
 		{
 			for(auto& com : command.second)

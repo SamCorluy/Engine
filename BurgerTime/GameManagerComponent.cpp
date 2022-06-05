@@ -742,7 +742,7 @@ void GameManagerComponent::HandleEnemyRespawns()
 	int currentMax = m_HotdogSpawns;
 	if (m_GameMode == GameModes::PVP)
 		--currentMax;
-	if (m_pHotDogs.size() < currentMax || (m_GameMode == GameModes::PVP && m_pPlayerControlledEnemy.expired()))
+	if (static_cast<int>(m_pHotDogs.size()) < currentMax || (m_GameMode == GameModes::PVP && m_pPlayerControlledEnemy.expired()))
 	{
 		if (m_CurrentHotDogSpawnCoolDown > 0.f)
 			m_CurrentHotDogSpawnCoolDown -= ElapsedTime::GetInstance().GetElapsedTime();
@@ -752,14 +752,14 @@ void GameManagerComponent::HandleEnemyRespawns()
 			else
 				SpawnHotDog();
 	}
-	if (m_pEggs.size() < m_EggSpawns)
+	if (static_cast<int>(m_pEggs.size()) < m_EggSpawns)
 	{
 		if (m_currentEggSpawnCoolDown > 0.f)
 			m_currentEggSpawnCoolDown -= ElapsedTime::GetInstance().GetElapsedTime();
 		if (m_currentEggSpawnCoolDown <= 0.f)
 			SpawnEgg();
 	}
-	if (m_pPickles.size() < m_PickleSpawns)
+	if (static_cast<int>(m_pPickles.size()) < m_PickleSpawns)
 	{
 		if (m_CurrentPickleSpawnCoolDown > 0.f)
 			m_CurrentPickleSpawnCoolDown -= ElapsedTime::GetInstance().GetElapsedTime();

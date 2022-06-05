@@ -100,7 +100,7 @@ void IngredientComponent::InitiateDrop(std::weak_ptr<PeterPepperComponent>& play
 	m_pPlayer = player;
 	auto pos = GetOwner().lock()->GetTransform().GetPosition();
 	bool walkedOn = false;
-	for (int i = 0; i < m_pPartitions.size(); ++i)
+	for (int i = 0; i < static_cast<int>(m_pPartitions.size()); ++i)
 	{
 		auto text = GetOwner().lock()->GetComponent<dae::TextureManagerComponent>();
 		auto offset = text.lock()->getOffset(i);
@@ -164,7 +164,7 @@ bool IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& play
 	//std::cout <<m_pNode.lock()->GetNodePos().first << " " << m_pNode.lock()->GetNodePos().first << "\n\n";
 	if (player.lock()->getNode().lock() == m_pNode.lock())
 	{
-		for (int i = 0; i < m_pPartitions.size(); ++i)
+		for (int i = 0; i < static_cast<int>(m_pPartitions.size()); ++i)
 		{
 			if (!m_pPartitions[i].hasDropped && ((playerPos.x >= m_pPartitions[i].botLeft.x + m_RectSize.second / 2 && m_PrevPlayerPos[idx].x < m_pPartitions[i].botLeft.x + m_RectSize.second / 2) ||
 				(playerPos.x < m_pPartitions[i].botLeft.x + m_RectSize.second / 2 && m_PrevPlayerPos[idx].x >= m_pPartitions[i].botLeft.x + m_RectSize.second / 2)))
