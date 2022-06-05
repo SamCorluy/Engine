@@ -13,7 +13,8 @@ public:
 	int loadSound(const char* filename, SoundType soundType) override;
 	void play(const sound_id id, const float volume, SoundType soundType)override;
 	void stopAllSounds() override;
-
+	virtual void update() override;
+	void Remove() override;
 private:
 	void log(const char* message);
 	Sound* wrapped_;

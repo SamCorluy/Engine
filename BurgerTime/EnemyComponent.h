@@ -43,6 +43,7 @@ public:
 	void SetDirection(Direction dir);
 	const bool IsDead() const;
 	const bool HasSpawned() const;
+	const float GetVelocity() const;
 private:
 	//std::weak_ptr<dae::Subject> m_pSubject;
 	std::weak_ptr<NodeComponent> m_pCurrentNode;
@@ -61,5 +62,6 @@ private:
 	bool m_HasSpawned = false;
 	const float m_SpawnTime = 1.f;
 	const float m_ChanceToTakeLadder;
+	const float m_Velocity;
 };
 

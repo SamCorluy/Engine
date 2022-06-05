@@ -11,6 +11,7 @@
 #include "ResourceManager.h"
 #include "MovementComponent.h"
 #include "HighScoreMenuComponent.h"
+#include "SoundLocator.h"
 
 const int hotdogMax = 6;
 const int eggMax = 1;
@@ -544,12 +545,16 @@ void GameManagerComponent::Reset()
 
 void GameManagerComponent::InitPlayer(size_t idx, size_t totalPlayers)
 {
+	std::string path{ "Textures/PeterPepper/" };
+	if (idx == 1)
+		path = "Textures/MsSalt/";
+	int health = 3;
 	//Temp spawn node for player, will be updated later
 	auto grid = m_pLevel.lock()->GetGrid();
 	auto startNode = grid[m_pLevel.lock()->GetPlayerOneSpawn()];
 	if(idx == 1)
 		startNode = grid[m_pLevel.lock()->GetPlayerTwoSpawn()];
-	float offset = 500.f;
+	float offset = 450.f;
 
 	auto scoreObject = std::make_shared<dae::GameObject>();
 	auto font = dae::ResourceManager::GetInstance().LoadFont("emulogic.ttf", 20);
@@ -560,7 +565,7 @@ void GameManagerComponent::InitPlayer(size_t idx, size_t totalPlayers)
 	//m_pPointsObserver = std::make_shared<PointsObserver>(scoreObject->GetComponent<CounterComponent>());
 
 	auto healthObject = std::make_shared<dae::GameObject>();
-	healthObject->AddComponent<HealthComponent>(std::make_shared<HealthComponent>(healthObject, 3, 1));
+	healthObject->AddComponent<HealthComponent>(std::make_shared<HealthComponent>(healthObject, 3, health));
 	healthObject->SetPosition(idx * offset + 10.f, 10.f);
 	m_pScene.lock()->Add(healthObject);
 	m_pHudElements[idx].first = healthObject->GetComponent<HealthComponent>();
@@ -572,7 +577,7 @@ void GameManagerComponent::InitPlayer(size_t idx, size_t totalPlayers)
 	m_pHudElements[idx].second = saltObject->GetComponent<SaltDisplayComponent>();
 
 	auto playerObject = std::make_shared<dae::GameObject>();
-	playerObject->AddComponent<PeterPepperComponent>(std::make_shared<PeterPepperComponent>(playerObject, 3, startNode, m_pLevel.lock()->GetFloorOffset(), m_pScene, 1));
+	playerObject->AddComponent<PeterPepperComponent>(std::make_shared<PeterPepperComponent>(playerObject, 3, startNode, m_pLevel.lock()->GetFloorOffset(), m_pScene, health, path));
 	playerObject->AddComponent<MovementComponent>(std::make_shared<MovementComponent>(playerObject));
 	playerObject->GetComponent<dae::Subject>().lock()->AddObserver(std::make_shared<HealthObserver>(healthObject->GetComponent<HealthComponent>()));
 	playerObject->GetComponent<dae::Subject>().lock()->AddObserver(std::make_shared<SaltObserver>(saltObject->GetComponent<SaltDisplayComponent>()));
@@ -584,7 +589,7 @@ void GameManagerComponent::InitPlayer(size_t idx, size_t totalPlayers)
 		dae::InputManager::GetInstance().AddKeyboardInput('s', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::DOWN));
 		dae::InputManager::GetInstance().AddKeyboardInput('a', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::LEFT));
 		dae::InputManager::GetInstance().AddKeyboardInput('d', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::RIGHT));
-		dae::InputManager::GetInstance().AddKeyboardInput('e', dae::InputType::Hold, std::make_shared<ThrowSaltCommand>(m_pPlayers[idx]));
+		dae::InputManager::GetInstance().AddKeyboardInput('e', dae::InputType::Press, std::make_shared<ThrowSaltCommand>(m_pPlayers[idx]));
 	}
 	if ((idx == 0 && totalPlayers == 1) || idx == 1)
 	{
@@ -592,6 +597,7 @@ void GameManagerComponent::InitPlayer(size_t idx, size_t totalPlayers)
 		dae::InputManager::GetInstance().AddControllerInput(0x5821, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::DOWN));
 		dae::InputManager::GetInstance().AddControllerInput(0x5823, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::LEFT));
 		dae::InputManager::GetInstance().AddControllerInput(0x5822, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayers[idx].lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::RIGHT));
+		dae::InputManager::GetInstance().AddControllerInput(0x5800, dae::InputType::Press, std::make_shared<ThrowSaltCommand>(m_pPlayers[idx]));
 	}
 	m_pScene.lock()->Add(playerObject);
 }
@@ -641,19 +647,20 @@ void GameManagerComponent::SpawnPlayerControlledHotDog()
 	auto startNode = grid[m_pLevel.lock()->GetHotDogSpawn()];
 	AnimDurationInit animInit(0.25f, 0.25f, 0.25f, 0.5f, 0.3f);
 	auto obj = std::make_shared<dae::GameObject>();
-	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/HotDog", animInit, 100, m_LadderDeviationChance));
+	obj->AddComponent<EnemyComponent>(std::make_shared<EnemyComponent>(obj, 3, startNode, m_pLevel.lock()->GetFloorOffset(), "Textures/PlayerControlledHotDog", animInit, 100, m_LadderDeviationChance));
 	obj->AddComponent<MovementComponent>(std::make_shared<MovementComponent>(obj));
 	//obj->GetComponent<dae::Subject>().lock()->AddObserver(m_pPointsObserver);
 	m_pScene.lock()->Add(obj);
 	m_pPlayerControlledEnemy = obj->GetComponent<EnemyComponent>();
-	dae::InputManager::GetInstance().AddKeyboardInput('w', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::UP));
-	dae::InputManager::GetInstance().AddKeyboardInput('s', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::DOWN));
-	dae::InputManager::GetInstance().AddKeyboardInput('a', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::LEFT));
-	dae::InputManager::GetInstance().AddKeyboardInput('d', dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::RIGHT));
+	dae::InputManager::GetInstance().AddControllerInput(0x5820, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::UP));
+	dae::InputManager::GetInstance().AddControllerInput(0x5821, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::DOWN));
+	dae::InputManager::GetInstance().AddControllerInput(0x5823, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::LEFT));
+	dae::InputManager::GetInstance().AddControllerInput(0x5822, dae::InputType::Hold, std::make_shared<CharacterMoveCommand>(m_pPlayerControlledEnemy.lock()->GetOwner().lock()->GetComponent<MovementComponent>(), Direction::RIGHT));
 }
 
 void GameManagerComponent::EndGame()
 {
+	SoundLocator::get_sound_system().stopAllSounds();
 	ClearEnemies();
 	ClearLevel();
 	ClearBurgers();

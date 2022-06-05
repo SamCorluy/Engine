@@ -21,5 +21,7 @@ public:
 	virtual int loadSound(const char* filename, SoundType soundType) = 0;
 	virtual void play(const sound_id id, const float volume, SoundType soundType) = 0;
 	virtual void stopAllSounds() = 0;
+	virtual void update() = 0;
+	virtual void Remove() = 0;
 };
 

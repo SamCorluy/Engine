@@ -6,10 +6,6 @@ PointsObserver::PointsObserver(const std::weak_ptr<CounterComponent>& counterCom
 {
 }
 
-void PointsObserver::Notify(dae::Event, const std::weak_ptr<dae::GameObject>&)
-{
-}
-
 void PointsObserver::Notify(dae::Event event, int data)
 {
 	if (event == dae::Event::SCORE_CHANGE)

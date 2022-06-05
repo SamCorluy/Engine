@@ -2,6 +2,7 @@
 #include "TextureManagerComponent.h"
 #include "GameObject.h"
 #include <iostream>
+#include "SoundLocator.h"
 
 
 IngredientComponent::IngredientComponent(std::pair<int, int> idx, const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<LevelComponent>& level, IngredientType type)
@@ -174,6 +175,7 @@ bool IngredientComponent::CheckOverlap(std::weak_ptr<PeterPepperComponent>& play
 				offset.y -= m_DropHeight;
 				text.lock()->setOffset(i, offset);
 				m_pPartitions[i].hasDropped = true;
+				SoundLocator::get_sound_system().play(2, 1.f, SoundType::EFFECT);
 				//if (hasDropped())
 				//{
 				//	InitiateDrop(playerIdx);

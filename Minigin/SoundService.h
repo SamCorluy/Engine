@@ -25,7 +25,8 @@ public:
 	void play(const sound_id id, const float volume, SoundType soundType)override;
 	void stopAllSounds() override;
 
-	static void update();
+	void update() override;
+	void Remove() override;
 private:
 	static const int MAX_PENDING;
 	static playSound pending_[];

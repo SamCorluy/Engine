@@ -5,7 +5,7 @@
 #include <iostream>
 #include "ElapsedTime.h"
 #include "MovementComponent.h"
-
+#include "SoundLocator.h"
 EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, std::string textFolder, AnimDurationInit animDurationInit, int points, float ladderChance)
 	:BaseComponent(owner)
 	, m_pCurrentNode{ node }
@@ -20,6 +20,7 @@ EnemyComponent::EnemyComponent(const std::shared_ptr<dae::GameObject>& owner, in
 	, m_Points{points}
 	, m_ElapsedTime{0}
 	, m_ChanceToTakeLadder{ladderChance}
+	, m_Velocity{75.f}
 {
 	// Initialize subject
 	//owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
@@ -105,7 +106,7 @@ void EnemyComponent::Update()
 	{
 		if (pos.x == levelPos.x + m_pTargetNode.lock()->GetNodePos().first + m_pTargetNode.lock()->GetNodeSize().first / 2)
 			return;
-		pos.x -= 85.f * ElapsedTime::GetInstance().GetElapsedTime();
+		pos.x -= m_Velocity * ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.x < levelPos.x + m_pCurrentNode.lock()->GetNodePos().first)
 		{
 			m_pCurrentNode = m_pTargetNode;
@@ -121,7 +122,7 @@ void EnemyComponent::Update()
 	{
 		if (pos.x == levelPos.x + m_pTargetNode.lock()->GetNodePos().first + m_pTargetNode.lock()->GetNodeSize().first / 2)
 			return;
-		pos.x += 85.f * ElapsedTime::GetInstance().GetElapsedTime();
+		pos.x += m_Velocity * ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.x > levelPos.x + m_pCurrentNode.lock()->GetNodePos().first + m_pCurrentNode.lock()->GetNodeSize().first)
 		{
 			m_pCurrentNode = m_pTargetNode;
@@ -137,7 +138,7 @@ void EnemyComponent::Update()
 	{
 		if (pos.y == levelPos.y + m_pTargetNode.lock()->GetNodePos().second + m_FloorOffset)
 			return;
-		pos.y += 85.f * ElapsedTime::GetInstance().GetElapsedTime();
+		pos.y += m_Velocity * ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.y > levelPos.y + m_pCurrentNode.lock()->GetNodePos().second + m_pCurrentNode.lock()->GetNodeSize().second)
 		{
 			m_pCurrentNode = m_pTargetNode;
@@ -153,7 +154,7 @@ void EnemyComponent::Update()
 	{
 		if (pos.y == levelPos.y + m_pTargetNode.lock()->GetNodePos().second + m_FloorOffset)
 			return;
-		pos.y -= 85.f * ElapsedTime::GetInstance().GetElapsedTime();
+		pos.y -= m_Velocity * ElapsedTime::GetInstance().GetElapsedTime();
 		if (pos.y < levelPos.y + m_pCurrentNode.lock()->GetNodePos().second)
 		{
 			m_pPrevNode = m_pTargetNode.lock()->GetConnection(Direction::UP);
@@ -258,13 +259,14 @@ const std::pair<int, int> EnemyComponent::GetRectSize() const
 
 void EnemyComponent::Stun()
 {
-	if (m_Dead)
+	if (m_Dead || m_Stunned)
 		return;
 	m_HasSpawned = true;
 	m_Stunned = true;
 	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
 	comp.lock()->SetActiveAnimation(3);
 	m_ElapsedTime = 0.f;
+	SoundLocator::get_sound_system().play(1, 1.f, SoundType::EFFECT);
 }
 
 void EnemyComponent::Kill(std::weak_ptr<PeterPepperComponent>& player)
@@ -278,6 +280,7 @@ void EnemyComponent::Kill(std::weak_ptr<PeterPepperComponent>& player)
 	auto comp = GetOwner().lock()->GetComponent<dae::AnimationComponent>();
 	comp.lock()->SetActiveAnimation(4);
 	m_ElapsedTime = 0.f;
+	SoundLocator::get_sound_system().play(0, 1.f, SoundType::EFFECT);
 }
 
 const bool EnemyComponent::IsStunned() const
@@ -308,4 +311,9 @@ const bool EnemyComponent::IsDead() const
 const bool EnemyComponent::HasSpawned() const
 {
 	return m_HasSpawned;
+}
+
+const float EnemyComponent::GetVelocity() const
+{
+	return m_Velocity;
 }

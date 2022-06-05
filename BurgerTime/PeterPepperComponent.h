@@ -16,7 +16,7 @@
 class PeterPepperComponent final : public dae::BaseComponent
 {
 public:
-	PeterPepperComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, const std::weak_ptr<dae::Scene>& scene, int lives);
+	PeterPepperComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, const std::weak_ptr<dae::Scene>& scene, int lives, std::string folder);
 	virtual void Update() override;
 	virtual void StaticUpdate() override;
 	virtual void Render(const dae::Transform& pos) const override;
@@ -37,6 +37,8 @@ public:
 	void SetDirection(Direction dir);
 	void SetMovementProcessed(bool processed);
 	void SetCurrentNode(const std::weak_ptr<NodeComponent>& node);
+
+	const float GetVelocity() const;
 private:
 	std::weak_ptr<dae::Subject> m_pSubject;
 	bool m_MovementProcessed;
@@ -57,5 +59,6 @@ private:
 	int m_Lives;
 	int m_Points = 0;
 	int m_SaltCharges = 5;
+	const float m_Velocity;
 };
 

@@ -5,7 +5,7 @@
 #include <iostream>
 #include "ElapsedTime.h"
 #include "Observer.h"
-PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, const std::weak_ptr<dae::Scene>& scene, int lives)
+PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject>& owner, int scale, const std::weak_ptr<NodeComponent>& node, const int floorOffset, const std::weak_ptr<dae::Scene>& scene, int lives, std::string folder)
 	:BaseComponent(owner)
 	, m_MovementProcessed{false}
 	, m_pCurrentNode{ node }
@@ -22,6 +22,7 @@ PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject
 	, m_Lives{lives}
 	, m_DieDuration{ 2.f }
 	, m_Dead{false}
+	, m_Velocity{100.f}
 {
 	// Initialize subject
 	owner->AddComponent<dae::Subject>(std::make_shared<dae::Subject>(owner));
@@ -29,21 +30,21 @@ PeterPepperComponent::PeterPepperComponent(const std::shared_ptr<dae::GameObject
 
 	// Handling animation info
 	std::vector<dae::AnimationInit> animInitList;
-	std::string fileName{ "Textures/PeterPepper/PeterPepperWalkSideWays.png" };
+	std::string fileName{ folder + "PeterPepperWalkSideWays.png" };
 	animInitList.push_back(dae::AnimationInit(3, 0.32f, fileName, { -m_RectSize.first / 2, 0 }));
-	fileName = "Textures/PeterPepper/peterPepperLadderDown.png";
+	fileName = folder + "peterPepperLadderDown.png";
 	animInitList.push_back(dae::AnimationInit(2, 0.2f, fileName, { -m_RectSize.first / 2, 0 }));
-	fileName = "Textures/PeterPepper/peterPepperLadderUp.png";
+	fileName = folder + "peterPepperLadderUp.png";
 	animInitList.push_back(dae::AnimationInit(2, 0.2f, fileName, { -m_RectSize.first / 2, 0 }));
-	fileName = "Textures/PeterPepper/PeterPepperIdle.png";
+	fileName = folder + "PeterPepperIdle.png";
 	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName, { -m_RectSize.first / 2, 0 }));
-	fileName = "Textures/PeterPepper/PeterPepperThrowSaltWalk.png";
+	fileName = folder + "PeterPepperThrowSaltWalk.png";
 	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName, { -m_RectSize.first / 2, 0 }));
-	fileName = "Textures/PeterPepper/PeterPepperThrowSaltDown.png";
+	fileName = folder + "PeterPepperThrowSaltDown.png";
 	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName, { -m_RectSize.first / 2, 0 }));
-	fileName = "Textures/PeterPepper/PeterPepperThrowSaltUp.png";
+	fileName = folder + "PeterPepperThrowSaltUp.png";
 	animInitList.push_back(dae::AnimationInit(1, 0.f, fileName, { -m_RectSize.first / 2, 0 }));
-	fileName = "Textures/PeterPepper/PeterPepperDeath.png";
+	fileName = folder + "PeterPepperDeath.png";
 	animInitList.push_back(dae::AnimationInit(12, m_DieDuration, fileName, { -m_RectSize.first / 2, 0 }));
 	owner->AddComponent<dae::AnimationComponent>(std::make_shared<dae::AnimationComponent>(owner, animInitList, scale));
 
@@ -342,4 +343,9 @@ void PeterPepperComponent::SetMovementProcessed(bool processed)
 void PeterPepperComponent::SetCurrentNode(const std::weak_ptr<NodeComponent>& node)
 {
 	m_pCurrentNode = node;
+}
+
+const float PeterPepperComponent::GetVelocity() const
+{
+	return m_Velocity;
 }

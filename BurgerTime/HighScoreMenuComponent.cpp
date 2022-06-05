@@ -163,4 +163,13 @@ void HighScoreMenuComponent::InitMenu(std::vector<int> scores)
 		m_pHighScores.push_back(obj->GetComponent<dae::TextComponent>());
 		m_pScene.lock()->Add(obj);
 	}
+
+	obj = std::make_shared<dae::GameObject>();
+	obj->AddComponent<dae::TextComponent>(std::make_shared<dae::TextComponent>(obj, "PRESS ENTER TO CONTINUE", font));
+	textSize = obj->GetComponent<dae::TextComponent>().lock()->GetTextSize();
+	pos.x = static_cast<float>(windowWidth - textSize.first) / 2.f;
+	pos.y = 20.f;
+	obj->SetPosition(pos);
+	m_pHighScores.push_back(obj->GetComponent<dae::TextComponent>());
+	m_pScene.lock()->Add(obj);
 }

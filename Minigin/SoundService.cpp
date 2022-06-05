@@ -15,10 +15,12 @@ public:
 	}
 	~SDLMixerPimpl()
 	{
-		for (auto effect : effects)
+		for (auto& effect : effects)
 			Mix_FreeChunk(effect);
-		for (auto track : music)
+		effects.clear();
+		for (auto& track : music)
 			Mix_FreeMusic(track);
+		music.clear();
 	}
 	int loadSound(const char* filename, SoundType soundType)
 	{
@@ -72,15 +74,15 @@ public:
 				if (pending_[i].id >= music.size())
 					return;
 				Mix_VolumeMusic((int)(pending_[i].volume * 100));
-				Mix_PlayMusic(music[pending_[i].id], 1);
+				Mix_PlayMusic(music[pending_[i].id], -1);
 			}
 		}
 		numPending_ = 0;
 	}
 	void stopAllSounds()
 	{
-		Mix_PauseMusic();
-		Mix_Pause(-1);
+		Mix_HaltMusic();
+		Mix_HaltChannel(-1);
 	}
 };
 
@@ -123,4 +125,9 @@ void SoundService::stopAllSounds()
 void SoundService::update()
 {
 	m_pImpl->update();
+}
+
+void SoundService::Remove()
+{
+	delete m_pImpl;
 }

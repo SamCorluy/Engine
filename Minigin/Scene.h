@@ -29,7 +29,6 @@ namespace dae
 		std::vector<std::pair<std::shared_ptr<GameObject>, size_t>> m_Objects{};
 		std::vector<std::pair<std::shared_ptr<GameObject>, size_t>> m_ObjectQueue{};
 
-		static unsigned int m_IdCounter;
 		bool m_ChangeOrder = false;
 	};
 

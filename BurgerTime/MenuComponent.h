@@ -22,6 +22,7 @@ private:
 	std::weak_ptr<dae::Scene> m_pHighScoreScene;
 	std::weak_ptr<dae::Scene> m_pActiveScene;
 	std::weak_ptr<GameManagerComponent> m_pGame;
+	bool m_IsInit = false;
 
 	std::weak_ptr<dae::TextComponent> m_pSinglePlayer;
 	std::weak_ptr<dae::TextComponent> m_pCoop;

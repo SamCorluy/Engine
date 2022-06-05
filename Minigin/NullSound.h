@@ -14,5 +14,6 @@ public:
 	virtual int loadSound(const char*, SoundType) override { return 0; };
 	virtual void play(const sound_id, const float, SoundType) override {};
 	virtual void stopAllSounds() override {};
+	virtual void update() override {};
+	virtual  void Remove() override {};
 };
-

@@ -14,8 +14,6 @@
 #include "SoundService.h"
 #include "ElapsedTime.h"
 
-#define MAX_LIVES 3
-
 using namespace std;
 
 void PrintSDLVersion()
@@ -55,7 +53,8 @@ void dae::Minigin::Initialize()
 
 	Renderer::GetInstance().Init(m_Window);
 
-	SoundLocator::register_sound_system(new SoundLogger{ new SoundService{} });
+	//SoundLocator::register_sound_system(new SoundLogger{ new SoundService{} });
+	SoundLocator::register_sound_system(new SoundService{});
 }
 
 void dae::Minigin::Cleanup()
@@ -63,7 +62,8 @@ void dae::Minigin::Cleanup()
 	Renderer::GetInstance().Destroy();
 	SDL_DestroyWindow(m_Window);
 	m_Window = nullptr;
-	SDL_Quit();
+	dae::InputManager::GetInstance().Remove();
+	delete SoundLocator::get_sound_system();
 }
 
 void dae::Minigin::Run()
@@ -102,8 +102,8 @@ void dae::Minigin::Run()
 			ElapsedTime::GetInstance().SetElapsedTime(deltaTime);
 			sceneManager.Update();
 			renderer.Render();
-			//auto& ss1 = SoundLocator::get_sound_system();
-			//ss1.update();
+			auto ss1 = SoundLocator::get_sound_system();
+			ss1->update();
 		}
 	}
 

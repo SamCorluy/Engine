@@ -15,7 +15,6 @@ namespace dae
 		void Update() override;
 		void Render(const Transform& pos) const override;
 
-		void Notify(Event event, const std::weak_ptr<GameObject>& gameObject);
 		void Notify(Event event, int data);
 	private:
 		std::vector<std::shared_ptr<Observer>> observers;

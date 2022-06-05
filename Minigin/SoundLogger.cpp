@@ -33,6 +33,16 @@ void SoundLogger::stopAllSounds()
 	wrapped_->stopAllSounds();
 }
 
+void SoundLogger::update()
+{
+	wrapped_->update();
+}
+
+void SoundLogger::Remove()
+{
+	wrapped_->Delete();
+}
+
 void SoundLogger::log(const char* message)
 {
 	std::cout << message << "\n";

@@ -24,9 +24,16 @@ public:
 	{
 		if (m_Reset)
 		{
+			std::vector<Input> in{};
 			m_Reset = false;
 			for (auto& command : m_Commands)
+			{
 				command.second.erase(std::remove_if(command.second.begin(), command.second.end(), [](std::pair<std::shared_ptr<BaseCommand>, bool>& object) { return object.second; }), command.second.end());
+				if (command.second.empty())
+					in.push_back(command.first);
+			}
+			for (auto input : in)
+				m_Commands.erase(input);
 		}
 		for (auto key : m_KeyQueue)
 			m_KeyQueue[key.first].second = true;
@@ -182,6 +189,11 @@ dae::InputManager::InputManager()
 }
 
 dae::InputManager::~InputManager()
+{
+	delete m_pImpl;
+}
+
+void dae::InputManager::Remove()
 {
 	delete m_pImpl;
 }

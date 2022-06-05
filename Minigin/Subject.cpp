@@ -28,12 +28,6 @@ void dae::Subject::Render(const Transform&) const
 {
 }
 
-void dae::Subject::Notify(Event event, const std::weak_ptr<GameObject>& gameObject)
-{
-	for (int i = 0; i < static_cast<int>(observers.size()); ++i)
-		observers[i]->Notify(event, gameObject);
-}
-
 void dae::Subject::Notify(Event event, int data)
 {
 	for (int i = 0; i < static_cast<int>(observers.size()); ++i)

@@ -7,10 +7,6 @@ SaltObserver::SaltObserver(const std::weak_ptr<SaltDisplayComponent>& saltComp)
 {
 }
 
-void SaltObserver::Notify(dae::Event, const std::weak_ptr<dae::GameObject>&)
-{
-}
-
 void SaltObserver::Notify(dae::Event event, int data)
 {
 	if (event == dae::Event::SALT_THROW && data >= 0)
