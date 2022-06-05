@@ -49,6 +49,7 @@ void MenuComponent::SelectGameMode()
 {
 	if (dae::SceneManager::GetInstance().GetActiveScene().lock()->GetName() != m_pScene.lock()->GetName())
 		return;
+	dae::InputManager::GetInstance().RemoveKeys();
 	dae::SceneManager::GetInstance().SetActiveScene("BurgerTime");
 	m_pActiveScene = m_pGameScene;
 	auto gameObject = std::make_shared<dae::GameObject>();
@@ -56,7 +57,6 @@ void MenuComponent::SelectGameMode()
 	m_pGame = gameObject->GetComponent<GameManagerComponent>();
 	m_pGameScene.lock()->Add(gameObject);
 	SoundLocator::get_sound_system().play(0, 1.f, SoundType::MUSIC);
-	dae::InputManager::GetInstance().RemoveKeys();
 }
 
 void MenuComponent::MoveDown()

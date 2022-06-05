@@ -40,7 +40,7 @@ void SoundLogger::update()
 
 void SoundLogger::Remove()
 {
-	wrapped_->Delete();
+	wrapped_->Remove();
 }
 
 void SoundLogger::log(const char* message)

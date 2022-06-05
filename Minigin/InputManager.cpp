@@ -193,11 +193,6 @@ dae::InputManager::~InputManager()
 	delete m_pImpl;
 }
 
-void dae::InputManager::Remove()
-{
-	delete m_pImpl;
-}
-
 void dae::InputManager::RemoveKeys()
 {
 	m_pImpl->RemoveKeys();

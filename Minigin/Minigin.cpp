@@ -62,8 +62,8 @@ void dae::Minigin::Cleanup()
 	Renderer::GetInstance().Destroy();
 	SDL_DestroyWindow(m_Window);
 	m_Window = nullptr;
-	dae::InputManager::GetInstance().Remove();
-	delete SoundLocator::get_sound_system();
+	//dae::InputManager::GetInstance().Remove();
+	delete &SoundLocator::get_sound_system();
 }
 
 void dae::Minigin::Run()
@@ -102,8 +102,8 @@ void dae::Minigin::Run()
 			ElapsedTime::GetInstance().SetElapsedTime(deltaTime);
 			sceneManager.Update();
 			renderer.Render();
-			auto ss1 = SoundLocator::get_sound_system();
-			ss1->update();
+			auto& ss1 = SoundLocator::get_sound_system();
+			ss1.update();
 		}
 	}
 

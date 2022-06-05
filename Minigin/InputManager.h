@@ -38,7 +38,6 @@ namespace dae
 	public:
 		InputManager();
 		~InputManager();
-		void Remove();
 		bool ProcessInput();
 		void AddControllerInput(int input, InputType type, const  std::shared_ptr<BaseCommand>& command);
 		void AddKeyboardInput(int input, InputType type, const  std::shared_ptr<BaseCommand>& command);
